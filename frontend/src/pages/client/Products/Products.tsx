@@ -30,8 +30,7 @@ function Products() {
                     <li key={product._id}>
                         <h2>{product.title}</h2>
                         <img src={product.thumbnail} alt={product.title} style={{ maxWidth: '100px' }} />
-                        <p>Giá: {product.oldPrice}</p>
-                        <p>Giá mới: {product.priceNew}</p>
+                        <p>Giá: {product.price}</p>
                     </li>
                 ))}
             </ul>

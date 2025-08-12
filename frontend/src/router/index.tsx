@@ -4,6 +4,7 @@ import Error from "../pages/client/Error";
 import Products from "../pages/client/Products/Products";
 import LayoutAdmin from "../layouts/layoutAdmin";
 import Product from "../pages/admin/product";
+import Dashboard from "../pages/admin/dashboard";
 
 
 export const routes = [
@@ -27,10 +28,16 @@ export const routes = [
     },
     {
         path: 'admin',
-        element: <LayoutAdmin/>
-    },
-    {
-        path: "admin/products",
-        element: <Product />,
+        element: <LayoutAdmin/>,
+        children: [
+            {
+                path: "dashboard",
+                element: <Dashboard />
+            },
+            {
+                path: "products",
+                element: <Product/>
+            }
+        ]
     }
 ]
