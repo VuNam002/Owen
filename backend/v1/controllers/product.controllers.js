@@ -80,19 +80,20 @@ module.exports.changePosition = async (req, res) => {
         handleError(res, error, "Lỗi khi cập nhật vị trí sản phẩm");
     }
 }
-module.exports.create = async (res, req) => {
-    try {
-        const product = new Product(req.body);
-        await product.save();
-        res.status({
-            success: true,
-            message: "Thêm sản phẩm mới thành công",
-            data: product,
-        })
-    } catch (error) {
-        handleError(res, error, "Lỗi khi thêm sản phẩm mới");
-    }
+module.exports.create = async (req, res) => {
+  try {
+    const product = new Product(req.body);
+    await product.save();
+    res.status(201).json({
+      success: true,
+      message: "Thêm sản phẩm mới thành công",
+      data: product,
+    });
+  } catch (error) {
+    handleError(res, error, "Lỗi khi thêm sản phẩm mới");
+  }
 }
+
 module.exports.edit = async (req, res) => {
     try {
         const id = req.params.id;
