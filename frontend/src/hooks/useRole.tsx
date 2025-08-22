@@ -102,6 +102,37 @@ export const useRole = () => {
       setLoading(false);
     }
   };
+  const updatePermission = async (id: string, permissions: string[]): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    try {
+      await apiRequest(`${API_BASE}/permission/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ permissions }),
+      });
+      await fetchRoles();
+      return true;
+    } catch {
+      setError("Không thể cập nhật quyền hạn");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+  const fetchPermissions = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await apiRequest(`${API_BASE}/permissions`);
+      return result.data;
+    } catch {
+      setError("Không thể tải dữ liệu quyền hạn");
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     roles,
     loading,
@@ -109,6 +140,8 @@ export const useRole = () => {
     fetchRoles,
     createRole,
     updateRole,
-    deleteRole
+    deleteRole,
+    updatePermission,
+    fetchPermissions
   }
 };

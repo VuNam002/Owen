@@ -101,3 +101,45 @@ module.exports.detail = async (req, res) => {
         handleError(res, error, "Lỗi khi lấy chi tiết nhóm quyền");
     }
 }
+module.exports.permissions = async (req, res) => {
+    try {
+      let permissions;
+      if (typeof req.body.permissions === 'string') {
+        permissions = JSON.parse(req.body.permissions);
+      } else {
+        permissions = req.body.permissions;
+      }
+      if (!Array.isArray(permissions)) {
+        return res.status(400).json({
+            success: false,
+            message: "Dữ liệu permissions phải là một mảng."
+        });
+      }
+      const updatePromises = permissions.map(item => {
+        return Role.updateOne(
+          { _id: item.id },
+          { $set: { permissions: item.permissions } }
+        );
+      });
+
+      await Promise.all(updatePromises);
+
+      res.json({
+        success: true,
+        message: "Cập nhật quyền thành công",
+      });
+    } catch (error) {
+      handleError(res, error, "Lỗi khi cập nhật quyền");
+    }
+};
+module.exports.permissionsIndex = async (req, res) => {
+    try {
+      const roles = await Role.find({ deleted: false });
+      res.json({
+        success: true,
+        data: roles,
+      });
+    } catch (error) {
+      handleError(res, error, "Lỗi khi lấy danh sách nhóm quyền");
+    }
+}

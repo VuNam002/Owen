@@ -16,7 +16,7 @@ import EditAccount from "../pages/admin/account/edit";
 import Role from "../pages/admin/role";
 import CreateRole from "../pages/admin/role/create";
 import EditRole from "../pages/admin/role/edit";
-
+import PermissionsPage from "../pages/admin/role/permissions";
 
 
 
@@ -94,6 +94,10 @@ export const routes = [
             {
                 path:"roles/edit/:id",
                 element: <EditRole/>
+            },
+            {
+                path:"permissions",
+                element: <PermissionsPage/>
             }
         ]
     }

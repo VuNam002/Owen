@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { BrowserRouter } from "react-router-dom";
+import { ToastContainer } from 'react-toastify'; // Added
+import 'react-toastify/dist/ReactToastify.css'; // Added
 
 const container = document.getElementById("root");
 if (container) {
@@ -11,6 +13,7 @@ if (container) {
     <StrictMode>
       <BrowserRouter>
         <App />
+        <ToastContainer /> {/* Added */}
       </BrowserRouter>
     </StrictMode>
   );

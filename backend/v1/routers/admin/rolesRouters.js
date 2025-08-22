@@ -8,6 +8,6 @@ router.patch("/edit/:id", controllers.edit);
 router.delete("/delete/:id", controllers.deleted)
 router.patch("/change-status/:status/:id", controllers.changeStatus);
 router.get("/detail/:id", controllers.detail);
-
+router.patch("/permissions", controllers.permissions)
 
 module.exports = router;

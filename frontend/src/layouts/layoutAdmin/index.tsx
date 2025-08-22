@@ -7,6 +7,7 @@ import { Outlet } from "react-router-dom";
 import { BiSolidCategoryAlt } from "react-icons/bi";
 import { RiAccountCircleFill } from "react-icons/ri";
 import { HiUserGroup } from "react-icons/hi";
+import { FaAddressCard } from "react-icons/fa";
 
 
 
@@ -103,6 +104,15 @@ function LayoutAdmin() {
             {sidebarOpen && (
               <span className="transition-opacity duration-300">Quyền</span>
             )}
+          </Link>
+          <Link
+            to="/admin/permissions"
+            className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"
+            >
+              <FaAddressCard className="w-5 h-5"/>
+              {sidebarOpen && (
+                <span className="transition-opacity duration-300">Phân quyền</span>
+              )}
           </Link>
           <Link
             to="/admin/settings"
