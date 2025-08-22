@@ -15,6 +15,8 @@ import CreateAccount from "../pages/admin/account/create"
 import EditAccount from "../pages/admin/account/edit"; 
 import Role from "../pages/admin/role";
 import CreateRole from "../pages/admin/role/create";
+import EditRole from "../pages/admin/role/edit";
+
 
 
 
@@ -88,6 +90,10 @@ export const routes = [
             {
                 path:"roles/create",
                 element: <CreateRole/>
+            },
+            {
+                path:"roles/edit/:id",
+                element: <EditRole/>
             }
         ]
     }

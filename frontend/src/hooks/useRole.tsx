@@ -76,6 +76,7 @@ export const useRole = () => {
     try {
       await apiRequest(`${API_BASE}/edit/${id}`, {
         method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(roleData),
       });
       await fetchRoles();
