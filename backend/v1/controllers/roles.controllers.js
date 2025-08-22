@@ -46,7 +46,7 @@ module.exports.edit = async (req, res) => {
     await Role.updateOne({
       _id: id,
       deleted: false,
-    });
+    }, req.body); 
     res.json({
       success: true,
       message: "Cập nhật nhóm quyền thành công",
