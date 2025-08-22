@@ -9,20 +9,24 @@ const buildPagination = require("../../helpers/buildPagination");
 const buildSortObject = require("../../helpers/buildSortObject");
 const handleError = require("../../helpers/handleError");
 
-function createTree (arr, parentId = "") {
-    const tree = [];
-    arr.forEach((item) => {
-        if(String(item.parent_id || "") === String(parentId)) {
-            const newItem = {...item};
-            const children = createTree(arr, item._id);
-            if(children.length > 0) {
-                newItem.children = children;
-            }
-            tree.push(newItem);
+const createTree = (arr) => {
+    const tree = {};
+    const result = [];
+
+    arr.forEach(item => {
+        tree[item._id] = { ...item, children: [] };
+    });
+
+    arr.forEach(item => {
+        if (item.parent_id && tree[item.parent_id]) {
+            tree[item.parent_id].children.push(tree[item._id]);
+        } else {
+            result.push(tree[item._id]);
         }
     });
-    return tree;
-}
+
+    return result;
+};
 
 async function handlePosition(reqBody) {
     if(reqBody.position === "" || reqBody.position === undefined) {
@@ -35,11 +39,15 @@ async function handlePosition(reqBody) {
 module.exports.index = async (req, res) => {
     try {
         const find = { deleted: false };
+        const objectSearch = searchHelper(req.query);
+        const filter = await buildSearchFilter(objectSearch, ProductCategory);
+        const sort = buildSortObject(req);
+        const pagination = await buildPagination(req, filter, ProductCategory, paginationHelper);
 
         const records = await ProductCategory.find(find)
             .sort({ position: "asc" })
             .populate({
-                path: "created_by",
+                path: "createdBy",
                 select: "fullName" 
             })
             .lean();
@@ -59,6 +67,14 @@ module.exports.create = async (req, res) => {
     try {
         const productCategory = new ProductCategory(req.body);
         await productCategory.save();
+        // Lấy lại danh sách sau khi thêm mới
+        const records = await ProductCategory.find({ deleted: false })
+            .sort({ position: "asc" })
+            .populate({
+                path: "createdBy",
+                select: "fullName" 
+            })
+            .lean();
         const tree = createTree(records);
         res.status(200).json({
             success: true,
@@ -84,21 +100,28 @@ module.exports.changeStatus = async (req, res) => {
 }
 module.exports.edit = async (req, res) => {
     try {
-        const id= req.params.id;
-        const newProductCategory = await ProductCategory.findOne({
-            _id: id,
-            deleted: false,
-        });
-        if(!newProductCategory) {
+        const id = req.params.id;
+        const updatedData = req.body;
+        const result = await ProductCategory.updateOne({ _id: id, deleted: false }, updatedData);
+
+        if (result.nModified === 0) {
             return res.status(404).json({
                 success: false,
-                message: "Không tìm thấy danh mục sản phẩm."
-            })
+                message: "Không tìm thấy danh mục sản phẩm hoặc không có gì thay đổi."
+            });
         }
-    } catch(error) {
+
+        const updatedProductCategory = await ProductCategory.findById(id);
+
+        res.status(200).json({
+            success: true,
+            message: "Cập nhật danh mục sản phẩm thành công.",
+            data: updatedProductCategory
+        });
+    } catch (error) {
         handleError(res, error, "Lỗi khi cập nhật danh mục sản phẩm.");
     }
-}
+};
 module.exports.detail = async (req, res) => {
     try {
         const id = req.params.id;
@@ -119,13 +142,20 @@ module.exports.detail = async (req, res) => {
 module.exports.delete = async (req, res) => {
     try {
         const id = req.params.id;
-        await ProductCategory.updateOne({
-            _id: id,
-            deleted: false,
-        }, {
-            deleted: true,
-            deletedAt: new Date(),  
-        })
+        const result = await ProductCategory.updateOne(
+            { _id: id, deleted: false },
+            { deleted: true, deletedAt: new Date() }
+        );
+        if (result.modifiedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy danh mục hoặc đã bị xóa."
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: "Xóa danh mục thành công."
+        });
     } catch (error) {
         handleError(res, error, "Lỗi khi xóa danh mục sản phẩm.");
     }

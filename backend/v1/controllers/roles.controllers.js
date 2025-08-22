@@ -16,14 +16,13 @@ module.exports.index = async (req, res) => {
       .sort(sort)
       .skip(pagination.skip)
       .limit(pagination.limitItems);
-    if(records.length === 0) {
-        return res.status(200).json({
-            success: true,
-            message: "Không tìm thấy nhóm quyền nào",
-            data: [],
-            pagination,
-        })
-    }
+    res.json({
+        success: true,
+        message: "Lấy danh sách nhóm quyền thành công",
+        data: records,
+        pagination,
+    });
+
   } catch (error) {
     handleError(res, error, "Lỗi khi lấy danh sách nhóm quyền");
   }
@@ -59,10 +58,10 @@ module.exports.edit = async (req, res) => {
 module.exports.deleted = async (req, res) => {
     try {
         const id = req.params.id;
-        await Role.updateOne({
-            _id: id,
-            deleted: false,
-        });
+        await Role.updateOne(
+            { _id: id }, 
+            { $set: { deleted: true, deleteAt: new Date() } }
+        );
         res.json({
             success: true,
             message: "Xóa nhóm quyền thành công",

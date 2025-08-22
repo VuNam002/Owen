@@ -1,5 +1,7 @@
 // components/ProductActions.tsx
 import type { FC } from 'react';
+import { Link } from 'react-router-dom';
+
 
 interface ProductActionsProps {
   selectedProductsCount: number;
@@ -22,12 +24,12 @@ export const ProductActions: FC<ProductActionsProps> = ({
 }) => {
   return (
     <div className="flex items-center gap-3 px-6 py-4">
-      <button
-        onClick={onCreateClick}
+      <Link
+        to="/admin/products/create"
         className="px-4 py-2 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
       >
         Thêm sản phẩm
-      </button>
+      </Link>
 
       {selectedProductsCount > 0 && (
         <>

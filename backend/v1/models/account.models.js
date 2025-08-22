@@ -14,6 +14,7 @@ const accountSchema = new mongoose.Schema(
     avatar: String,
     role_id: String,
     status: String,
+    position: Number,
     deleted: {
       type: Boolean,
       default: false,
@@ -21,6 +22,7 @@ const accountSchema = new mongoose.Schema(
     deletedAt: Date,
     updateBy: String,
     updateAt: Date,
+
   },
   {
     timestamps: true, 

@@ -12,7 +12,7 @@ interface Product {
   createdBy: {
     _id: string;
     name: string;
-  };
+  };  
   createdAt?: string;
 }
 interface ApiResponse {

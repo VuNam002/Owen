@@ -7,7 +7,7 @@ router.get("/", controller.index);
 router.patch("/change-status/:status/:id", controller.changeStatus);
 router.patch("/change-position", controller.changePosition);
 router.post("/create", controller.create);
-router.patch("/edit", controller.edit);
+router.patch("/edit/:id", controller.edit);
 router.delete("/delete/:id", controller.delete);
 router.get("/detail/:id", controller.detail)
 

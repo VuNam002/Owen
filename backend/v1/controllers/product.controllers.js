@@ -100,7 +100,7 @@ module.exports.edit = async (req, res) => {
         await Product.updateOne({
             _id: id,
             deleted: false,
-        })
+        }, req.body); 
         res.json({
             success: true,
             message: "Cập nhật sản phẩm thành công"
@@ -142,7 +142,8 @@ module.exports.detail = async (req, res) => {
         }
         res.status(200).json({
             success: true,
-            message: "Lấy danh sách sản phẩm thành công"
+            message: "Lấy chi tiết sản phẩm thành công",
+            data: product
         })
     } catch (error) {
         handleError(res, error, "Lỗi khi lấy chi tiết sản phẩm");

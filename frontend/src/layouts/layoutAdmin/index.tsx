@@ -4,6 +4,11 @@ import { Menu, Users, Settings, Home, User, ChevronLeft } from "lucide-react";
 import logo from "../../assets/logo.svg";
 import { IoBagAdd } from "react-icons/io5";
 import { Outlet } from "react-router-dom";
+import { BiSolidCategoryAlt } from "react-icons/bi";
+import { RiAccountCircleFill } from "react-icons/ri";
+import { HiUserGroup } from "react-icons/hi";
+
+
 
 function LayoutAdmin() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -66,6 +71,37 @@ function LayoutAdmin() {
             </div>
             {sidebarOpen && (
               <span className="transition-opacity duration-300">Sản phẩm</span>
+            )}
+          </Link>
+          <Link
+            to="/admin/category"
+            className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"
+            >
+              <div className="flex items-center justify-center w-6 h-6">
+                <BiSolidCategoryAlt className="w-5 h-5" />
+              </div>
+              {sidebarOpen && (
+                <span className="transition-opacity duration-300">Danh mục</span>
+              )}
+          </Link>
+          <Link
+            to="/admin/accounts"
+            className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"
+          >
+            <div className="flex items-center justify-center w-6 h-6">
+              <RiAccountCircleFill  className="w-5 h-5"/>
+            </div>
+            {sidebarOpen && (
+              <span className="transition-opacity duration-300">Tài khoản</span>
+            )}
+          </Link>
+          <Link
+            to="/admin/roles"
+            className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"
+          >
+            <HiUserGroup className="w-5 h-5" />
+            {sidebarOpen && (
+              <span className="transition-opacity duration-300">Quyền</span>
             )}
           </Link>
           <Link

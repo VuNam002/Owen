@@ -7,6 +7,7 @@ interface Product {
     thumbnail: string;
     oldPrice: number;
     priceNew: number;
+    status: string;
 }
 
 function Products() {
@@ -26,10 +27,12 @@ function Products() {
         <>
             <h1>Danh sách sản phẩm</h1>
             <ul>
-                {products.map((product: Product) => (
+                {products
+                .filter(products => products.status === 'active')
+                .map((product: Product) => (
                     <li key={product._id}>
                         <h2>{product.title}</h2>
-                        <img src={product.thumbnail} alt={product.title} style={{ maxWidth: '100px' }} />
+                        <img src={product.thumbnail} alt={product.title} style={{ maxWidth: '400px' }} />
                         <p>Giá: {product.price}</p>
                     </li>
                 ))}

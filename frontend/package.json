@@ -14,7 +14,7 @@
     "axios": "^1.11.0",
     "cloudinary": "^2.7.0",
     "he": "^1.2.0",
-    "lucide-react": "^0.539.0",
+    "lucide-react": "^0.268.0",
     "moment": "^2.30.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

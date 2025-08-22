@@ -1,6 +1,5 @@
 const buildSearchFilter = async (objectSearch, Category) => {
   const filter = {
-    status: "active", 
     deleted: { $ne: true },
   };
 
