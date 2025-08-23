@@ -108,7 +108,13 @@ const PermissionsPage: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="p-6">Đang tải dữ liệu...</div>;
+    return (
+      <div className="min-h-screen p-6 bg-gray-50">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">Đang tải...</div>
+        </div>
+      </div>
+    );
   }
 
   return (

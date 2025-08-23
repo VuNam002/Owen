@@ -13,6 +13,10 @@ import { FaAddressCard } from "react-icons/fa";
 
 function LayoutAdmin() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/admin/login";
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -134,7 +138,9 @@ function LayoutAdmin() {
                 <User className="w-8 h-8 text-gray-400" />
                 <div>
                   <p className="text-sm font-medium">Admin User</p>
-                  <button className="text-xs text-red-600 hover:underline">
+                  <button
+                    onClick={handleLogout}
+                    className="text-xs text-red-600 hover:underline">
                     Đăng xuất
                   </button>
                 </div>

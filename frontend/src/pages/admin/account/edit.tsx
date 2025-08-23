@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAccount } from "../../../hooks/useAccount";
+import { toast } from 'react-toastify';
 
 interface FormData {
     fullName: string;
@@ -92,7 +93,7 @@ const EditAccount: React.FC = () => {
 
         const success = await updateAccount(id, dataToUpdate);
         if (success) {
-            alert('Cập nhật tài khoản thành công!');
+            toast.success('Cập nhật tài khoản thành công!');
             navigate('/admin/accounts');
         } else {
             console.error('Failed to edit account');

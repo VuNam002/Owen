@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useRole } from "../../../hooks/useRole";
 import { useNavigate, useParams } from "react-router-dom";
 import { Editor } from "@tinymce/tinymce-react";
+import { toast } from "react-toastify";
+
 
 interface Role {
   id: string;
@@ -70,7 +72,7 @@ const EditRole: React.FC = () => {
 
     const success = await updateRole(id, formData);
     if (success) {
-      alert("Cập nhật vai trò thành công!");
+      toast.success("Cập nhật vai trò thành công!");
       navigate("/admin/roles");
     }
   };

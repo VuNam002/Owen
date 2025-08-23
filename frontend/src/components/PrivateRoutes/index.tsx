@@ -8,7 +8,7 @@ function PrivateRoutes() {
             {isLogin ? (
                 <Outlet />
             ) : (
-                <Navigate to="/auth/login" replace />
+                <Navigate to="/admin/login" replace />
             )}
         </>
     )

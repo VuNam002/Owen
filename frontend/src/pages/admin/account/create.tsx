@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAccount } from '../../../hooks/useAccount'; 
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 interface FormData {
     fullName: string;
@@ -83,9 +84,10 @@ const CreateAccount: React.FC = () => {
         const success = await createAccount(formData);
 
         if (success) {
-            alert('Tạo tài khoản thành công!');
+            toast.success('Tạo tài khoản thành công!');
             navigate('/admin/accounts'); 
         } else {
+            toast.error('Tạo tài khoản thất bại');
             console.error('Failed to create account');
         }
     };
