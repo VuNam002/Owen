@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useRole } from "../../../hooks/useRole"; 
 
-// Định nghĩa kiểu dữ liệu cho Role
+
 interface Role {
   _id: string;
   title: string;
   permissions: string[];
 }
-// Định nghĩa các nhóm quyền và quyền hạn
+
 const permissionConfig = [
   {
     name: 'Danh mục sản phẩm',
