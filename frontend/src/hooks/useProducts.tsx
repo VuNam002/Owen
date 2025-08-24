@@ -1,5 +1,5 @@
 // hooks/useProducts.ts
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 
 interface Product {
   _id: string;
@@ -46,9 +46,9 @@ export const useProducts = () => {
   const [selectAll, setSelectAll] = useState<boolean>(false);
   const [positions, setPositions] = useState<{ [key: string]: number }>({});
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage] = useState<number>(10);
+  const [itemsPerPage] = useState<number>(5);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -64,7 +64,7 @@ export const useProducts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setLoading, setError, setProducts, setPositions]);
 
   useEffect(() => {
     fetchProducts();
@@ -263,6 +263,25 @@ export const useProducts = () => {
     }
   };
 
+  const handleEditProduct = useCallback(async(productId: string, productData: Partial<Product>): Promise<boolean> => {
+    if(loading) return false;
+    setLoading(true);
+    setError(null);
+    try {
+      await apiRequest(`${API_BASE}/edit/${productId}`, {
+        method: "PATCH",
+        body: JSON.stringify(productData),
+      });
+      await fetchProducts();
+      return true;
+    } catch {
+      setError("Không thể cập nhật sản phẩm");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, setLoading, setError, fetchProducts]);
+
   return {
     loading,
     error,
@@ -294,5 +313,6 @@ export const useProducts = () => {
     handleDeleteProduct,
     handleBulkDelete,
     positions, 
+    handleEditProduct
   };
 };
