@@ -12,7 +12,6 @@ interface ApiResponse {
 
 const API_BASE = "http://localhost:3000/api/v1/roles";
 
-// Hàm gọi API chung
 const apiRequest = async (
   url: string,
   option: RequestInit = {}
