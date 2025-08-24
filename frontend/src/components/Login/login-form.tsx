@@ -9,7 +9,7 @@ import {
 } from "../ui/card"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
-import { useAuth } from "../../hooks/useAuth" 
+import { useAuth } from "../../context/AuthContext" 
 import { useState } from "react"
 import type { FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
@@ -21,7 +21,7 @@ export function LoginForm({
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { LoginAccount, loading, error } = useAuth()
+  const { login, loading, error } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: FormEvent) => {
@@ -31,12 +31,12 @@ export function LoginForm({
     }
     setIsSubmitting(true)
     try {
-      const token = await LoginAccount(email.trim(), password)
+      const success = await login(email.trim(), password)
       
-      if (token) {
-        setTimeout(() => {
-          navigate("/admin/dashboard")
-        }, 500)
+      console.log("Login result:", success) 
+      
+      if (success) {
+        navigate("/admin/dashboard")
       }
     } catch (err) {
       console.error("Login failed:", err)
