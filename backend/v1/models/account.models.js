@@ -12,7 +12,7 @@ const accountSchema = new mongoose.Schema(
     },
     phone: String,
     avatar: String,
-    role_id: String,
+    role_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Role' },
     status: String,
     position: Number,
     deleted: {
