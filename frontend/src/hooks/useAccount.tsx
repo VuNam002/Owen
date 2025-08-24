@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 
 interface Account {
     _id: string;
@@ -16,6 +16,7 @@ interface ApiResponse {
 
 const API_BASE = "http://localhost:3000/api/v1/accounts";
 
+// Memoize API request function
 const apiRequest = async (
     url: string,
     options: RequestInit = {}
@@ -37,22 +38,33 @@ export const useAccount = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [itemsPerPage, setItemsPerPage] = useState<number>(10);
     const [positions, setPositions] = useState<{ [key: string]: number }>({});
+    
+    // Use ref to prevent unnecessary re-renders
+    const loadingRef = useRef(false);
 
     const fetchAccounts = useCallback(async () => {
+        if (loadingRef.current) return; // Prevent concurrent requests
+        
+        loadingRef.current = true;
         setLoading(true);
         setError(null);
+        
         try {
             const result = await apiRequest(API_BASE);
             setAccounts(result.data);
-            const positions: { [key: string]: number } = {};
+            
+            // Optimize positions calculation
+            const newPositions: { [key: string]: number } = {};
             result.data.forEach((account, index) => {
-                positions[account._id] = index + 1;
+                newPositions[account._id] = index + 1;
             });
-            setPositions(positions);
-        } catch {
+            setPositions(newPositions);
+        } catch (err) {
             setError("Không thể tải dữ liệu tài khoản");
+            console.error("Fetch accounts error:", err);
         } finally {
             setLoading(false);
+            loadingRef.current = false;
         }
     }, []);
 
@@ -60,27 +72,42 @@ export const useAccount = () => {
         fetchAccounts();
     }, [fetchAccounts]);
 
+    // Memoize filtered accounts with dependency optimization
     const filterAccounts = useMemo(() => {
-        return accounts
-            .filter((account: Account) => {
-                if (filterStatus && account.status !== filterStatus) {
-                    return false;
-                }
-                if (keyword) {
-                    const searchLower = keyword.toLowerCase();
-                    return (
-                        account.fullName.toLowerCase().includes(searchLower) ||
-                        account.email.toLowerCase().includes(searchLower) ||
-                        account.phone.includes(keyword)
-                    );
-                }
-                return true;
-            });
+        if (!accounts.length) return [];
+        
+        const keywordLower = keyword.toLowerCase();
+        const hasKeyword = keyword.trim().length > 0;
+        const hasStatusFilter = filterStatus.length > 0;
+        
+        if (!hasKeyword && !hasStatusFilter) return accounts;
+        
+        return accounts.filter((account: Account) => {
+            // Status filter check
+            if (hasStatusFilter && account.status !== filterStatus) {
+                return false;
+            }
+            
+            // Keyword search check
+            if (hasKeyword) {
+                return (
+                    account.fullName.toLowerCase().includes(keywordLower) ||
+                    account.email.toLowerCase().includes(keywordLower) ||
+                    account.phone.includes(keyword)
+                );
+            }
+            
+            return true;
+        });
     }, [accounts, filterStatus, keyword]);
 
-    const createAccount = async (accountData: Omit<Account, "_id">): Promise<boolean> => {
+    const createAccount = useCallback(async (accountData: Omit<Account, "_id">): Promise<boolean> => {
+        if (loadingRef.current) return false;
+        
+        loadingRef.current = true;
         setLoading(true);
         setError(null);
+        
         try {
             await apiRequest(`${API_BASE}/create`, {
                 method: "POST",
@@ -88,17 +115,23 @@ export const useAccount = () => {
             });
             await fetchAccounts();
             return true;
-        } catch  {
+        } catch (err) {
             setError("Không thể tạo tài khoản");
+            console.error("Create account error:", err);
             return false;
         } finally {
             setLoading(false);
+            loadingRef.current = false;
         }
-    };
+    }, [fetchAccounts]);
 
-    const updateAccount = async (id: string, accountData: Partial<Account>): Promise<boolean> => {
+    const updateAccount = useCallback(async (id: string, accountData: Partial<Account>): Promise<boolean> => {
+        if (loadingRef.current) return false;
+        
+        loadingRef.current = true;
         setLoading(true);
         setError(null);
+        
         try {
             await apiRequest(`${API_BASE}/edit/${id}`, {
                 method: "PATCH",
@@ -106,23 +139,27 @@ export const useAccount = () => {
             });
             await fetchAccounts();
             return true;
-        } catch  {
-            setError( "Không thể cập nhật tài khoản");
+        } catch (err) {
+            setError("Không thể cập nhật tài khoản");
+            console.error("Update account error:", err);
             return false;
         } finally {
             setLoading(false);
+            loadingRef.current = false;
         }
-    };
+    }, [fetchAccounts]);
 
-    const handleStatusChange = async (
+    const handleStatusChange = useCallback(async (
         id: string,
         currentStatus: string
     ) => {
         const newStatus = currentStatus === "active" ? "inactive" : "active";
+        
         try {
             await apiRequest(`${API_BASE}/change-status/${newStatus}/${id}`, {
                 method: "PATCH",
             });
+            
             setAccounts(prev => 
                 prev.map(account => 
                     account._id === id 
@@ -130,45 +167,77 @@ export const useAccount = () => {
                         : account
                 )
             );
-        } catch {
+        } catch (err) {
             setError("Không thể cập nhật trạng thái tài khoản");
+            console.error("Status change error:", err);
+            fetchAccounts();
         }
-    };
+    }, [fetchAccounts]);
 
-    const deleteAccount = async (id: string) => {
+    const deleteAccount = useCallback(async (id: string) => {
+        if (loadingRef.current) return;
+        
+        loadingRef.current = true;
         setLoading(true);
         setError(null);
+        
         try {
             await apiRequest(`${API_BASE}/deleted/${id}`, {
                 method: "DELETE",
             });
             await fetchAccounts();
-        } catch {
+        } catch (err) {
             setError("Không thể xóa tài khoản");
+            console.error("Delete account error:", err);
         } finally {
             setLoading(false);
+            loadingRef.current = false;
         }
-    };
+    }, [fetchAccounts]);
 
-    const totalPages = Math.ceil(filterAccounts.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedAccounts = filterAccounts.slice(
-        startIndex,
-        startIndex + itemsPerPage
-    );
+    const getAccountById = useCallback(async (id: string): Promise<Account | undefined> => {
+        if (loadingRef.current) return undefined;
+        
+        loadingRef.current = true;
+        setLoading(true);
+        setError(null);
+        
+        try {
+            const result = await apiRequest(`${API_BASE}/${id}`);
+            return result as unknown as Account; 
+        } catch (err) {
+            setError("Không thể tải thông tin tài khoản");
+            console.error("Get account by ID error:", err);
+            return undefined;
+        } finally {
+            setLoading(false);
+            loadingRef.current = false;
+        }
+    }, []);
 
-    const getAccountById = useCallback((id: string): Account | undefined => {
-        return accounts.find(account => account._id === id);
-    }, [accounts]);
-
-    const resetFilters = () => {
+    const resetFilters = useCallback(() => {
         setKeyword("");
         setFilterStatus("");
         setCurrentPage(1);
-    };
+    }, []);
+
+    // Memoize pagination calculations
+    const paginationData = useMemo(() => {
+        const totalPages = Math.ceil(filterAccounts.length / itemsPerPage);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const paginatedAccounts = filterAccounts.slice(
+            startIndex,
+            startIndex + itemsPerPage
+        );
+        
+        return { totalPages, paginatedAccounts };
+    }, [filterAccounts, currentPage, itemsPerPage]);
+
+    // Memoize error setter to prevent unnecessary re-renders
+    const clearError = useCallback(() => setError(null), []);
 
     return {
-        accounts: paginatedAccounts,
+        accounts: paginationData.paginatedAccounts,
         allAccounts: accounts,
         filteredAccounts: filterAccounts,
         loading,
@@ -176,10 +245,10 @@ export const useAccount = () => {
         keyword,
         currentPage,
         itemsPerPage,
-        totalPages,
+        totalPages: paginationData.totalPages,
         positions,
         createAccount,
-        updateAccount, // Export updateAccount
+        updateAccount,
         deleteAccount,
         fetchAccounts,
         getAccountById,
@@ -190,6 +259,6 @@ export const useAccount = () => {
         setKeyword,
         setCurrentPage,
         setItemsPerPage,
-        setError,
+        setError: clearError,
     };
 };
