@@ -18,8 +18,7 @@ import CreateRole from "../pages/admin/role/create";
 import EditRole from "../pages/admin/role/edit";
 import PermissionsPage from "../pages/admin/role/permissions";
 import Login from "../pages/admin/login";
-import PrivateRoutes from "../components/PrivateRoutes/index";
-
+import PrivateRoutes from "../components/PrivateRoutes"; 
 
 
 export const routes = [
@@ -54,55 +53,55 @@ export const routes = [
                     },
                     {
                         path: "products",
-                        element: <Product/>
+                        element: <PrivateRoutes requiredPermission="product_view"><Product/></PrivateRoutes> 
                     },
                     {
                         path: "products/edit/:id", 
-                        element: <EditProduct/>
+                        element: <PrivateRoutes requiredPermission="product_edit"><EditProduct/></PrivateRoutes> 
                     },
                     {
                         path: "products/create", 
-                        element: <CreateProductPage/>
+                        element: <PrivateRoutes requiredPermission="product_create"><CreateProductPage/></PrivateRoutes> 
                     },
                     {
                         path: "category", 
-                        element: <Category/>
+                        element: <PrivateRoutes requiredPermission="product-category_view"><Category/></PrivateRoutes> 
                     },
                     {
                         path: "categorys/create", 
-                        element: <CreateCategory/>
+                        element: <PrivateRoutes requiredPermission="product-category_create"><CreateCategory/></PrivateRoutes> 
                     },
                     {
                         path: "categorys/edit/:id",
-                        element: <EditCategoryPage/>
+                        element: <PrivateRoutes requiredPermission="product-category_edit"><EditCategoryPage/></PrivateRoutes>
                     },
                     {
                         path: "accounts",
-                        element: <Account/>
+                        element: <PrivateRoutes requiredPermission="accounts_view"><Account/></PrivateRoutes> 
                     },
                     {
                         path:"accounts/create",
-                        element: <CreateAccount/>
+                        element: <PrivateRoutes requiredPermission="accounts_create"><CreateAccount/></PrivateRoutes> 
                     },
                     {
                         path:"accounts/edit/:id",
-                        element: <EditAccount/>
+                        element: <PrivateRoutes requiredPermission="accounts_edit"><EditAccount/></PrivateRoutes> 
                     },
                     {
                         path: "roles",
-                        element: <Role/>
+                        element: <PrivateRoutes requiredPermission="roles_view"><Role/></PrivateRoutes> 
                     },
                     {
                         path:"roles/create",
-                        element: <CreateRole/>
+                        element: <PrivateRoutes requiredPermission="roles_create"><CreateRole/></PrivateRoutes> 
                     },
                     {
                         path:"roles/edit/:id",
-                        element: <EditRole/>
+                        element: <PrivateRoutes requiredPermission="roles_edit"><EditRole/></PrivateRoutes> 
                     },
                     {
                         path:"permissions",
-                        element: <PermissionsPage/>
+                        element: <PrivateRoutes requiredPermission="roles_permissions"><PermissionsPage/></PrivateRoutes> 
                     }
                 ]
             }
