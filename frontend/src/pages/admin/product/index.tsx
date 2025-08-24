@@ -195,7 +195,7 @@ function Products() {
                     <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => setEditingProduct(product)}
+                          onClick={() => window.location.href = `/admin/products/edit/${product._id}`}
                           className="text-blue-600 transition-colors hover:text-blue-900"
                         >
                           Sửa
