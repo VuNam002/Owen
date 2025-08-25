@@ -15,6 +15,8 @@ interface Product {
   brand: string;
   stock: string;
   status: string;
+  size: string;
+  color: string;
   featured: string;
   position: string;
   product_category_id: string;
@@ -63,8 +65,21 @@ const TINYMCE_CONFIG = {
 };
 
 const INITIAL_PRODUCT_STATE: Product = {
-  title: "", description: "", price: "", discountPercentage: "", brand: "", stock: "", status: "", featured: "0", position: "", product_category_id: "", thumbnail: "", image: "",
+  title: "", description: "", price: "", discountPercentage: "", brand: "", stock: "", status: "", featured: "0", position: "", product_category_id: "", thumbnail: "", image: "", size: "", color: ""
 };
+
+// Predefined options
+const COLOR_OPTIONS = [
+  { value: "red", label: "Đỏ", hex: "#FF0000" },
+  { value: "blue", label: "Xanh dương", hex: "#0000FF" },
+  { value: "green", label: "Xanh lá", hex: "#008000" },
+];
+
+const SIZE_OPTIONS = [
+  { value: "S", label: "S (Small)" },
+  { value: "M", label: "M (Medium)" },
+  { value: "L", label: "L (Large)" },
+];
 
 interface FormFieldProps {
   label: string;
@@ -74,10 +89,10 @@ interface FormFieldProps {
   options?: { value: string; label: string }[] | null;
   product: Product;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  [key: string]: any; // Nếu cần truyền thêm props
+  [key: string]: any;
 }
 
-// FormField component - move outside to avoid recreation on each render
+// FormField component
 const FormField: React.FC<FormFieldProps> = ({
   label, name, type = "text", required = false, options = null, product, onChange, ...props
 }) => (
@@ -112,6 +127,177 @@ const FormField: React.FC<FormFieldProps> = ({
     )}
   </div>
 );
+
+// Enhanced Color Picker Component
+const ColorPicker: React.FC<{
+  value: string;
+  onChange: (color: string) => void;
+  allowCustom?: boolean;
+}> = ({ value, onChange, allowCustom = true }) => {
+  const [customColor, setCustomColor] = useState(value && !COLOR_OPTIONS.find(c => c.value === value) ? value : "");
+  const [showCustomInput, setShowCustomInput] = useState(false);
+
+  const handleColorSelect = (colorValue: string) => {
+    onChange(colorValue);
+    setCustomColor("");
+    setShowCustomInput(false);
+  };
+
+  const handleCustomColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const color = e.target.value;
+    setCustomColor(color);
+    onChange(color);
+  };
+
+  return (
+    <div>
+      <label className="block mb-2 text-sm font-medium text-gray-700">
+        Màu sắc
+      </label>
+      
+      {/* Predefined Colors */}
+      <div className="grid grid-cols-6 gap-2 mb-3">
+        {COLOR_OPTIONS.map((color) => (
+          <button
+            key={color.value}
+            type="button"
+            onClick={() => handleColorSelect(color.value)}
+            className={`relative w-12 h-12 rounded-lg border-2 transition-all ${
+              value === color.value ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-300 hover:border-gray-400'
+            }`}
+            style={{ backgroundColor: color.hex }}
+            title={color.label}
+          >
+            {value === color.value && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg className="w-6 h-6 text-white drop-shadow" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Custom Color Input */}
+      {allowCustom && (
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowCustomInput(!showCustomInput)}
+            className="mb-2 text-sm text-blue-600 hover:text-blue-800"
+          >
+            {showCustomInput ? 'Ẩn màu tùy chỉnh' : '+ Thêm màu tùy chỉnh'}
+          </button>
+          
+          {showCustomInput && (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Nhập tên màu (VD: coral, #FF6B6B)"
+                value={customColor}
+                onChange={handleCustomColorChange}
+                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {customColor && (
+                <div 
+                  className="w-8 h-8 border border-gray-300 rounded"
+                  style={{ backgroundColor: customColor }}
+                ></div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Current Selection Display */}
+      {value && (
+        <div className="mt-2 text-sm text-gray-600">
+          Đã chọn: <span className="font-medium">{COLOR_OPTIONS.find(c => c.value === value)?.label || value}</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Enhanced Size Selector Component
+const SizeSelector: React.FC<{
+  value: string;
+  onChange: (size: string) => void;
+  allowCustom?: boolean;
+}> = ({ value, onChange, allowCustom = true }) => {
+  const [customSize, setCustomSize] = useState(value && !SIZE_OPTIONS.find(s => s.value === value) ? value : "");
+  const [showCustomInput, setShowCustomInput] = useState(false);
+
+  const handleSizeSelect = (sizeValue: string) => {
+    onChange(sizeValue);
+    setCustomSize("");
+    setShowCustomInput(false);
+  };
+
+  const handleCustomSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const size = e.target.value;
+    setCustomSize(size);
+    onChange(size);
+  };
+
+  return (
+    <div>
+      <label className="block mb-2 text-sm font-medium text-gray-700">
+        Kích thước
+      </label>
+      
+      {/* Predefined Sizes */}
+      <div className="grid grid-cols-4 gap-2 mb-3">
+        {SIZE_OPTIONS.map((size) => (
+          <button
+            key={size.value}
+            type="button"
+            onClick={() => handleSizeSelect(size.value)}
+            className={`px-3 py-2 text-sm font-medium rounded-md border transition-all ${
+              value === size.value 
+                ? 'bg-blue-500 text-white border-blue-500' 
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            }`}
+            title={size.label}
+          >
+            {size.value}
+          </button>
+        ))}
+      </div>
+
+      {/* Custom Size Input */}
+      {allowCustom && (
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowCustomInput(!showCustomInput)}
+            className="mb-2 text-sm text-blue-600 hover:text-blue-800"
+          >
+            {showCustomInput ? 'Ẩn kích thước tùy chỉnh' : '+ Thêm kích thước tùy chỉnh'}
+          </button>
+          
+          {showCustomInput && (
+            <input
+              type="text"
+              placeholder="Nhập kích thước (VD: 38, 42, One Size)"
+              value={customSize}
+              onChange={handleCustomSizeChange}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          )}
+        </div>
+      )}
+
+      {/* Current Selection Display */}
+      {value && (
+        <div className="mt-2 text-sm text-gray-600">
+          Đã chọn: <span className="font-medium">{SIZE_OPTIONS.find(s => s.value === value)?.label || value}</span>
+        </div>
+      )}
+    </div>
+  );
+};
 
 function CreateProductPage(): JSX.Element {
   const navigate = useNavigate();
@@ -168,6 +354,14 @@ function CreateProductPage(): JSX.Element {
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value, type, checked } = e.target as HTMLInputElement;
     setProduct(prev => ({ ...prev, [name]: type === "checkbox" ? (checked ? "1" : "0") : value }));
+  }, []);
+
+  const handleColorChange = useCallback((color: string): void => {
+    setProduct(prev => ({ ...prev, color }));
+  }, []);
+
+  const handleSizeChange = useCallback((size: string): void => {
+    setProduct(prev => ({ ...prev, size }));
   }, []);
 
   const handleEditorChange = useCallback((content: string): void => {
@@ -309,7 +503,7 @@ function CreateProductPage(): JSX.Element {
               <FormField label="Giá" name="price" type="number" required min="0" step="0.01" product={product} onChange={handleInputChange} />
               <FormField label="Phần trăm giảm giá (%)" name="discountPercentage" type="number" min="0" max="100" product={product} onChange={handleInputChange} />
               <FormField label="Tồn kho" name="stock" type="number" min="0" product={product} onChange={handleInputChange} />
-              <FormField label="Danh mục" name="product_category_id" required options={categories.map(cat => ({ value: cat._id, label: cat.title }))} product={product} onChange={handleInputChange} />
+              <FormField label="Danh mục" name="product_category_id" required options={categories.map(cat => ({ value: cat._id.toString(), label: cat.title }))} product={product} onChange={handleInputChange} />
               <FormField label="Trạng thái" name="status" options={[{ value: "active", label: "Hoạt động" }, { value: "inactive", label: "Không hoạt động" }]} product={product} onChange={handleInputChange} />
               <FormField label="Vị trí" name="position" type="number" min="0" product={product} onChange={handleInputChange} />
             </div>
@@ -318,6 +512,23 @@ function CreateProductPage(): JSX.Element {
                 <input type="checkbox" name="featured" checked={product.featured === "1"} onChange={handleInputChange} className="mr-2" />
                 <span className="text-sm font-medium text-gray-700">Sản phẩm nổi bật</span>
               </label>
+            </div>
+          </div>
+
+          {/* Color and Size */}
+          <div className="p-6 bg-white rounded-lg shadow">
+            <h2 className="mb-4 text-lg font-semibold">Màu sắc & Kích thước</h2>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <ColorPicker 
+                value={product.color} 
+                onChange={handleColorChange}
+                allowCustom={true}
+              />
+              <SizeSelector 
+                value={product.size} 
+                onChange={handleSizeChange}
+                allowCustom={true}
+              />
             </div>
           </div>
 
