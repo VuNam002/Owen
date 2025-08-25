@@ -13,10 +13,8 @@ const handleError = require("../../helpers/handleError");
 module.exports.index = async (req, res) => {
     try {
       const objectSearch = searchHelper(req.query);
-      // Truyền Category model vào buildSearchFilter
       const filter = await buildSearchFilter(objectSearch, Category);
       const sort = buildSortObject(req);
-      // Truyền Product model và paginationHelper vào buildPagination
       const pagination = await buildPagination(req, filter, Product, paginationHelper);
 
       const products = await Product.find(filter)
