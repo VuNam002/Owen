@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { PaginationComponent } from "../../../helpers/pagination";
-import { MdAttachMoney } from "react-icons/md";
+import { MdAttachMoney, MdFavorite, MdFavoriteBorder } from "react-icons/md";
+import { FiGrid, FiList } from "react-icons/fi";
 
 interface Product {
   _id: string;
@@ -22,6 +23,7 @@ interface Category {
   slug?: string;
   productCount?: number;
   name: string;
+  status: string; // Đảm bảo interface có trường status
 }
 
 function Products() {
@@ -32,6 +34,9 @@ function Products() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [showFilter, setShowFilter] = useState(true);
+  const [favorites, setFavorites] = useState<string[]>([]);
 
   const calculateDiscountedPrice = (
     originalPrice: number,
@@ -51,6 +56,14 @@ function Products() {
   ): number => {
     if (!discountPercentage || discountPercentage <= 0) return 0;
     return (originalPrice * discountPercentage) / 100;
+  };
+
+  const toggleFavorite = (productId: string) => {
+    setFavorites((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
   };
 
   // Fetch categories
@@ -73,7 +86,7 @@ function Products() {
   useEffect(() => {
     setLoading(true);
 
-    let url = `http://localhost:3000/api/v1/products?page=${currentPage}&limit=10`;
+    let url = `http://localhost:3000/api/v1/products?page=${currentPage}&limit=12`;
     if (selectedCategory) {
       url += `&product_category_id=${encodeURIComponent(selectedCategory)}`;
     }
@@ -111,6 +124,11 @@ function Products() {
     setCurrentPage(1);
   };
 
+  // Lọc ra những categories có status là "active"
+  const activeCategories = categories.filter(
+    (category) => category.status === "active"
+  );
+
   const filteredProducts = selectedCategory
     ? products.filter(
         (product) => product.product_category_id?.title === selectedCategory
@@ -120,185 +138,260 @@ function Products() {
   const activeProducts = filteredProducts.filter((p) => p.status === "active");
 
   return (
-    <div className="flex gap-6">
-      <div className="flex-shrink-0 w-64">
-        <div className="p-4 bg-white border border-gray-100 rounded-lg shadow-sm">
-          <h3 className="mb-4 font-semibold text-gray-900">DANH MỤC</h3>
-          <ul className="space-y-2">
-            <li>
-              <button
-                onClick={handleShowAll}
-                className={`text-left w-full px-2 py-1 rounded transition-colors ${
-                  !selectedCategory
-                    ? "text-blue-600 bg-blue-50 font-medium"
-                    : "text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                }`}
-              >
-                TẤT CẢ SẢN PHẨM
-              </button>
-            </li>
-
-            {/* Danh sách categories */}
-            {categories.map((category) => (
-              <li key={category._id}>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header Section */}
+      <div className="bg-white border-b">
+        <div className="container px-4 py-6 mx-auto">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="mb-2 text-3xl font-bold text-gray-900">
+                Thời Trang
+              </h1>
+              <p className="text-gray-600">
+                Khám phá bộ sưu tập thời trang mới nhất
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex overflow-hidden border rounded-lg">
                 <button
-                  onClick={() => handleCategoryClick(category.title)}
-                  className={`text-left w-full px-2 py-1 rounded transition-colors ${
-                    selectedCategory === category.title
-                      ? "text-blue-600 bg-blue-50 font-medium"
-                      : "text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                  onClick={() => setViewMode("grid")}
+                  className={`p-2 ${
+                    viewMode === "grid"
+                      ? "bg-blue-500 text-white"
+                      : "bg-white text-gray-600 hover:bg-gray-50"
                   }`}
                 >
-                  {category.title}
-                  {category.productCount && (
-                    <span className="ml-2 text-xs text-gray-500">
-                      ({category.productCount})
-                    </span>
-                  )}
+                  <FiGrid className="w-4 h-4" />
                 </button>
-              </li>
-            ))}
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`p-2 ${
+                    viewMode === "list"
+                      ? "bg-blue-500 text-white"
+                      : "bg-white text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  <FiList className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
 
-            {loadingCategories && (
-              <li className="text-sm italic text-gray-400">
-                Đang tải danh mục...
-              </li>
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span>Trang chủ</span>
+            <span>/</span>
+            <span>Sản phẩm</span>
+            {selectedCategory && (
+              <>
+                <span>/</span>
+                <span className="font-medium text-gray-900">
+                  {selectedCategory}
+                </span>
+              </>
             )}
-          </ul>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="relative inline-block text-2xl font-bold text-gray-800">
-              Danh sách sản phẩm
-              <span className="absolute left-0 w-1/2 h-1 bg-green-500 rounded -bottom-1"></span>
-            </h1>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-gray-500">Đang tải sản phẩm...</div>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              {activeProducts.map((product) => (
-                <div
-                  key={product._id}
-                  className="overflow-hidden transition-shadow border shadow-sm cursor-pointer "
-                >
-                  {/* Container cho ảnh và badge giảm giá */}
-                  <div className="relative overflow-hidden aspect-square ">
-                    <img
-                      src={product.thumbnail}
-                      alt={product.title}
-                      className="object-cover w-full h-full transition-transform duration-300 "
-                    />
-
-                    {/* Badge giảm giá */}
-                    {hasDiscount(product) && (
-                      <div className="absolute top-2 left-2">
-                        <span className="inline-block px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-md ">
-                          -{product.discountPercentage}%
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="p-4">
-                    <h2 className="mb-3 text-sm font-medium text-gray-900 line-clamp-2 hover:text-blue-600">
-                      {product.title}
-                    </h2>
-
-                    {/* Phần hiển thị giá */}
-                    <div className="space-y-2">
-                      {/* Giá gốc */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-500">Giá gốc:</span>
-                        <span
-                          className={`text-sm ${
-                            hasDiscount(product)
-                              ? "text-gray-400 line-through"
-                              : "text-gray-900 font-semibold"
-                          }`}
-                        >
-                          {product.price.toLocaleString("vi-VN")}₫
-                        </span>
-                      </div>
-
-                      {hasDiscount(product) && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-red-600">
-                            Giá khuyến mãi:
-                          </span>
-                          <span className="text-lg font-bold text-red-600">
-                            {calculateDiscountedPrice(
-                              product.price,
-                              product.discountPercentage!
-                            ).toLocaleString("vi-VN")}
-                            ₫
-                          </span>
-                        </div>
-                      )}
-
-                      {hasDiscount(product) && (
-                        <div className="flex items-center justify-between p-2 rounded bg-green-50">
-                          <span className="flex items-center gap-1 text-xs font-medium text-green-700">
-                            <MdAttachMoney className="text-sm" />
-                            Tiết kiệm:{" "}
-                            {calculateSavings(
-                              product.price,
-                              product.discountPercentage!
-                            ).toLocaleString("vi-VN")}
-                            ₫
-                          </span>
-                          <span className="text-xs font-bold text-green-600">
-                            (-{product.discountPercentage}%)
-                          </span>
-                        </div>
-                      )}
-
-                      {product.oldPrice &&
-                        product.oldPrice !== product.price &&
-                        !hasDiscount(product) && (
-                          <div className="text-xs text-gray-500">
-                            Giá tham khảo:{" "}
-                            {product.oldPrice.toLocaleString("vi-VN")}₫
-                          </div>
-                        )}
+      <div className="container px-4 py-8 mx-auto">
+        <div className="flex gap-8">
+          {/* Sidebar */}
+          {showFilter && (
+            <div className="flex-shrink-0 w-80">
+              <div className="sticky p-6 top-8">
+                <div className="space-y-3">
+                  <button
+                    onClick={handleShowAll}
+                    className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
+                      !selectedCategory
+                        ? "text-[#DCB963]"
+                        : "text-gray-700 hover:text-[#DCB963]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>Tất cả sản phẩm</span>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  </button>
 
-            {activeProducts.length === 0 && (
-              <div className="py-12 text-center text-gray-500">
-                Không tìm thấy sản phẩm nào
-                {selectedCategory && (
-                  <div className="mt-2">
+                  {/* Chỉ hiển thị categories có status là "active" */}
+                  {activeCategories.map((category) => (
                     <button
-                      onClick={handleShowAll}
-                      className="text-blue-600 hover:underline"
+                      key={category._id}
+                      onClick={() => handleCategoryClick(category.title)}
+                      className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
+                        selectedCategory === category.title
+                          ? "text-[#DCB963]"
+                          : "text-gray-700 hover:text-[#DCB963]"
+                      }`}
                     >
-                      Xem tất cả sản phẩm
+                      <div className="flex items-center justify-between">
+                        <span>{category.title}</span>
+                        {category.productCount && (
+                          <span className="px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded-full">
+                            {category.productCount}
+                          </span>
+                        )}
+                      </div>
                     </button>
+                  ))}
+                </div>
+
+                {loadingCategories && (
+                  <div className="py-4 text-center">
+                    <div className="w-8 h-8 mx-auto border-b-2 border-blue-500 rounded-full animate-spin"></div>
+                    <p className="mt-2 text-sm text-gray-500">
+                      Đang tải danh mục...
+                    </p>
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Main Content */}
+          <div className="flex-1">
+            {/* Results Header */}
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="text-center">
+                  <div className="mx-auto mb-4 border-b-2 border-blue-500 rounded-full w-14 h-14 animate-spin"></div>
+                  <p className="text-gray-500">Đang tải sản phẩm...</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div
+                  className={`grid gap-6 mb-8 ${
+                    viewMode === "grid"
+                      ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3"
+                      : "grid-cols-1"
+                  }`}
+                >
+                  {activeProducts.map((product) => (
+                    <div
+                      key={product._id}
+                      className={`bg-white shadow-sm  transition-all duration-300 group overflow-hidden ${
+                        viewMode === "list" ? "flex" : ""
+                      }`}
+                    >
+                      <div
+                        className={`relative overflow-hidden ${
+                          viewMode === "list" ? "w-48 h-48" : "aspect-square"
+                        }`}
+                      >
+                        <img
+                          src={product.thumbnail}
+                          alt={product.title}
+                          className="object-cover w-full h-full transition-transform duration-300 "
+                        />
+
+                        {/* Badges */}
+                        <div className="absolute flex flex-col gap-2 top-3 left-3">
+                          {hasDiscount(product) && (
+                            <span className="px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-md">
+                              -{product.discountPercentage}%
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="absolute flex flex-col gap-2 transition-opacity duration-200 opacity-0 top-3 right-3 group-hover:opacity-100">
+                          <button
+                            onClick={() => toggleFavorite(product._id)}
+                            className="p-2 transition-colors bg-white rounded-full shadow-md hover:bg-red-50"
+                          >
+                            {favorites.includes(product._id) ? (
+                              <MdFavorite className="w-4 h-4 text-red-500" />
+                            ) : (
+                              <MdFavoriteBorder className="w-4 h-4 text-gray-600" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div
+                        className={`p-4 ${viewMode === "list" ? "flex-1" : ""}`}
+                      >
+                        <div className="mb-3">
+                          <h3 className="font-medium text-gray-900 transition-colors cursor-pointer line-clamp-2 hover:text-blue-600">
+                            {product.title}
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3">
+                          {hasDiscount(product) ? (
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg font-bold text-red-600">
+                                  {calculateDiscountedPrice(
+                                    product.price,
+                                    product.discountPercentage!
+                                  ).toLocaleString("vi-VN")}
+                                  ₫
+                                </span>
+                                <span className="text-sm text-gray-400 line-through">
+                                  {product.price.toLocaleString("vi-VN")}₫
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-green-50">
+                                <span className="flex items-center gap-1 text-xs font-medium text-green-700">
+                                  <MdAttachMoney className="w-3 h-3" />
+                                  Tiết kiệm{" "}
+                                  {calculateSavings(
+                                    product.price,
+                                    product.discountPercentage!
+                                  ).toLocaleString("vi-VN")}
+                                  ₫
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-lg font-bold text-gray-900">
+                              {product.price.toLocaleString("vi-VN")}₫
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {activeProducts.length === 0 && (
+                  <div className="py-20 text-center">
+                    <div className="flex items-center justify-center w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full">
+                      <FiGrid className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="mb-2 text-lg font-medium text-gray-900">
+                      Không tìm thấy sản phẩm nào
+                    </h3>
+                    <p className="mb-4 text-gray-500">
+                      Hãy thử tìm kiếm với từ khóa khác hoặc xem tất cả sản phẩm
+                    </p>
+                    {selectedCategory && (
+                      <button
+                        onClick={handleShowAll}
+                        className="px-6 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
+                      >
+                        Xem tất cả sản phẩm
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {totalPages > 1 && (
+                  <div className="mt-12">
+                    <PaginationComponent
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                    />
+                  </div>
+                )}
+              </>
             )}
-            {totalPages > 1 && (
-              <PaginationComponent
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
-            )}
-          </>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );
