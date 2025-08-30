@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PaginationComponent } from "../../../helpers/pagination"; 
 
 interface Product {
     _id: number;
@@ -12,16 +13,25 @@ interface Product {
 
 function Products() {
     const [products, setProducts] = useState<Product[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1); 
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
 
     useEffect(() => {
-        fetch("http://localhost:3000/api/v1/products")
+        fetch(`http://localhost:3000/api/v1/products?page=${currentPage}&limit=10`)
             .then(response => response.json())
             .then((result) => {
                 const data: Product[] = result.data || [];
                 setProducts(data);
-                console.log(data);
+                if (result.totalPages) {
+                    setTotalPages(result.totalPages);
+                }
             })
-    }, []);
+            .catch(error => console.error("Error fetching products:", error)); 
+    }, [currentPage]); 
 
     return (
         <>
@@ -37,6 +47,11 @@ function Products() {
                     </li>
                 ))}
             </ul>
+            <PaginationComponent
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+            />
         </>
     )
 }

@@ -9,8 +9,13 @@ interface Product {
   price: number;
   category: string;
   status: string;
-  createdBy: {
+  product_category_id: {
     _id: string;
+    title: string;
+    position: number;
+  }
+  createdBy: {
+    account_id: string;
     name: string;
   };  
   createdAt?: string;

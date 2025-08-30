@@ -19,6 +19,7 @@ import EditRole from "../pages/admin/role/edit";
 import PermissionsPage from "../pages/admin/role/permissions";
 import Login from "../pages/admin/login";
 import PrivateRoutes from "../components/PrivateRoutes"; 
+import SearchPage from "../pages/client/Products/SearchPage"
 
 
 export const routes = [
@@ -33,6 +34,10 @@ export const routes = [
             {
                 path: 'products',
                 element: <Products/>
+            },
+            {
+                path: 'search',
+                element: <SearchPage/>
             },
             {
                 path: "*",

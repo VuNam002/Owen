@@ -49,6 +49,16 @@ function Products() {
     }).format(price);
   };
 
+  const formatDateTime = (dateString: string) => {
+    return new Intl.DateTimeFormat('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(new Date(dateString));
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen p-6 bg-gray-50">
@@ -128,6 +138,9 @@ function Products() {
                     Người tạo
                   </th>
                   <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                    Thời gian tạo
+                  </th>
+                  <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                     Thao tác
                   </th>
                 </tr>
@@ -146,7 +159,7 @@ function Products() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <input
                         type="number"
-                        value={positions[product._id] || product.position} // ✅ Đã thêm thuộc tính value
+                        value={positions[product._id] || product.position}
                         onChange={(e) => handlePositionChange(product._id, parseInt(e.target.value) || 0)}
                         className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
@@ -175,7 +188,8 @@ function Products() {
                       {formatPrice(product.price)}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                      {product.category}
+                      {/* Hiển thị tên danh mục */}
+                      {product.product_category_id?.title || 'Chưa phân loại'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
@@ -190,7 +204,12 @@ function Products() {
                       </button>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                      {product.createdBy.name}
+                      {/* Hiển thị account_id từ createdBy */}
+                      {product.createdBy?.account_id || 'Không xác định'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                      {/* Hiển thị thời gian tạo */}
+                      {product.createdAt ? formatDateTime(product.createdAt) : 'Không rõ'}
                     </td>
                     <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                       <div className="flex items-center gap-2">

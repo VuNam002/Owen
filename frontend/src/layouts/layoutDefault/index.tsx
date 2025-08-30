@@ -1,6 +1,7 @@
 import { FiPhoneCall } from "react-icons/fi";
 import { Link, Outlet } from "react-router-dom";
 import Logo from "../../assets/logo.svg";
+import Search from "../../helpers/search"
 
 function LayoutDefault() {
   return (
@@ -44,6 +45,7 @@ function LayoutDefault() {
                 {" "}
                 Sản phẩm
               </Link>
+              <Search/>
             </nav>
           </div>
         </div>
