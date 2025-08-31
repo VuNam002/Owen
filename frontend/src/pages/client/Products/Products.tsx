@@ -23,7 +23,7 @@ interface Category {
   slug?: string;
   productCount?: number;
   name: string;
-  status: string; // Đảm bảo interface có trường status
+  status: string;
 }
 
 function Products() {
@@ -31,11 +31,12 @@ function Products() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage] = useState(6);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [showFilter, setShowFilter] = useState(true);
+  const [showFilter] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
 
   const calculateDiscountedPrice = (
@@ -86,7 +87,7 @@ function Products() {
   useEffect(() => {
     setLoading(true);
 
-    let url = `http://localhost:3000/api/v1/products?page=${currentPage}&limit=12`;
+    let url = `http://localhost:3000/api/v1/products?page=${currentPage}&limit=${itemsPerPage}`;
     if (selectedCategory) {
       url += `&product_category_id=${encodeURIComponent(selectedCategory)}`;
     }
@@ -97,21 +98,43 @@ function Products() {
         const data: Product[] = result.data || [];
         setProducts(data);
 
+        let calculatedTotalPages = 1;
+        let calculatedTotalItems = data.length;
+
         if (result.totalPages) {
-          setTotalPages(result.totalPages);
+          calculatedTotalPages = result.totalPages;
         } else if (result.pagination?.totalPages) {
-          setTotalPages(result.pagination.totalPages);
+          calculatedTotalPages = result.pagination.totalPages;
         }
 
+        if (result.totalItems) {
+          calculatedTotalItems = result.totalItems;
+        } else if (result.pagination?.totalItems) {
+          calculatedTotalItems = result.pagination.totalItems;
+        } else if (result.total) {
+          calculatedTotalItems = result.total;
+        }
+
+        if (calculatedTotalItems > itemsPerPage) {
+          calculatedTotalPages = Math.ceil(calculatedTotalItems / itemsPerPage);
+        }
+
+        if (data.length === itemsPerPage && calculatedTotalPages === 1) {
+          calculatedTotalPages = currentPage + 1;
+        }
+
+        setTotalPages(calculatedTotalPages);
         setLoading(false);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error("API Error:", error);
         setLoading(false);
       });
-  }, [currentPage, selectedCategory]);
+  }, [currentPage, selectedCategory, itemsPerPage]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleCategoryClick = (categoryTitle: string) => {
@@ -124,7 +147,6 @@ function Products() {
     setCurrentPage(1);
   };
 
-  // Lọc ra những categories có status là "active"
   const activeCategories = categories.filter(
     (category) => category.status === "active"
   );
@@ -143,13 +165,12 @@ function Products() {
       <div className="bg-white border-b">
         <div className="container px-4 py-6 mx-auto">
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="mb-2 text-3xl font-bold text-gray-900">
-                Thời Trang
-              </h1>
-              <p className="text-gray-600">
-                Khám phá bộ sưu tập thời trang mới nhất
-              </p>
+            <div className="flex items-center gap-4">
+              <div>
+                <h1 className="mb-2 text-3xl font-bold text-gray-900">
+                  Thời Trang
+                </h1>
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex overflow-hidden border rounded-lg">
@@ -195,7 +216,7 @@ function Products() {
       </div>
 
       <div className="container px-4 py-8 mx-auto">
-        <div className="flex gap-8">
+        <div className="flex">
           {/* Sidebar */}
           {showFilter && (
             <div className="flex-shrink-0 w-80">
@@ -219,7 +240,7 @@ function Products() {
                     <button
                       key={category._id}
                       onClick={() => handleCategoryClick(category.title)}
-                      className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
+                      className={`w-full text-left px-4 py-3 transition-all duration-300 ${
                         selectedCategory === category.title
                           ? "text-[#DCB963]"
                           : "text-gray-700 hover:text-[#DCB963]"
@@ -251,7 +272,19 @@ function Products() {
 
           {/* Main Content */}
           <div className="flex-1">
-            {/* Results Header */}
+            {!loading && activeProducts.length > 0 && (
+              <div className="flex items-center justify-between ">
+                {selectedCategory && (
+                  <span className="ml-2">
+                    trong danh mục{" "}
+                    <span className="font-medium text-[#DCB963]">
+                      {selectedCategory}
+                    </span>
+                  </span>
+                )}
+              </div>
+            )}
+
             {loading ? (
               <div className="flex items-center justify-center py-20">
                 <div className="text-center">
@@ -271,13 +304,15 @@ function Products() {
                   {activeProducts.map((product) => (
                     <div
                       key={product._id}
-                      className={`bg-white shadow-sm  transition-all duration-300 group overflow-hidden ${
+                      className={`bg-white shadow-sm transition-all duration-300 group overflow-hidden ${
                         viewMode === "list" ? "flex" : ""
                       }`}
                     >
                       <div
                         className={`relative overflow-hidden ${
-                          viewMode === "list" ? "w-48 h-48" : "aspect-square"
+                          viewMode === "list"
+                            ? "w-[370px] h-[494px]"
+                            : "w-[370px] h-[494px]"
                         }`}
                       >
                         <img
@@ -286,7 +321,6 @@ function Products() {
                           className="object-cover w-full h-full transition-transform duration-300 "
                         />
 
-                        {/* Badges */}
                         <div className="absolute flex flex-col gap-2 top-3 left-3">
                           {hasDiscount(product) && (
                             <span className="px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-md">
@@ -379,13 +413,22 @@ function Products() {
                   </div>
                 )}
 
-                {totalPages > 1 && (
-                  <div className="mt-12">
-                    <PaginationComponent
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      onPageChange={handlePageChange}
-                    />
+                {activeProducts.length > 0 && (
+                  <div className="py-8 mt-12">
+                    <div className="max-w-4xl mx-auto">
+                      <div className="flex justify-center mb-4">
+                        <PaginationComponent
+                          currentPage={currentPage}
+                          totalPages={Math.max(
+                            totalPages,
+                            activeProducts.length === itemsPerPage
+                              ? currentPage + 1
+                              : 1
+                          )}
+                          onPageChange={handlePageChange}
+                        />
+                      </div>
+                    </div>
                   </div>
                 )}
               </>

@@ -11,7 +11,6 @@ function HeaderSearch() {
     const trimmedKeyword = keyword.trim();
     
     if (trimmedKeyword && trimmedKeyword.length >= 2) {
-      // Navigate đến trang search results, không phải API trực tiếp
       navigate(`/search?keyword=${encodeURIComponent(trimmedKeyword)}`);
       setKeyword("");
     }

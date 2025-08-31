@@ -12,6 +12,8 @@ interface PaginationComponentProps {
   currentPage: number
   totalPages: number
   onPageChange: (page: number) => void
+  itemsPerPage: number
+  totalItems: number
 }
 
 export function PaginationComponent({
@@ -19,7 +21,7 @@ export function PaginationComponent({
   totalPages,
   onPageChange,
 }: PaginationComponentProps) {
-  const pagesToShow = 5 // Number of page links to display
+  const pagesToShow = 3 
 
   const getPageNumbers = () => {
     const pageNumbers: (number | 'ellipsis')[] = []
