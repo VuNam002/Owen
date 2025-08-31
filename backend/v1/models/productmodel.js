@@ -10,7 +10,7 @@ const productSchema = new mongoose.Schema(
             ref: "ProductCategory",
             required: true,
         },
-        descripttion: String,
+        description: String,
         price: Number,
         size: [String],
         color: [String],

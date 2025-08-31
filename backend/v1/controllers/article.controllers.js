@@ -177,3 +177,32 @@ module.exports.changeStatus = async (req, res) => {
         handleError(res, error, "Lỗi khi cập nhật trạng thái bài viết");
     }
 }
+module.exports.createComment = async (req, res) => {
+    try {
+        const slug = req.params.slug;
+        const article = await Article.findOne({
+            slug: slug,
+            deleted: false,
+        })
+        if(!article) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy bài viết",
+            })
+        }
+        const comment = new Comment({
+            article_id: article._id,
+            fullName: req.body.fullName,
+            email: req.body.email,
+            content: req.body.content,
+        })
+        await comment.save()
+        res.status(201).json({
+            success: true,
+            message: "Thêm bình luận thành công",
+            data: comment,
+        })
+    } catch (error) {
+        handleError(res, error, "Lỗi khi thêm bình luận")
+    }
+}

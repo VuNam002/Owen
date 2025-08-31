@@ -2,6 +2,7 @@ const Product = require("../models/productmodel");
 const Category = require("../models/productCategory");
 const paginationHelper = require("../../helpers/pagination");
 const searchHelper = require("../../helpers/search");
+const Comment = require("../models/comment.model")
 
 const buildSearchFilter = require("../../helpers/buildSearchFilter");
 const buildPagination = require("../../helpers/buildPagination");
@@ -158,5 +159,35 @@ module.exports.detail = async (req, res) => {
         })
     } catch (error) {
         handleError(res, error, "Lỗi khi lấy chi tiết sản phẩm");
+    }
+}
+module.exports.createComment = async (req, res) => {
+    try {
+        const slug = req.params.slug;
+        const product = await Product.findOne({
+            slug: slug,
+            deleted: false,
+            status: "active",
+        })
+        if(!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy sản phẩm"
+            })
+        }
+        const comment = new Comment({
+            product_id: product._id,
+            fullName: req.body.fullName,
+            email: req.body.email,
+            content: req.body.content,
+        })
+        await comment.save();
+        res.status(201).json({
+            success: true,
+            message: "Thêm bình luận thành công",
+            data: comment,
+        })
+    } catch (error) {
+        handleError(res, error, "Lỗi khi thêm bình luận");
     }
 }
