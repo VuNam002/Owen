@@ -8,39 +8,52 @@ const buildPagination = require("../../helpers/buildPagination");
 const buildSortObject = require("../../helpers/buildSortObject");
 const handleError = require("../../helpers/handleError");
 
-
-
 module.exports.index = async (req, res) => {
-    try {
-      const objectSearch = searchHelper(req.query);
-      const filter = await buildSearchFilter(objectSearch, Category);
-      const sort = buildSortObject(req);
-      const pagination = await buildPagination(req, filter, Product, paginationHelper);
+  try {
+    let objectSearch = {
+      keyword: "",
+    };
+    
+    // Tìm theo keyword
+    if (req.query.keyword) {
+      objectSearch.keyword = req.query.keyword;
+      const regex = new RegExp(objectSearch.keyword, "i");
+      objectSearch.regex = regex;
+    }
+    const filter = await buildSearchFilter(objectSearch, Category);
+    if (req.query.brand) {
+      filter.brand = new RegExp(req.query.brand, "i");
+    }
 
-      const products = await Product.find(filter)
-        .populate("product_category_id", "title")
-        .sort(sort)
-        .skip(pagination.skip)
-        .limit(pagination.limitItems);
-      if (products.length === 0) {
-        return res.status(200).json({
-            success: true,
-            message: "Không tìm thấy sản phẩm nào",
-            data: [],
-            pagination,
-        });
-      }
+    const sort = buildSortObject(req);
+    const pagination = await buildPagination(req, filter, Product, paginationHelper);
 
-      res.status(200).json({
+    const products = await Product.find(filter)
+      .populate("product_category_id", "title")
+      .sort(sort)
+      .skip(pagination.skip)
+      .limit(pagination.limitItems);
+
+    if (products.length === 0) {
+      return res.status(200).json({
         success: true,
-        message: "Lấy danh sách sản phẩm thành công",
-        data: products,
+        message: "Không tìm thấy sản phẩm nào",
+        data: [],
         pagination,
       });
-    } catch (error) {
-        handleError(res, error, "Lỗi khi lấy danh sách sản phẩm");
     }
+
+    res.status(200).json({
+      success: true,
+      message: "Lấy danh sách sản phẩm thành công",
+      data: products,
+      pagination,
+    });
+  } catch (error) {
+    handleError(res, error, "Lỗi khi lấy danh sách sản phẩm");
+  }
 };
+
 module.exports.changeStatus = async (req, res) => {
     try {
         const id = req.params.id;
