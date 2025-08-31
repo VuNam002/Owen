@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Star, Heart, ShoppingCart, Minus, Plus, Share2, Truck, RotateCcw, Shield } from "lucide-react";
+import { Heart, ShoppingCart, Minus, Plus, Share2, Truck, RotateCcw, Shield } from "lucide-react";
 import { useParams } from "react-router-dom";
 
 interface Product {
@@ -11,16 +11,29 @@ interface Product {
     discountPercentage?: number;
     status: string;
     description: string;
-    size: string[];
-    color: string[];
-    quantity: number;
+    size: string; 
+    color: string; 
+    stock: number;
     
     product_category_id: {
         _id: string;
         title: string;
     };
-    
 }
+
+// Predefined color options với hex values
+const COLOR_OPTIONS = [
+    { value: "red", label: "Đỏ", hex: "#FF0000" },
+    { value: "blue", label: "Xanh dương", hex: "#0000FF" },
+    { value: "green", label: "Xanh lá", hex: "#008000" },
+    { value: "yellow", label: "Vàng", hex: "#FFFF00" },
+    { value: "purple", label: "Tím", hex: "#800080" },
+    { value: "orange", label: "Cam", hex: "#FFA500" },
+    { value: "pink", label: "Hồng", hex: "#FFC0CB" },
+    { value: "brown", label: "Nâu", hex: "#A52A2A" },
+    { value: "black", label: "Đen", hex: "#000000" },
+    { value: "white", label: "Trắng", hex: "#FFFFFF" },
+];
 
 // Mock images cho demo
 const mockImages = [
@@ -31,7 +44,6 @@ const mockImages = [
 ];
 
 function ProductDetail() {
-    // Lấy id từ URL params
     const { id } = useParams<{ id: string }>();
     
     const [product, setProduct] = useState<Product | null>(null);
@@ -43,8 +55,24 @@ function ProductDetail() {
     const [selectedImage, setSelectedImage] = useState<string>("");
     const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
 
+    // Parse colors and sizes từ JSON string
+    const availableColors = product?.color ? (() => {
+        try {
+            return JSON.parse(product.color);
+        } catch {
+            return [];
+        }
+    })() : [];
+
+    const availableSizes = product?.size ? (() => {
+        try {
+            return JSON.parse(product.size);
+        } catch {
+            return [];
+        }
+    })() : [];
+
     useEffect(() => {
-        // Kiểm tra id có tồn tại không
         if (!id) {
             setError("Không tìm thấy ID sản phẩm");
             setLoading(false);
@@ -71,14 +99,6 @@ function ProductDetail() {
                 setProduct(result.data);
                 setSelectedImage(result.data.thumbnail || mockImages[0]);
                 
-                // Set default size và color nếu có
-                if (result.data.size && result.data.size.length > 0) {
-                    setSelectedSize(result.data.size[0]);
-                }
-                if (result.data.color && result.data.color.length > 0) {
-                    setSelectedColor(result.data.color[0]);
-                }
-                
             } catch (error) {
                 console.error('Lỗi khi tải sản phẩm:', error);
                 setError(error instanceof Error ? error.message : 'Có lỗi xảy ra');
@@ -88,7 +108,22 @@ function ProductDetail() {
         };
 
         fetchProduct();
-    }, [id]); // Dependency array chỉ có id
+    }, [id]);
+
+    // Set default selections khi product được load
+    useEffect(() => {
+        if (product) {
+            const colors = availableColors;
+            const sizes = availableSizes;
+            
+            if (colors.length > 0 && !selectedColor) {
+                setSelectedColor(colors[0]);
+            }
+            if (sizes.length > 0 && !selectedSize) {
+                setSelectedSize(sizes[0]);
+            }
+        }
+    }, [product, availableColors, availableSizes, selectedColor, selectedSize]);
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('vi-VN', {
@@ -108,11 +143,11 @@ function ProductDetail() {
     const handleAddToCart = () => {
         if (!product) return;
         
-        if (!selectedSize) {
+        if (availableSizes.length > 0 && !selectedSize) {
             alert("Vui lòng chọn size!");
             return;
         }
-        if (!selectedColor) {
+        if (availableColors.length > 0 && !selectedColor) {
             alert("Vui lòng chọn màu sắc!");
             return;
         }
@@ -129,6 +164,23 @@ function ProductDetail() {
         
         console.log('Thêm vào giỏ hàng:', cartItem);
         alert(`Đã thêm ${quantity} sản phẩm "${product.title}" vào giỏ hàng!`);
+    };
+
+    // Helper function để lấy hex color
+    const getColorHex = (colorValue: string) => {
+        const predefinedColor = COLOR_OPTIONS.find(c => c.value === colorValue);
+        return predefinedColor?.hex || colorValue;
+    };
+
+    // Helper function để lấy color label
+    const getColorLabel = (colorValue: string) => {
+        const predefinedColor = COLOR_OPTIONS.find(c => c.value === colorValue);
+        return predefinedColor?.label || colorValue;
+    };
+
+    // Helper function để render HTML content từ TinyMCE
+    const renderDescription = (description: string) => {
+        return { __html: description };
     };
 
     // Loading state
@@ -222,21 +274,6 @@ function ProductDetail() {
                         {product.title}
                     </h1>
 
-                    {/* Rating */}
-                    <div className="flex items-center mt-3">
-                        <div className="flex items-center">
-                            {[0, 1, 2, 3, 4].map((rating) => (
-                                <Star
-                                    key={rating}
-                                    className="flex-shrink-0 w-5 h-5 text-yellow-400 fill-current"
-                                />
-                            ))}
-                        </div>
-                        <p className="ml-3 text-sm text-gray-500">
-                            4.8 (124 đánh giá)
-                        </p>
-                    </div>
-
                     {/* Price */}
                     <div className="mt-4">
                         <div className="flex items-center space-x-2">
@@ -256,28 +293,76 @@ function ProductDetail() {
                         </div>
                     </div>
 
-                    {/* Description */}
+                    {/* Description - Render HTML từ TinyMCE */}
                     <div className="mt-6">
                         <h3 className="text-sm font-medium text-gray-900">Mô tả sản phẩm</h3>
-                        <div className="mt-4 prose-sm prose text-gray-500">
-                            <p>{product.description}</p>
-                        </div>
+                        <div 
+                            className="mt-4 prose-sm prose text-gray-500 max-w-none"
+                            dangerouslySetInnerHTML={renderDescription(product.description)}
+                        />
                     </div>
 
-                    {/* Size Selection */}
-                    {product.size && product.size.length > 0 && (
+                    {/* Color Selection - Enhanced */}
+                    {availableColors.length > 0 && (
+                        <div className="mt-6">
+                            <h3 className="mb-3 text-sm font-medium text-gray-900">
+                                Màu sắc <span className="text-red-500">*</span>
+                            </h3>
+                            <div className="grid grid-cols-4 gap-3">
+                                {availableColors.map((color: string) => {
+                                    const colorHex = getColorHex(color);
+                                    const colorLabel = getColorLabel(color);
+                                    const isSelected = selectedColor === color;
+                                    
+                                    return (
+                                        <button
+                                            key={color}
+                                            className={`relative flex flex-col items-center p-3 border-2 rounded-lg transition-all ${
+                                                isSelected 
+                                                    ? 'border-indigo-500 bg-indigo-50' 
+                                                    : 'border-gray-200 hover:border-gray-300'
+                                            }`}
+                                            onClick={() => setSelectedColor(color)}
+                                        >
+                                            <div
+                                                className={`w-8 h-8 rounded-full border-2 ${
+                                                    color === 'white' ? 'border-gray-300' : 'border-gray-200'
+                                                }`}
+                                                style={{ backgroundColor: colorHex }}
+                                            />
+                                            <span className="mt-2 text-xs font-medium text-center">
+                                                {colorLabel}
+                                            </span>
+                                            {isSelected && (
+                                                <div className="absolute flex items-center justify-center w-6 h-6 text-white bg-indigo-500 rounded-full -top-2 -right-2">
+                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Size Selection - Enhanced */}
+                    {availableSizes.length > 0 && (
                         <div className="mt-6">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-sm font-medium text-gray-900">Kích cỡ</h3>
+                                <h3 className="text-sm font-medium text-gray-900">
+                                    Kích cỡ <span className="text-red-500">*</span>
+                                </h3>
                                 <a href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
                                     Hướng dẫn chọn size
                                 </a>
                             </div>
                             <div className="grid grid-cols-4 gap-3 mt-4 sm:grid-cols-6">
-                                {product.size.map((size) => (
+                                {availableSizes.map((size: string) => (
                                     <button
                                         key={size}
-                                        className={`border rounded-md py-3 px-3 text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                                        className={`border-2 rounded-md py-3 px-3 text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
                                             selectedSize === size
                                                 ? 'border-indigo-500 text-indigo-600 bg-indigo-50'
                                                 : 'border-gray-200 text-gray-900'
@@ -291,24 +376,25 @@ function ProductDetail() {
                         </div>
                     )}
 
-                    {/* Color Selection */}
-                    {product.color && product.color.length > 0 && (
-                        <div className="mt-6">
-                            <h3 className="text-sm font-medium text-gray-900">Màu sắc</h3>
-                            <div className="flex items-center mt-4 space-x-3">
-                                {product.color.map((color) => (
-                                    <button
-                                        key={color}
-                                        className={`border-2 rounded-md px-4 py-2 text-sm font-medium ${
-                                            selectedColor === color
-                                                ? 'border-indigo-500 text-indigo-600 bg-indigo-50'
-                                                : 'border-gray-200 text-gray-900 hover:bg-gray-50'
-                                        }`}
-                                        onClick={() => setSelectedColor(color)}
-                                    >
-                                        {color}
-                                    </button>
-                                ))}
+                    {/* Selected Options Display */}
+                    {(selectedColor || selectedSize) && (
+                        <div className="p-4 mt-6 rounded-lg bg-gray-50">
+                            <h4 className="mb-2 text-sm font-medium text-gray-900">Lựa chọn của bạn:</h4>
+                            <div className="flex flex-wrap gap-2">
+                                {selectedColor && (
+                                    <span className="inline-flex items-center px-3 py-1 text-sm bg-white border border-gray-200 rounded-full">
+                                        <div
+                                            className="w-3 h-3 mr-2 border border-gray-300 rounded-full"
+                                            style={{ backgroundColor: getColorHex(selectedColor) }}
+                                        />
+                                        Màu: {getColorLabel(selectedColor)}
+                                    </span>
+                                )}
+                                {selectedSize && (
+                                    <span className="inline-flex items-center px-3 py-1 text-sm bg-white border border-gray-200 rounded-full">
+                                        Size: {selectedSize}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     )}
@@ -333,7 +419,7 @@ function ProductDetail() {
                                 <button
                                     onClick={() => handleQuantityChange('increase')}
                                     className="p-2 hover:bg-gray-100 disabled:opacity-50"
-                                    disabled={quantity >= product.quantity}
+                                    disabled={quantity >= product.stock}
                                 >
                                     <Plus className="w-4 h-4" />
                                 </button>
@@ -344,10 +430,10 @@ function ProductDetail() {
                             <button
                                 onClick={handleAddToCart}
                                 className="flex items-center justify-center flex-1 px-8 py-3 text-base font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                                disabled={product.quantity <= 0}
+                                disabled={product.stock <= 0}
                             >
                                 <ShoppingCart className="w-5 h-5 mr-2" />
-                                {product.quantity <= 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng'}
+                                {product.stock <= 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng'}
                             </button>
                             <button
                                 onClick={() => setIsWishlisted(!isWishlisted)}
@@ -390,6 +476,65 @@ function ProductDetail() {
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    {/* Detailed Description Section */}
+                    <div className="pt-8 mt-8 border-t border-gray-200">
+                        <h3 className="mb-4 text-lg font-medium text-gray-900">Chi tiết sản phẩm</h3>
+                        <div 
+                            className="prose-sm prose text-gray-600 max-w-none"
+                            dangerouslySetInnerHTML={renderDescription(product.description)}
+                        />
+                    </div>
+
+                    {/* Specifications */}
+                    <div className="pt-8 mt-8 border-t border-gray-200">
+                        <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+                            <div>
+                                <dt className="text-sm font-medium text-gray-900">Tình trạng</dt>
+                                <dd className="mt-1 text-sm text-gray-600">
+                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                        product.status === 'active' 
+                                            ? 'bg-green-100 text-green-800' 
+                                            : 'bg-red-100 text-red-800'
+                                    }`}>
+                                        {product.status === 'active' ? 'Còn hàng' : 'Hết hàng'}
+                                    </span>
+                                </dd>
+                            </div>
+                            {availableColors.length > 0 && (
+                                <div>
+                                    <dt className="text-sm font-medium text-gray-900">Màu sắc có sẵn</dt>
+                                    <dd className="mt-1">
+                                        <div className="flex flex-wrap gap-2">
+                                            {availableColors.map((color: string) => (
+                                                <div key={color} className="flex items-center">
+                                                    <div
+                                                        className="w-4 h-4 mr-1 border border-gray-300 rounded-full"
+                                                        style={{ backgroundColor: getColorHex(color) }}
+                                                    />
+                                                    <span className="text-sm text-gray-600">{getColorLabel(color)}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </dd>
+                                </div>
+                            )}
+                            {availableSizes.length > 0 && (
+                                <div>
+                                    <dt className="text-sm font-medium text-gray-900">Kích thước có sẵn</dt>
+                                    <dd className="mt-1">
+                                        <div className="flex flex-wrap gap-1">
+                                            {availableSizes.map((size: string, index: number) => (
+                                                <span key={size} className="text-sm text-gray-600">
+                                                    {size}{index < availableSizes.length - 1 && ', '}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </dd>
+                                </div>
+                            )}
+                        </dl>
                     </div>
                 </div>
             </div>

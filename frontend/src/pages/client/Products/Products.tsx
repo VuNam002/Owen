@@ -31,7 +31,7 @@ function Products() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage] = useState(6);
+  const [itemsPerPage] = useState(9);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
@@ -173,12 +173,12 @@ function Products() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex overflow-hidden border rounded-lg">
+              <div className="flex overflow-hidden border border-gray-200 rounded-lg shadow-sm">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`p-2 ${
+                  className={`p-2 transition-all duration-200 ${
                     viewMode === "grid"
-                      ? "bg-blue-500 text-white"
+                      ? "bg-blue-500 text-white shadow-inner"
                       : "bg-white text-gray-600 hover:bg-gray-50"
                   }`}
                 >
@@ -186,9 +186,9 @@ function Products() {
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-2 ${
+                  className={`p-2 transition-all duration-200 ${
                     viewMode === "list"
-                      ? "bg-blue-500 text-white"
+                      ? "bg-blue-500 text-white shadow-inner"
                       : "bg-white text-gray-600 hover:bg-gray-50"
                   }`}
                 >
@@ -200,13 +200,17 @@ function Products() {
 
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span>Trang chủ</span>
+            <span className="transition-colors cursor-pointer hover:text-gray-700">
+              Trang chủ
+            </span>
             <span>/</span>
-            <span>Sản phẩm</span>
+            <span className="transition-colors cursor-pointer hover:text-gray-700">
+              Sản phẩm
+            </span>
             {selectedCategory && (
               <>
                 <span>/</span>
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-[#DCB963]">
                   {selectedCategory}
                 </span>
               </>
@@ -216,51 +220,44 @@ function Products() {
       </div>
 
       <div className="container px-4 py-8 mx-auto">
-        <div className="flex">
-          {/* Sidebar */}
+        <div className="flex gap-8">
+          {/* Simple Sidebar */}
           {showFilter && (
-            <div className="flex-shrink-0 w-80">
-              <div className="sticky p-6 top-8">
-                <div className="space-y-3">
+            <div className="flex-shrink-0 w-64">
+              <div className="sticky top-8">
+                <div className="space-y-1">
+                  {/* All Products */}
                   <button
                     onClick={handleShowAll}
-                    className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
+                    className={`w-full text-left px-0 py-3 text-sm font-medium transition-colors ${
                       !selectedCategory
-                        ? "text-[#DCB963]"
-                        : "text-gray-700 hover:text-[#DCB963]"
+                        ? "text-gray-900 border-b border-gray-300"
+                        : "text-gray-600 hover:text-gray-900"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span>Tất cả sản phẩm</span>
-                    </div>
+                    Tất cả sản phẩm
                   </button>
 
-                  {/* Chỉ hiển thị categories có status là "active" */}
+                  {/* Categories */}
                   {activeCategories.map((category) => (
                     <button
                       key={category._id}
                       onClick={() => handleCategoryClick(category.title)}
-                      className={`w-full text-left px-4 py-3 transition-all duration-300 ${
+                      className={`w-full text-left px-0 py-3 text-sm font-medium transition-colors ${
                         selectedCategory === category.title
-                          ? "text-[#DCB963]"
-                          : "text-gray-700 hover:text-[#DCB963]"
+                          ? "text-gray-900 border-b border-gray-300"
+                          : "text-gray-600 hover:text-gray-900"
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <span>{category.title}</span>
-                        {category.productCount && (
-                          <span className="px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded-full">
-                            {category.productCount}
-                          </span>
-                        )}
-                      </div>
+                      {category.title}
                     </button>
                   ))}
                 </div>
 
+                {/* Loading State */}
                 {loadingCategories && (
-                  <div className="py-4 text-center">
-                    <div className="w-8 h-8 mx-auto border-b-2 border-blue-500 rounded-full animate-spin"></div>
+                  <div className="py-8 text-center">
+                    <div className="w-6 h-6 mx-auto border-2 border-gray-300 rounded-full animate-spin border-t-gray-900"></div>
                     <p className="mt-2 text-sm text-gray-500">
                       Đang tải danh mục...
                     </p>
@@ -273,23 +270,28 @@ function Products() {
           {/* Main Content */}
           <div className="flex-1">
             {!loading && activeProducts.length > 0 && (
-              <div className="flex items-center justify-between ">
-                {selectedCategory && (
-                  <span className="ml-2">
-                    trong danh mục{" "}
-                    <span className="font-medium text-[#DCB963]">
-                      {selectedCategory}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  {selectedCategory && (
+                    <span>
+                      trong danh mục{" "}
+                      <span className="font-medium text-[#DCB963] bg-yellow-50 px-2 py-1 rounded-md">
+                        {selectedCategory}
+                      </span>
                     </span>
-                  </span>
-                )}
+                  )}
+                </div>
               </div>
             )}
 
             {loading ? (
               <div className="flex items-center justify-center py-20">
                 <div className="text-center">
-                  <div className="mx-auto mb-4 border-b-2 border-blue-500 rounded-full w-14 h-14 animate-spin"></div>
-                  <p className="text-gray-500">Đang tải sản phẩm...</p>
+                  <div className="relative">
+                    <div className="w-16 h-16 mx-auto mb-4 border-4 border-gray-200 rounded-full animate-spin border-t-blue-500"></div>
+                    <div className="absolute inset-0 w-10 h-10 mx-auto mt-3 border-2 border-transparent rounded-full border-t-blue-300 animate-spin"></div>
+                  </div>
+                  <p className="font-medium text-gray-500">Đang tải sản phẩm...</p>
                 </div>
               </div>
             ) : (
@@ -302,92 +304,101 @@ function Products() {
                   }`}
                 >
                   {activeProducts.map((product) => (
-                    <div
+                    <a 
                       key={product._id}
-                      className={`bg-white shadow-sm transition-all duration-300 group overflow-hidden ${
-                        viewMode === "list" ? "flex" : ""
-                      }`}
+                      href={`/products/detail/${product._id}`}
+                      className="block transition-transform duration-200 "
                     >
                       <div
-                        className={`relative overflow-hidden ${
-                          viewMode === "list"
-                            ? "w-[370px] h-[494px]"
-                            : "w-[370px] h-[494px]"
+                        className={`bg-white shadow-sm transition-all duration-300 group overflow-hidden hover:shadow-lg ${
+                          viewMode === "list" ? "flex" : ""
                         }`}
                       >
-                        <img
-                          src={product.thumbnail}
-                          alt={product.title}
-                          className="object-cover w-full h-full transition-transform duration-300 "
-                        />
+                        <div
+                          className={`relative overflow-hidden ${
+                            viewMode === "list"
+                              ? "w-[385px] h-[496px]"
+                              : "w-[385px] h-[496px]"
+                          }`}
+                        >
+                          <img
+                            src={product.thumbnail}
+                            alt={product.title}
+                            className="object-cover w-full h-full transition-transform duration-300"
+                          />
 
-                        <div className="absolute flex flex-col gap-2 top-3 left-3">
-                          {hasDiscount(product) && (
-                            <span className="px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-md">
-                              -{product.discountPercentage}%
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="absolute flex flex-col gap-2 transition-opacity duration-200 opacity-0 top-3 right-3 group-hover:opacity-100">
-                          <button
-                            onClick={() => toggleFavorite(product._id)}
-                            className="p-2 transition-colors bg-white rounded-full shadow-md hover:bg-red-50"
-                          >
-                            {favorites.includes(product._id) ? (
-                              <MdFavorite className="w-4 h-4 text-red-500" />
-                            ) : (
-                              <MdFavoriteBorder className="w-4 h-4 text-gray-600" />
+                          <div className="absolute flex flex-col gap-2 top-3 left-3">
+                            {hasDiscount(product) && (
+                              <span className="px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-md shadow-sm">
+                                -{product.discountPercentage}%
+                              </span>
                             )}
-                          </button>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="absolute flex flex-col gap-2 transition-opacity duration-200 opacity-0 top-3 right-3 group-hover:opacity-100">
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault(); // Prevent navigation when clicking favorite
+                                e.stopPropagation();
+                                toggleFavorite(product._id);
+                              }}
+                              className="p-2 transition-all bg-white rounded-full shadow-md hover:bg-red-50 hover:scale-110"
+                            >
+                              {favorites.includes(product._id) ? (
+                                <MdFavorite className="w-4 h-4 text-red-500" />
+                              ) : (
+                                <MdFavoriteBorder className="w-4 h-4 text-gray-600" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div
+                          className={`p-4 ${viewMode === "list" ? "flex-1" : ""}`}
+                        >
+                          <div className="mb-3">
+                            <h3 className="font-medium text-gray-900 transition-colors cursor-pointer line-clamp-2 hover:text-blue-600">
+                              {product.title}
+                            </h3>
+                          </div>
+
+                          <div className="space-y-3">
+                            {hasDiscount(product) ? (
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg font-bold text-red-600">
+                                    {calculateDiscountedPrice(
+                                      product.price,
+                                      product.discountPercentage!
+                                    ).toLocaleString("vi-VN")}
+                                    ₫
+                                  </span>
+                                  <span className="text-sm text-gray-400 line-through">
+                                    {product.price.toLocaleString("vi-VN")}₫
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-green-50">
+                                  <span className="flex items-center gap-1 text-xs font-medium text-green-700">
+                                    <MdAttachMoney className="w-3 h-3" />
+                                    Tiết kiệm{" "}
+                                    {calculateSavings(
+                                      product.price,
+                                      product.discountPercentage!
+                                    ).toLocaleString("vi-VN")}
+                                    ₫
+                                  </span>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="text-lg font-bold text-gray-900">
+                                {product.price.toLocaleString("vi-VN")}₫
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-
-                      <div
-                        className={`p-4 ${viewMode === "list" ? "flex-1" : ""}`}
-                      >
-                        <div className="mb-3">
-                          <h3 className="font-medium text-gray-900 transition-colors cursor-pointer line-clamp-2 hover:text-blue-600">
-                            {product.title}
-                          </h3>
-                        </div>
-
-                        <div className="space-y-3">
-                          {hasDiscount(product) ? (
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <span className="text-lg font-bold text-red-600">
-                                  {calculateDiscountedPrice(
-                                    product.price,
-                                    product.discountPercentage!
-                                  ).toLocaleString("vi-VN")}
-                                  ₫
-                                </span>
-                                <span className="text-sm text-gray-400 line-through">
-                                  {product.price.toLocaleString("vi-VN")}₫
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-green-50">
-                                <span className="flex items-center gap-1 text-xs font-medium text-green-700">
-                                  <MdAttachMoney className="w-3 h-3" />
-                                  Tiết kiệm{" "}
-                                  {calculateSavings(
-                                    product.price,
-                                    product.discountPercentage!
-                                  ).toLocaleString("vi-VN")}
-                                  ₫
-                                </span>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="text-lg font-bold text-gray-900">
-                              {product.price.toLocaleString("vi-VN")}₫
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                    </a>
                   ))}
                 </div>
 

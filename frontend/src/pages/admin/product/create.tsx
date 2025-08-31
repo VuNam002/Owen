@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Editor } from "@tinymce/tinymce-react";
 
@@ -15,8 +15,8 @@ interface Product {
   brand: string;
   stock: string;
   status: string;
-  size: string;
-  color: string;
+  size: string; // Now will store JSON string of array
+  color: string; // Now will store JSON string of array
   featured: string;
   position: string;
   product_category_id: string;
@@ -65,7 +65,7 @@ const TINYMCE_CONFIG = {
 };
 
 const INITIAL_PRODUCT_STATE: Product = {
-  title: "", description: "", price: "", discountPercentage: "", brand: "", stock: "", status: "", featured: "0", position: "", product_category_id: "", thumbnail: "", image: "", size: "", color: ""
+  title: "", description: "", price: "", discountPercentage: "", brand: "", stock: "", status: "", featured: "0", position: "", product_category_id: "", thumbnail: "", image: "", size: "[]", color: "[]"
 };
 
 // Predefined options
@@ -73,12 +73,19 @@ const COLOR_OPTIONS = [
   { value: "red", label: "Đỏ", hex: "#FF0000" },
   { value: "blue", label: "Xanh dương", hex: "#0000FF" },
   { value: "green", label: "Xanh lá", hex: "#008000" },
+  { value: "yellow", label: "Vàng", hex: "#FFFF00" },
+  { value: "purple", label: "Tím", hex: "#800080" },
+
+
 ];
 
 const SIZE_OPTIONS = [
+  { value: "XS", label: "XS (Extra Small)" },
   { value: "S", label: "S (Small)" },
   { value: "M", label: "M (Medium)" },
   { value: "L", label: "L (Large)" },
+  { value: "XL", label: "XL (Extra Large)" },
+  { value: "XXL", label: "XXL (Double XL)" },
 ];
 
 interface FormFieldProps {
@@ -128,60 +135,103 @@ const FormField: React.FC<FormFieldProps> = ({
   </div>
 );
 
-// Enhanced Color Picker Component
-const ColorPicker: React.FC<{
+// Enhanced Multi-Color Picker Component
+const MultiColorPicker: React.FC<{
   value: string;
-  onChange: (color: string) => void;
+  onChange: (colors: string) => void;
   allowCustom?: boolean;
 }> = ({ value, onChange, allowCustom = true }) => {
-  const [customColor, setCustomColor] = useState(value && !COLOR_OPTIONS.find(c => c.value === value) ? value : "");
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [customColor, setCustomColor] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
 
-  const handleColorSelect = (colorValue: string) => {
-    onChange(colorValue);
-    setCustomColor("");
-    setShowCustomInput(false);
+  // Parse initial value
+  useEffect(() => {
+    try {
+      const parsed = value ? JSON.parse(value) : [];
+      setSelectedColors(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setSelectedColors([]);
+    }
+  }, [value]);
+
+  const handleColorToggle = (colorValue: string) => {
+    const newColors = selectedColors.includes(colorValue)
+      ? selectedColors.filter(c => c !== colorValue)
+      : [...selectedColors, colorValue];
+    
+    setSelectedColors(newColors);
+    onChange(JSON.stringify(newColors));
   };
 
-  const handleCustomColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const color = e.target.value;
-    setCustomColor(color);
-    onChange(color);
+  const handleCustomColorAdd = () => {
+    if (customColor.trim() && !selectedColors.includes(customColor.trim())) {
+      const newColors = [...selectedColors, customColor.trim()];
+      setSelectedColors(newColors);
+      onChange(JSON.stringify(newColors));
+      setCustomColor("");
+      setShowCustomInput(false);
+    }
+  };
+
+  const handleRemoveColor = (colorToRemove: string) => {
+    const newColors = selectedColors.filter(c => c !== colorToRemove);
+    setSelectedColors(newColors);
+    onChange(JSON.stringify(newColors));
+  };
+
+  const clearAllColors = () => {
+    setSelectedColors([]);
+    onChange(JSON.stringify([]));
   };
 
   return (
     <div>
-      <label className="block mb-2 text-sm font-medium text-gray-700">
-        Màu sắc
-      </label>
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-sm font-medium text-gray-700">
+          Màu sắc ({selectedColors.length} đã chọn)
+        </label>
+        {selectedColors.length > 0 && (
+          <button
+            type="button"
+            onClick={clearAllColors}
+            className="text-xs text-red-600 hover:text-red-800"
+          >
+            Xóa tất cả
+          </button>
+        )}
+      </div>
       
       {/* Predefined Colors */}
-      <div className="grid grid-cols-6 gap-2 mb-3">
-        {COLOR_OPTIONS.map((color) => (
-          <button
-            key={color.value}
-            type="button"
-            onClick={() => handleColorSelect(color.value)}
-            className={`relative w-12 h-12 rounded-lg border-2 transition-all ${
-              value === color.value ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-300 hover:border-gray-400'
-            }`}
-            style={{ backgroundColor: color.hex }}
-            title={color.label}
-          >
-            {value === color.value && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white drop-shadow" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-            )}
-          </button>
-        ))}
+      <div className="grid grid-cols-5 gap-2 mb-4">
+        {COLOR_OPTIONS.map((color) => {
+          const isSelected = selectedColors.includes(color.value);
+          return (
+            <button
+              key={color.value}
+              type="button"
+              onClick={() => handleColorToggle(color.value)}
+              className={`relative w-12 h-12 rounded-lg border-2 transition-all ${
+                isSelected ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-300 hover:border-gray-400'
+              }`}
+              style={{ backgroundColor: color.hex }}
+              title={color.label}
+            >
+              {isSelected && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white drop-shadow" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Custom Color Input */}
       {allowCustom && (
-        <div>
+        <div className="mb-4">
           <button
             type="button"
             onClick={() => setShowCustomInput(!showCustomInput)}
@@ -196,9 +246,17 @@ const ColorPicker: React.FC<{
                 type="text"
                 placeholder="Nhập tên màu (VD: coral, #FF6B6B)"
                 value={customColor}
-                onChange={handleCustomColorChange}
+                onChange={(e) => setCustomColor(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleCustomColorAdd()}
                 className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              <button
+                type="button"
+                onClick={handleCustomColorAdd}
+                className="px-3 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
+              >
+                Thêm
+              </button>
               {customColor && (
                 <div 
                   className="w-8 h-8 border border-gray-300 rounded"
@@ -210,65 +268,132 @@ const ColorPicker: React.FC<{
         </div>
       )}
 
-      {/* Current Selection Display */}
-      {value && (
-        <div className="mt-2 text-sm text-gray-600">
-          Đã chọn: <span className="font-medium">{COLOR_OPTIONS.find(c => c.value === value)?.label || value}</span>
+      {/* Selected Colors Display */}
+      {selectedColors.length > 0 && (
+        <div>
+          <p className="mb-2 text-sm text-gray-600">Màu đã chọn:</p>
+          <div className="flex flex-wrap gap-2">
+            {selectedColors.map((color, index) => {
+              const predefinedColor = COLOR_OPTIONS.find(c => c.value === color);
+              return (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1 text-sm bg-gray-100 rounded-full"
+                >
+                  <div
+                    className="w-4 h-4 mr-2 border border-gray-300 rounded-full"
+                    style={{ backgroundColor: predefinedColor?.hex || color }}
+                  ></div>
+                  {predefinedColor?.label || color}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveColor(color)}
+                    className="ml-2 text-red-500 hover:text-red-700"
+                  >
+                    ×
+                  </button>
+                </span>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
   );
 };
 
-// Enhanced Size Selector Component
-const SizeSelector: React.FC<{
+// Enhanced Multi-Size Selector Component
+const MultiSizeSelector: React.FC<{
   value: string;
-  onChange: (size: string) => void;
+  onChange: (sizes: string) => void;
   allowCustom?: boolean;
 }> = ({ value, onChange, allowCustom = true }) => {
-  const [customSize, setCustomSize] = useState(value && !SIZE_OPTIONS.find(s => s.value === value) ? value : "");
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [customSize, setCustomSize] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
 
-  const handleSizeSelect = (sizeValue: string) => {
-    onChange(sizeValue);
-    setCustomSize("");
-    setShowCustomInput(false);
+  // Parse initial value
+  useEffect(() => {
+    try {
+      const parsed = value ? JSON.parse(value) : [];
+      setSelectedSizes(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setSelectedSizes([]);
+    }
+  }, [value]);
+
+  const handleSizeToggle = (sizeValue: string) => {
+    const newSizes = selectedSizes.includes(sizeValue)
+      ? selectedSizes.filter(s => s !== sizeValue)
+      : [...selectedSizes, sizeValue];
+    
+    setSelectedSizes(newSizes);
+    onChange(JSON.stringify(newSizes));
   };
 
-  const handleCustomSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const size = e.target.value;
-    setCustomSize(size);
-    onChange(size);
+  const handleCustomSizeAdd = () => {
+    if (customSize.trim() && !selectedSizes.includes(customSize.trim())) {
+      const newSizes = [...selectedSizes, customSize.trim()];
+      setSelectedSizes(newSizes);
+      onChange(JSON.stringify(newSizes));
+      setCustomSize("");
+      setShowCustomInput(false);
+    }
+  };
+
+  const handleRemoveSize = (sizeToRemove: string) => {
+    const newSizes = selectedSizes.filter(s => s !== sizeToRemove);
+    setSelectedSizes(newSizes);
+    onChange(JSON.stringify(newSizes));
+  };
+
+  const clearAllSizes = () => {
+    setSelectedSizes([]);
+    onChange(JSON.stringify([]));
   };
 
   return (
     <div>
-      <label className="block mb-2 text-sm font-medium text-gray-700">
-        Kích thước
-      </label>
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-sm font-medium text-gray-700">
+          Kích thước ({selectedSizes.length} đã chọn)
+        </label>
+        {selectedSizes.length > 0 && (
+          <button
+            type="button"
+            onClick={clearAllSizes}
+            className="text-xs text-red-600 hover:text-red-800"
+          >
+            Xóa tất cả
+          </button>
+        )}
+      </div>
       
       {/* Predefined Sizes */}
-      <div className="grid grid-cols-4 gap-2 mb-3">
-        {SIZE_OPTIONS.map((size) => (
-          <button
-            key={size.value}
-            type="button"
-            onClick={() => handleSizeSelect(size.value)}
-            className={`px-3 py-2 text-sm font-medium rounded-md border transition-all ${
-              value === size.value 
-                ? 'bg-blue-500 text-white border-blue-500' 
-                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-            }`}
-            title={size.label}
-          >
-            {size.value}
-          </button>
-        ))}
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        {SIZE_OPTIONS.map((size) => {
+          const isSelected = selectedSizes.includes(size.value);
+          return (
+            <button
+              key={size.value}
+              type="button"
+              onClick={() => handleSizeToggle(size.value)}
+              className={`px-3 py-2 text-sm font-medium rounded-md border transition-all ${
+                isSelected
+                  ? 'bg-blue-500 text-white border-blue-500' 
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+              title={size.label}
+            >
+              {size.value}
+            </button>
+          );
+        })}
       </div>
 
       {/* Custom Size Input */}
       {allowCustom && (
-        <div>
+        <div className="mb-4">
           <button
             type="button"
             onClick={() => setShowCustomInput(!showCustomInput)}
@@ -278,21 +403,51 @@ const SizeSelector: React.FC<{
           </button>
           
           {showCustomInput && (
-            <input
-              type="text"
-              placeholder="Nhập kích thước (VD: 38, 42, One Size)"
-              value={customSize}
-              onChange={handleCustomSizeChange}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Nhập kích thước (VD: 38, 42, One Size)"
+                value={customSize}
+                onChange={(e) => setCustomSize(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleCustomSizeAdd()}
+                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                onClick={handleCustomSizeAdd}
+                className="px-3 py-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
+              >
+                Thêm
+              </button>
+            </div>
           )}
         </div>
       )}
 
-      {/* Current Selection Display */}
-      {value && (
-        <div className="mt-2 text-sm text-gray-600">
-          Đã chọn: <span className="font-medium">{SIZE_OPTIONS.find(s => s.value === value)?.label || value}</span>
+      {/* Selected Sizes Display */}
+      {selectedSizes.length > 0 && (
+        <div>
+          <p className="mb-2 text-sm text-gray-600">Kích thước đã chọn:</p>
+          <div className="flex flex-wrap gap-2">
+            {selectedSizes.map((size, index) => {
+              const predefinedSize = SIZE_OPTIONS.find(s => s.value === size);
+              return (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1 text-sm bg-gray-100 rounded-full"
+                >
+                  {predefinedSize?.label || size}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSize(size)}
+                    className="ml-2 text-red-500 hover:text-red-700"
+                  >
+                    ×
+                  </button>
+                </span>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
@@ -339,6 +494,9 @@ function CreateProductPage(): JSX.Element {
           ...prev,
           ...Object.fromEntries(Object.entries(data).map(([key, value]) => [key, value || ""])),
           featured: data.featured || "0",
+          // Ensure color and size are JSON strings
+          color: typeof data.color === 'string' && data.color ? data.color : "[]",
+          size: typeof data.size === 'string' && data.size ? data.size : "[]",
         }));
       }
     } catch (error) {
@@ -356,12 +514,12 @@ function CreateProductPage(): JSX.Element {
     setProduct(prev => ({ ...prev, [name]: type === "checkbox" ? (checked ? "1" : "0") : value }));
   }, []);
 
-  const handleColorChange = useCallback((color: string): void => {
-    setProduct(prev => ({ ...prev, color }));
+  const handleColorChange = useCallback((colors: string): void => {
+    setProduct(prev => ({ ...prev, color: colors }));
   }, []);
 
-  const handleSizeChange = useCallback((size: string): void => {
-    setProduct(prev => ({ ...prev, size }));
+  const handleSizeChange = useCallback((sizes: string): void => {
+    setProduct(prev => ({ ...prev, size: sizes }));
   }, []);
 
   const handleEditorChange = useCallback((content: string): void => {
@@ -519,12 +677,12 @@ function CreateProductPage(): JSX.Element {
           <div className="p-6 bg-white rounded-lg shadow">
             <h2 className="mb-4 text-lg font-semibold">Màu sắc & Kích thước</h2>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <ColorPicker 
+              <MultiColorPicker 
                 value={product.color} 
                 onChange={handleColorChange}
                 allowCustom={true}
               />
-              <SizeSelector 
+              <MultiSizeSelector 
                 value={product.size} 
                 onChange={handleSizeChange}
                 allowCustom={true}
