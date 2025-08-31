@@ -48,8 +48,9 @@ This is a full-stack web application with a React frontend and a Node.js (Expres
     - Create a `.env` file in the `backend` directory and add the necessary environment variables (e.g., `MONGO_URI`, `JWT_SECRET`, `CLOUDINARY_URL`).
     ```bash
     # .env example
-    MONGO_URI=your_mongodb_connection_string
-    JWT_SECRET=your_jwt_secret
+    PORT=3000
+    MONGO_URL=mongodb+srv://namvu7702:5go1WutvKcx4mGN8@cluster0.j08llyg.mongodb.net/shopnew?retryWrites=true&w=majority&appName=Cluster0
+    JWT_SECRET=your_jwt_secret_key
     ```
 
 3.  **Setup Frontend:**
