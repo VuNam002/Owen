@@ -46,7 +46,7 @@ function LayoutDefault() {
               </Link>
               <Link
                 to="/products"
-                className="px-4 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:scale-105  rounded-lg relative overflow-hidden group"
+                className="px-4 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative overflow-hidden group"
               >
                 <span className="relative z-10">Sản phẩm</span>
                 <div className="absolute inset-0 transition-opacity duration-300 ease-in-out opacity-0 bg-gradient-to-r group-hover:opacity-10"></div>
