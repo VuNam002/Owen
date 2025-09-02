@@ -139,33 +139,11 @@ module.exports.delete = async (req, res) => {
         handleError(res, error, "Lỗi khi xóa sản phẩm");
     }
 }
-module.exports.detail = async (req, res) => {
+module.exports.createComment = async (req, res) => {
     try {
         const id = req.params.id;
         const product = await Product.findOne({
             _id: id,
-            deleted: false
-        })
-        if(!product) {
-            return res.status(400).json({
-                success: false,
-                message: "Không tìm thấy sản phẩm"
-            })
-        }
-        res.status(200).json({
-            success: true,
-            message: "Lấy chi tiết sản phẩm thành công",
-            data: product
-        })
-    } catch (error) {
-        handleError(res, error, "Lỗi khi lấy chi tiết sản phẩm");
-    }
-}
-module.exports.createComment = async (req, res) => {
-    try {
-        const slug = req.params.slug;
-        const product = await Product.findOne({
-            slug: slug,
             deleted: false,
             status: "active",
         })
@@ -189,5 +167,40 @@ module.exports.createComment = async (req, res) => {
         })
     } catch (error) {
         handleError(res, error, "Lỗi khi thêm bình luận");
+    }
+}
+module.exports.detail = async (req, res) => {
+    try {
+        const id = req.params.id;
+        
+        const product = await Product.findOne({
+            _id: id,
+            deleted: false
+        }).populate("product_category_id", "title");
+        
+        if(!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy sản phẩm"
+            });
+        }
+
+        // Lấy danh sách comment của sản phẩm
+        const comments = await Comment.find({
+            product_id: product._id,
+            deleted: false
+        }).sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            message: "Lấy chi tiết sản phẩm thành công",
+            data: {
+                ...product.toObject(),
+                comments: comments,
+                totalComments: comments.length
+            }
+        });
+    } catch (error) {
+        handleError(res, error, "Lỗi khi lấy chi tiết sản phẩm");
     }
 }
