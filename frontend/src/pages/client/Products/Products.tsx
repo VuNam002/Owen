@@ -17,6 +17,17 @@ interface Product {
   };
 }
 
+interface Comment {
+  _id: string;
+  fullNames: string;
+  content: string;
+  product_id: {
+    _id: string;
+    title: string;
+  };
+  email: string;
+}
+
 interface Category {
   _id: string;
   title: string;

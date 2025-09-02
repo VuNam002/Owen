@@ -9,8 +9,19 @@ import {
   Truck,
   RotateCcw,
   Shield,
+  MessageCircle,
+  Send,
+  User,
 } from "lucide-react";
 import { useParams } from "react-router-dom";
+
+interface Comment {
+  _id: string;
+  fullName: string;
+  email: string;
+  content: string;
+  createdAt: string;
+}
 
 interface Product {
   _id: string;
@@ -24,10 +35,13 @@ interface Product {
   size: string;
   color: string;
   stock: number;
+  slug: string;
   product_category_id: {
     _id: string;
     title: string;
   };
+  comments?: Comment[];
+  totalComments?: number;
 }
 
 const COLOR_OPTIONS = [
@@ -60,6 +74,16 @@ function ProductDetail() {
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedImage, setSelectedImage] = useState<string>("");
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
+  
+  // Comment states
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentForm, setCommentForm] = useState({
+    fullName: "",
+    email: "",
+    content: ""
+  });
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [showCommentForm, setShowCommentForm] = useState(false);
 
   // Helper functions
   const parseJsonArray = (jsonStr: string) => {
@@ -78,6 +102,16 @@ function ProductDetail() {
       style: "currency",
       currency: "VND",
     }).format(price);
+
+  const formatDate = (dateString: string) => {
+    return new Intl.DateTimeFormat("vi-VN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(dateString));
+  };
 
   const getColorInfo = (colorValue: string) => {
     const predefinedColor = COLOR_OPTIONS.find((c) => c.value === colorValue);
@@ -146,7 +180,79 @@ function ProductDetail() {
     };
 
     console.log("Thêm vào giỏ hàng:", cartItem);
-    alert(`Đã thêm ${quantity} sản phẩm "${product.title}" vào giỏ hàng!`);
+    toast.success(`Đã thêm ${quantity} sản phẩm "${product.title}" vào giỏ hàng!`);
+  };
+
+  // Comment handlers
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!product?.slug) {
+      toast.error("Không thể thêm bình luận lúc này");
+      return;
+    }
+
+    if (!commentForm.fullName.trim() || !commentForm.email.trim() || !commentForm.content.trim()) {
+      toast.error("Vui lòng điền đầy đủ thông tin!");
+      return;
+    }
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(commentForm.email)) {
+      toast.error("Email không hợp lệ!");
+      return;
+    }
+
+    setIsSubmittingComment(true);
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/v1/products/create-comment/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(commentForm),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        const newComment: Comment = {
+          _id: result.data._id,
+          fullName: commentForm.fullName,
+          email: commentForm.email,
+          content: commentForm.content,
+          createdAt: new Date().toISOString(),
+        };
+        
+        setComments(prev => [newComment, ...prev]);
+        
+        // Reset form
+        setCommentForm({
+          fullName: "",
+          email: "",
+          content: ""
+        });
+        
+        setShowCommentForm(false);
+        toast.success("Đã thêm bình luận thành công!");
+      } else {
+        toast.error(result.message || "Có lỗi xảy ra khi thêm bình luận");
+      }
+    } catch (error) {
+      console.error("Lỗi khi thêm bình luận:", error);
+      toast.error("Có lỗi xảy ra khi thêm bình luận");
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
+
+  const handleCommentFormChange = (field: string, value: string) => {
+    setCommentForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   // Effects
@@ -169,6 +275,7 @@ function ProductDetail() {
         if (!result.data) throw new Error("Không có dữ liệu sản phẩm");
         
         setProduct(result.data);
+        setComments(result.data.comments || []);
         setSelectedImage(result.data.thumbnail || mockImages[0]);
       } catch (error) {
         console.error("Lỗi khi tải sản phẩm:", error);
@@ -541,6 +648,134 @@ function ProductDetail() {
                 className="prose-sm prose text-gray-600 max-w-none"
                 dangerouslySetInnerHTML={{ __html: product.description }}
               />
+            </div>
+          </div>
+
+          {/* Comments Section */}
+          <div className="px-8 pb-8">
+            <div className="pt-8 border-t border-gray-200">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="flex items-center text-xl font-semibold text-gray-900">
+                  <MessageCircle className="w-6 h-6 mr-2 text-indigo-600" />
+                  Đánh giá và bình luận ({comments.length})
+                </h3>
+                <button
+                  onClick={() => setShowCommentForm(!showCommentForm)}
+                  className="flex items-center px-4 py-2 text-sm font-medium text-white transition-colors bg-indigo-600 rounded-lg hover:bg-indigo-700"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Viết bình luận
+                </button>
+              </div>
+
+              {/* Comment Form */}
+              {showCommentForm && (
+                <div className="p-6 mb-8 border border-gray-200 rounded-lg bg-gray-50">
+                  <h4 className="mb-4 text-lg font-semibold text-gray-900">Viết bình luận của bạn</h4>
+                  <form onSubmit={handleCommentSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <label htmlFor="fullName" className="block mb-2 text-sm font-medium text-gray-700">
+                          Họ và tên <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="fullName"
+                          value={commentForm.fullName}
+                          onChange={(e) => handleCommentFormChange("fullName", e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          placeholder="Nhập họ và tên của bạn"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-700">
+                          Email <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="email"
+                          id="email"
+                          value={commentForm.email}
+                          onChange={(e) => handleCommentFormChange("email", e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          placeholder="Nhập email của bạn"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label htmlFor="content" className="block mb-2 text-sm font-medium text-gray-700">
+                        Nội dung bình luận <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        id="content"
+                        rows={4}
+                        value={commentForm.content}
+                        onChange={(e) => handleCommentFormChange("content", e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."
+                        required
+                      />
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <button
+                        type="submit"
+                        disabled={isSubmittingComment}
+                        className="flex items-center px-6 py-2 text-sm font-medium text-white transition-colors bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSubmittingComment ? (
+                          <>
+                            <div className="w-4 h-4 mr-2 border-2 border-white rounded-full border-t-transparent animate-spin" />
+                            Đang gửi...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4 mr-2" />
+                            Gửi bình luận
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowCommentForm(false)}
+                        className="px-6 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                      >
+                        Hủy
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {/* Comments List */}
+              <div className="space-y-6">
+                {comments.length === 0 ? (
+                  <div className="py-12 text-center">
+                    <MessageCircle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <h4 className="mb-2 text-lg font-medium text-gray-900">Chưa có bình luận nào</h4>
+                    <p className="text-gray-500">Hãy là người đầu tiên chia sẻ cảm nhận về sản phẩm này!</p>
+                  </div>
+                ) : (
+                  comments.map((comment) => (
+                    <div key={comment._id} className="p-6 bg-white border border-gray-200 rounded-lg">
+                      <div className="flex items-start space-x-4">
+                        <div className="flex-shrink-0">
+                          <div className="flex items-center justify-center w-10 h-10 bg-indigo-100 rounded-full">
+                            <User className="w-5 h-5 text-indigo-600" />
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-semibold text-gray-900">{comment.fullName}</h4>
+                            <p className="text-sm text-gray-500">{formatDate(comment.createdAt)}</p>
+                          </div>
+                          <p className="text-sm leading-relaxed text-gray-700">{comment.content}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>
