@@ -1,303 +1,13 @@
-import { useEffect, useState } from "react";
-import {toast} from "react-toastify";
-import {
-  Heart,
-  ShoppingCart,
-  Minus,
-  Plus,
-  Share2,
-  Truck,
-  RotateCcw,
-  Shield,
-  MessageCircle,
-  Send,
-  User,
-} from "lucide-react";
-import { useParams } from "react-router-dom";
-
-interface Comment {
-  _id: string;
-  fullName: string;
-  email: string;
-  content: string;
-  createdAt: string;
-}
-
-interface Product {
-  _id: string;
-  title: string;
-  price: number;
-  thumbnail: string;
-  oldPrice?: number;
-  discountPercentage?: number;
-  status: string;
-  description: string;
-  size: string;
-  color: string;
-  stock: number;
-  slug: string;
-  product_category_id: {
-    _id: string;
-    title: string;
-  };
-  comments?: Comment[];
-  totalComments?: number;
-}
-
-const COLOR_OPTIONS = [
-  { value: "red", label: "Đỏ", hex: "#FF0000" },
-  { value: "blue", label: "Xanh dương", hex: "#0000FF" },
-  { value: "green", label: "Xanh lá", hex: "#008000" },
-  { value: "yellow", label: "Vàng", hex: "#FFFF00" },
-  { value: "purple", label: "Tím", hex: "#800080" },
-  { value: "orange", label: "Cam", hex: "#FFA500" },
-  { value: "pink", label: "Hồng", hex: "#FFC0CB" },
-  { value: "brown", label: "Nâu", hex: "#A52A2A" },
-  { value: "black", label: "Đen", hex: "#000000" },
-  { value: "white", label: "Trắng", hex: "#FFFFFF" },
-];
-
-const mockImages = [
-  "https://via.placeholder.com/400x400/4F46E5/ffffff?text=Product+1",
-  "https://via.placeholder.com/400x400/7C3AED/ffffff?text=Product+2",
-  "https://via.placeholder.com/400x400/DC2626/ffffff?text=Product+3",
-  "https://via.placeholder.com/400x400/059669/ffffff?text=Product+4",
-];
+import { Heart,ShoppingCart,Minus,Plus,Truck,RotateCcw,Shield,MessageCircle,Send,User,} from "lucide-react";
+import { useProductDetail } from "../../../hooks/useDetail";
+import { useNavigate } from "react-router-dom"
 
 function ProductDetail() {
-  const { id } = useParams<{ id: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedSize, setSelectedSize] = useState<string>("");
-  const [selectedColor, setSelectedColor] = useState<string>("");
-  const [quantity, setQuantity] = useState<number>(1);
-  const [selectedImage, setSelectedImage] = useState<string>("");
-  const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
-  
-  // Comment states
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [commentForm, setCommentForm] = useState({
-    fullName: "",
-    email: "",
-    content: ""
-  });
-  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [showCommentForm, setShowCommentForm] = useState(false);
-
-  // Helper functions
-  const parseJsonArray = (jsonStr: string) => {
-    try {
-      return JSON.parse(jsonStr);
-    } catch {
-      return [];
-    }
-  };
-
-  const availableColors = product?.color ? parseJsonArray(product.color) : [];
-  const availableSizes = product?.size ? parseJsonArray(product.size) : [];
-
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
-
-  const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat("vi-VN", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(dateString));
-  };
-
-  const getColorInfo = (colorValue: string) => {
-    const predefinedColor = COLOR_OPTIONS.find((c) => c.value === colorValue);
-    return {
-      hex: predefinedColor?.hex || colorValue,
-      label: predefinedColor?.label || colorValue,
-    };
-  };
-
-  const hasDiscount = () => product && (product.oldPrice || product.discountPercentage);
-  
-  //Giá sau khi giảm
-  const calculateDiscountedPrice = () => {
-    if (!product) return 0;
-    if (product.oldPrice && product.discountPercentage) {
-      return product.oldPrice * (1 - product.discountPercentage / 100);
-    }
-    if (product.discountPercentage) {
-      return product.price * (1 - product.discountPercentage / 100);
-    }
-    return product.oldPrice ? product.price : product.price;
-  };
-
-  const calculateSavings = () => {
-    if (!product || !hasDiscount()) return 0;
-    const originalPrice = product.oldPrice || product.price;
-    return originalPrice - calculateDiscountedPrice();
-  };
-
-  const getDiscountPercent = () => {
-    if (!product) return 0;
-    return product.discountPercentage || 
-           (product.oldPrice ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100) : 0);
-  };
-
-  // Event handlers
-  const handleQuantityChange = (type: "increase" | "decrease") => {
-    if (type === "increase" && quantity < (product?.stock || 0)) {
-      setQuantity(prev => prev + 1);
-    } else if (type === "decrease" && quantity > 1) {
-      setQuantity(prev => prev - 1);
-    }
-  };
-
-  const handleAddToCart = () => {
-    if (!product) return;
-    
-    if (availableSizes.length > 0 && !selectedSize) {
-      toast.error("Vui lòng chọn size!");
-      return;
-    }
-    if (availableColors.length > 0 && !selectedColor) {
-      toast.error("Vui lòng chọn màu sắc!");
-      return;
-    }
-
-    const cartItem = {
-      productId: product._id,
-      title: product.title,
-      price: hasDiscount() ? calculateDiscountedPrice() : product.price,
-      originalPrice: product.oldPrice || product.price,
-      size: selectedSize,
-      color: selectedColor,
-      quantity: quantity,
-      image: selectedImage,
-    };
-
-    console.log("Thêm vào giỏ hàng:", cartItem);
-    toast.success(`Đã thêm ${quantity} sản phẩm "${product.title}" vào giỏ hàng!`);
-  };
-
-  // Comment handlers
-  const handleCommentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!product?.slug) {
-      toast.error("Không thể thêm bình luận lúc này");
-      return;
-    }
-
-    if (!commentForm.fullName.trim() || !commentForm.email.trim() || !commentForm.content.trim()) {
-      toast.error("Vui lòng điền đầy đủ thông tin!");
-      return;
-    }
-
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(commentForm.email)) {
-      toast.error("Email không hợp lệ!");
-      return;
-    }
-
-    setIsSubmittingComment(true);
-
-    try {
-      const response = await fetch(`http://localhost:3000/api/v1/products/create-comment/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(commentForm),
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        const newComment: Comment = {
-          _id: result.data._id,
-          fullName: commentForm.fullName,
-          email: commentForm.email,
-          content: commentForm.content,
-          createdAt: new Date().toISOString(),
-        };
-        
-        setComments(prev => [newComment, ...prev]);
-        
-        // Reset form
-        setCommentForm({
-          fullName: "",
-          email: "",
-          content: ""
-        });
-        
-        setShowCommentForm(false);
-        toast.success("Đã thêm bình luận thành công!");
-      } else {
-        toast.error(result.message || "Có lỗi xảy ra khi thêm bình luận");
-      }
-    } catch (error) {
-      console.error("Lỗi khi thêm bình luận:", error);
-      toast.error("Có lỗi xảy ra khi thêm bình luận");
-    } finally {
-      setIsSubmittingComment(false);
-    }
-  };
-
-  const handleCommentFormChange = (field: string, value: string) => {
-    setCommentForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  // Effects
-  useEffect(() => {
-    if (!id) {
-      setError("Không tìm thấy ID sản phẩm");
-      setLoading(false);
-      return;
-    }
-
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await fetch(`http://localhost:3000/api/v1/products/detail/${id}`);
-        
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
-        const result = await response.json();
-        if (!result.data) throw new Error("Không có dữ liệu sản phẩm");
-        
-        setProduct(result.data);
-        setComments(result.data.comments || []);
-        setSelectedImage(result.data.thumbnail || mockImages[0]);
-      } catch (error) {
-        console.error("Lỗi khi tải sản phẩm:", error);
-        setError(error instanceof Error ? error.message : "Có lỗi xảy ra");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProduct();
-  }, [id]);
-
-  useEffect(() => {
-    if (product) {
-      if (availableColors.length > 0 && !selectedColor) {
-        setSelectedColor(availableColors[0]);
-      }
-      if (availableSizes.length > 0 && !selectedSize) {
-        setSelectedSize(availableSizes[0]);
-      }
-    }
-  }, [product, availableColors, availableSizes, selectedColor, selectedSize]);
+  const {product,loading, error,selectedSize, selectedColor,  quantity,  selectedImage,  isWishlisted,  comments,  commentForm,  isSubmittingComment,
+  showCommentForm,  mockImages,  availableColors,  availableSizes,  formatPrice,  formatDate,  getColorInfo,  hasDiscount,  calculateDiscountedPrice,
+  calculateSavings,  getDiscountPercent,  handleQuantityChange,  handleAddToCart,  handleWishlistToggle,  handleCommentSubmit,  handleCommentFormChange,
+  toggleCommentForm,setSelectedSize,setSelectedColor,setSelectedImage} = useProductDetail();
+  const navigate = useNavigate()
 
   // Loading state
   if (loading) {
@@ -316,8 +26,13 @@ function ProductDetail() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="space-y-4 text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Không tìm thấy sản phẩm</h2>
-          <p className="text-gray-600">{error || "Sản phẩm bạn đang tìm kiếm không tồn tại hoặc đã bị xóa."}</p>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Không tìm thấy sản phẩm
+          </h2>
+          <p className="text-gray-600">
+            {error ||
+              "Sản phẩm bạn đang tìm kiếm không tồn tại hoặc đã bị xóa."}
+          </p>
           <button
             onClick={() => window.history.back()}
             className="px-6 py-2 text-white transition-colors bg-indigo-600 rounded-lg hover:bg-indigo-700"
@@ -334,20 +49,28 @@ function ProductDetail() {
       <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav className="flex items-center mb-8 space-x-2 text-sm text-gray-500">
-          <a href="/" className="transition-colors hover:text-indigo-600">Trang chủ</a>
+          <a href="/" className="transition-colors hover:text-indigo-600">
+            Trang chủ
+          </a>
           <span>/</span>
-          <a href="/products" className="transition-colors hover:text-indigo-600">Sản phẩm</a>
+          <a
+            href="/products"
+            className="transition-colors hover:text-indigo-600"
+          >
+            Sản phẩm
+          </a>
           <span>/</span>
-          <span className="text-gray-900">{product.product_category_id.title}</span>
+          <span className="text-gray-900">
+            {product.product_category_id.title}
+          </span>
           <span>/</span>
           <span className="font-medium text-gray-900">{product.title}</span>
         </nav>
 
         <div className="overflow-hidden bg-white rounded-xl">
           <div className="lg:grid lg:grid-cols-2">
-            {/* Image Gallery */}
+            {/* Product Images */}
             <div className="p-8">
-              {/* Main Image */}
               <div className="mb-6 overflow-hidden bg-gray-100 aspect-square rounded-xl">
                 <img
                   src={selectedImage}
@@ -356,7 +79,6 @@ function ProductDetail() {
                 />
               </div>
 
-              {/* Image Thumbnails */}
               <div className="grid grid-cols-4 gap-4">
                 {mockImages.map((image, index) => (
                   <button
@@ -368,7 +90,11 @@ function ProductDetail() {
                     }`}
                     onClick={() => setSelectedImage(image)}
                   >
-                    <img src={image} alt={`Product ${index + 1}`} className="object-cover w-full h-full" />
+                    <img
+                      src={image}
+                      alt={`Product ${index + 1}`}
+                      className="object-cover w-full h-full"
+                    />
                   </button>
                 ))}
               </div>
@@ -376,14 +102,15 @@ function ProductDetail() {
 
             {/* Product Info */}
             <div className="p-8 space-y-6">
-              {/* Header */}
               <div>
-                <p className="mb-2 text-sm font-medium text-indigo-600">
+                <p className="mb-2 text-sm font-medium text-[#323232]">
                   {product.product_category_id.title}
                 </p>
-                <h1 className="mb-4 text-3xl font-bold text-gray-900">{product.title}</h1>
-                
-                {/* Price Section */}
+                <h1 className="mb-4 text-3xl font-bold text-gray-900">
+                  {product.title}
+                </h1>
+
+                {/* Price */}
                 {hasDiscount() ? (
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
@@ -399,7 +126,10 @@ function ProductDetail() {
                     </div>
                     <div className="p-3 border border-green-200 rounded-lg bg-green-50">
                       <p className="text-sm font-medium text-green-800">
-                        Tiết kiệm: <span className="font-bold">{formatPrice(calculateSavings())}</span>
+                        Tiết kiệm:{" "}
+                        <span className="font-bold">
+                          {formatPrice(calculateSavings())}
+                        </span>
                       </p>
                     </div>
                   </div>
@@ -410,9 +140,8 @@ function ProductDetail() {
                 )}
               </div>
 
-              {/* Options Section */}
+              {/* Color Selection */}
               <div className="space-y-6">
-                {/* Color Selection */}
                 {availableColors.length > 0 && (
                   <div>
                     <h3 className="mb-3 text-sm font-medium text-gray-900">
@@ -422,13 +151,13 @@ function ProductDetail() {
                       {availableColors.map((color: string) => {
                         const { hex, label } = getColorInfo(color);
                         const isSelected = selectedColor === color;
-                        
+
                         return (
                           <button
                             key={color}
                             className={`relative flex items-center space-x-2 px-4 py-2 border-2 rounded-lg transition-all ${
                               isSelected
-                                ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                                ? "border-[#323232] bg-indigo-50 text-[#323232]"
                                 : "border-gray-200 hover:border-gray-300"
                             }`}
                             onClick={() => setSelectedColor(color)}
@@ -454,7 +183,7 @@ function ProductDetail() {
                       </h3>
                       <a
                         href="#"
-                        className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                        className="text-sm font-medium text-[#323232] hover:text-[#323232]"
                       >
                         Hướng dẫn chọn size
                       </a>
@@ -465,7 +194,7 @@ function ProductDetail() {
                           key={size}
                           className={`px-4 py-2 border-2 rounded-lg text-sm font-medium transition-all ${
                             selectedSize === size
-                              ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                              ? "border-[#323232] bg-indigo-50 text-[#323232]"
                               : "border-gray-200 hover:border-gray-300"
                           }`}
                           onClick={() => setSelectedSize(size)}
@@ -481,8 +210,12 @@ function ProductDetail() {
               {/* Quantity & Actions */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-900">Số lượng</span>
-                  <span className="text-sm text-gray-500">Còn {product.stock} sản phẩm</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    Số lượng
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    Còn {product.stock} sản phẩm
+                  </span>
                 </div>
 
                 <div className="flex items-center space-x-4">
@@ -508,27 +241,33 @@ function ProductDetail() {
                 {/* Action Buttons */}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <button
-                    onClick={handleAddToCart}
-                    className="flex items-center justify-center col-span-2 px-6 py-3 font-semibold text-white transition-colors bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                    onClick={async () => {
+                      const success = await handleAddToCart();
+                      if (success) {
+                        navigate("/cart"); // chuyển sang giỏ hàng sau khi thêm
+                      }
+                    }}
+                    className="flex items-center justify-center col-span-2 px-6 py-3 font-semibold text-white transition-colors bg-[#323232] hover:bg-[#323236] disabled:opacity-50"
                     disabled={product.stock <= 0}
                   >
                     <ShoppingCart className="w-5 h-5 mr-2" />
                     {product.stock <= 0 ? "Hết hàng" : "Thêm vào giỏ"}
                   </button>
-                  
+
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => setIsWishlisted(!isWishlisted)}
+                      onClick={handleWishlistToggle}
                       className={`flex-1 flex items-center justify-center p-3 border-2 rounded-lg transition-colors ${
                         isWishlisted
                           ? "border-red-300 text-red-600 bg-red-50"
                           : "border-gray-300 text-gray-600 hover:bg-gray-50"
                       }`}
                     >
-                      <Heart className={`w-5 h-5 ${isWishlisted ? "fill-current" : ""}`} />
-                    </button>
-                    <button className="flex items-center justify-center flex-1 p-3 text-gray-600 transition-colors border-2 border-gray-300 rounded-lg hover:bg-gray-50">
-                      <Share2 className="w-5 h-5" />
+                      <Heart
+                        className={`w-5 h-5 ${
+                          isWishlisted ? "fill-current" : ""
+                        }`}
+                      />
                     </button>
                   </div>
                 </div>
@@ -537,14 +276,31 @@ function ProductDetail() {
               {/* Features */}
               <div className="grid grid-cols-1 gap-4 p-6 rounded-lg bg-gray-50">
                 {[
-                  { icon: Truck, title: "Miễn phí vận chuyển", desc: "Đơn hàng từ 500k", color: "text-green-600" },
-                  { icon: RotateCcw, title: "Đổi trả 30 ngày", desc: "Miễn phí đổi trả", color: "text-blue-600" },
-                  { icon: Shield, title: "Bảo hành chính hãng", desc: "Cam kết chất lượng", color: "text-purple-600" },
+                  {
+                    icon: Truck,
+                    title: "Miễn phí vận chuyển",
+                    desc: "Đơn hàng từ 500k",
+                    color: "text-green-600",
+                  },
+                  {
+                    icon: RotateCcw,
+                    title: "Đổi trả 30 ngày",
+                    desc: "Miễn phí đổi trả",
+                    color: "text-blue-600",
+                  },
+                  {
+                    icon: Shield,
+                    title: "Bảo hành chính hãng",
+                    desc: "Cam kết chất lượng",
+                    color: "text-purple-600",
+                  },
                 ].map((feature, index) => (
                   <div key={index} className="flex items-center space-x-3">
                     <feature.icon className={`w-5 h-5 ${feature.color}`} />
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{feature.title}</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {feature.title}
+                      </p>
                       <p className="text-xs text-gray-500">{feature.desc}</p>
                     </div>
                   </div>
@@ -557,13 +313,17 @@ function ProductDetail() {
           {(selectedColor || selectedSize) && (
             <div className="mx-8 mb-6">
               <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
-                <h4 className="mb-2 text-sm font-medium text-gray-900">Lựa chọn của bạn:</h4>
+                <h4 className="mb-2 text-sm font-medium text-gray-900">
+                  Lựa chọn của bạn:
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {selectedColor && (
                     <span className="inline-flex items-center px-3 py-1 text-sm bg-white border border-gray-200 rounded-full">
                       <div
                         className="w-3 h-3 mr-2 border border-gray-300 rounded-full"
-                        style={{ backgroundColor: getColorInfo(selectedColor).hex }}
+                        style={{
+                          backgroundColor: getColorInfo(selectedColor).hex,
+                        }}
                       />
                       Màu: {getColorInfo(selectedColor).label}
                     </span>
@@ -581,10 +341,14 @@ function ProductDetail() {
           {/* Specifications */}
           <div className="px-8 pb-6">
             <div className="pt-6 border-t border-gray-200">
-              <h3 className="mb-4 text-lg font-semibold text-gray-900">Thông số kỹ thuật</h3>
+              <h3 className="mb-4 text-lg font-semibold text-gray-900">
+                Thông số kỹ thuật
+              </h3>
               <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="p-4 rounded-lg bg-gray-50">
-                  <dt className="mb-1 text-sm font-medium text-gray-900">Tình trạng</dt>
+                  <dt className="mb-1 text-sm font-medium text-gray-900">
+                    Tình trạng
+                  </dt>
                   <dd>
                     <span
                       className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
@@ -600,17 +364,24 @@ function ProductDetail() {
 
                 {availableColors.length > 0 && (
                   <div className="p-4 rounded-lg bg-gray-50">
-                    <dt className="mb-2 text-sm font-medium text-gray-900">Màu sắc có sẵn</dt>
+                    <dt className="mb-2 text-sm font-medium text-gray-900">
+                      Màu sắc có sẵn
+                    </dt>
                     <dd className="flex flex-wrap gap-2">
                       {availableColors.map((color: string) => {
                         const { hex, label } = getColorInfo(color);
                         return (
-                          <div key={color} className="flex items-center space-x-1">
+                          <div
+                            key={color}
+                            className="flex items-center space-x-1"
+                          >
                             <div
                               className="w-4 h-4 border border-gray-300 rounded-full"
                               style={{ backgroundColor: hex }}
                             />
-                            <span className="text-xs text-gray-600">{label}</span>
+                            <span className="text-xs text-gray-600">
+                              {label}
+                            </span>
                           </div>
                         );
                       })}
@@ -620,7 +391,9 @@ function ProductDetail() {
 
                 {availableSizes.length > 0 && (
                   <div className="p-4 rounded-lg bg-gray-50">
-                    <dt className="mb-1 text-sm font-medium text-gray-900">Kích thước có sẵn</dt>
+                    <dt className="mb-1 text-sm font-medium text-gray-900">
+                      Kích thước có sẵn
+                    </dt>
                     <dd className="flex flex-wrap gap-1">
                       {availableSizes.map((size: string, index: number) => (
                         <span key={size} className="text-sm text-gray-600">
@@ -633,8 +406,12 @@ function ProductDetail() {
                 )}
 
                 <div className="p-4 rounded-lg bg-gray-50">
-                  <dt className="mb-1 text-sm font-medium text-gray-900">Số lượng trong kho</dt>
-                  <dd className="text-sm text-gray-600">{product.stock} sản phẩm</dd>
+                  <dt className="mb-1 text-sm font-medium text-gray-900">
+                    Số lượng trong kho
+                  </dt>
+                  <dd className="text-sm text-gray-600">
+                    {product.stock} sản phẩm
+                  </dd>
                 </div>
               </dl>
             </div>
@@ -643,7 +420,9 @@ function ProductDetail() {
           {/* Product Description */}
           <div className="px-8 pb-8">
             <div className="pt-8 border-t border-gray-200">
-              <h3 className="mb-4 text-xl font-semibold text-gray-900">Chi tiết sản phẩm</h3>
+              <h3 className="mb-4 text-xl font-semibold text-gray-900">
+                Chi tiết sản phẩm
+              </h3>
               <div
                 className="prose-sm prose text-gray-600 max-w-none"
                 dangerouslySetInnerHTML={{ __html: product.description }}
@@ -660,8 +439,8 @@ function ProductDetail() {
                   Đánh giá và bình luận ({comments.length})
                 </h3>
                 <button
-                  onClick={() => setShowCommentForm(!showCommentForm)}
-                  className="flex items-center px-4 py-2 text-sm font-medium text-white transition-colors bg-indigo-600 rounded-lg hover:bg-indigo-700"
+                  onClick={toggleCommentForm}
+                  className="flex items-center px-4 py-2 text-sm font-medium text-white transition-colors bg-[#323232] rounded-lg"
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Viết bình luận
@@ -671,32 +450,44 @@ function ProductDetail() {
               {/* Comment Form */}
               {showCommentForm && (
                 <div className="p-6 mb-8 border border-gray-200 rounded-lg bg-gray-50">
-                  <h4 className="mb-4 text-lg font-semibold text-gray-900">Viết bình luận của bạn</h4>
+                  <h4 className="mb-4 text-lg font-semibold text-gray-900">
+                    Viết bình luận của bạn
+                  </h4>
                   <form onSubmit={handleCommentSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
-                        <label htmlFor="fullName" className="block mb-2 text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="fullName"
+                          className="block mb-2 text-sm font-medium text-gray-700"
+                        >
                           Họ và tên <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
                           id="fullName"
                           value={commentForm.fullName}
-                          onChange={(e) => handleCommentFormChange("fullName", e.target.value)}
+                          onChange={(e) =>
+                            handleCommentFormChange("fullName", e.target.value)
+                          }
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           placeholder="Nhập họ và tên của bạn"
                           required
                         />
                       </div>
                       <div>
-                        <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-700">
+                        <label
+                          htmlFor="email"
+                          className="block mb-2 text-sm font-medium text-gray-700"
+                        >
                           Email <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="email"
                           id="email"
                           value={commentForm.email}
-                          onChange={(e) => handleCommentFormChange("email", e.target.value)}
+                          onChange={(e) =>
+                            handleCommentFormChange("email", e.target.value)
+                          }
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           placeholder="Nhập email của bạn"
                           required
@@ -704,14 +495,20 @@ function ProductDetail() {
                       </div>
                     </div>
                     <div>
-                      <label htmlFor="content" className="block mb-2 text-sm font-medium text-gray-700">
-                        Nội dung bình luận <span className="text-red-500">*</span>
+                      <label
+                        htmlFor="content"
+                        className="block mb-2 text-sm font-medium text-gray-700"
+                      >
+                        Nội dung bình luận{" "}
+                        <span className="text-red-500">*</span>
                       </label>
                       <textarea
                         id="content"
                         rows={4}
                         value={commentForm.content}
-                        onChange={(e) => handleCommentFormChange("content", e.target.value)}
+                        onChange={(e) =>
+                          handleCommentFormChange("content", e.target.value)
+                        }
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."
                         required
@@ -737,7 +534,7 @@ function ProductDetail() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setShowCommentForm(false)}
+                        onClick={toggleCommentForm}
                         className="px-6 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                       >
                         Hủy
@@ -752,12 +549,19 @@ function ProductDetail() {
                 {comments.length === 0 ? (
                   <div className="py-12 text-center">
                     <MessageCircle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <h4 className="mb-2 text-lg font-medium text-gray-900">Chưa có bình luận nào</h4>
-                    <p className="text-gray-500">Hãy là người đầu tiên chia sẻ cảm nhận về sản phẩm này!</p>
+                    <h4 className="mb-2 text-lg font-medium text-gray-900">
+                      Chưa có bình luận nào
+                    </h4>
+                    <p className="text-gray-500">
+                      Hãy là người đầu tiên chia sẻ cảm nhận về sản phẩm này!
+                    </p>
                   </div>
                 ) : (
                   comments.map((comment) => (
-                    <div key={comment._id} className="p-6 bg-white border border-gray-200 rounded-lg">
+                    <div
+                      key={comment._id}
+                      className="p-6 bg-white border border-gray-200 rounded-lg"
+                    >
                       <div className="flex items-start space-x-4">
                         <div className="flex-shrink-0">
                           <div className="flex items-center justify-center w-10 h-10 bg-indigo-100 rounded-full">
@@ -766,10 +570,16 @@ function ProductDetail() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-sm font-semibold text-gray-900">{comment.fullName}</h4>
-                            <p className="text-sm text-gray-500">{formatDate(comment.createdAt)}</p>
+                            <h4 className="text-sm font-semibold text-gray-900">
+                              {comment.fullName}
+                            </h4>
+                            <p className="text-sm text-gray-500">
+                              {formatDate(comment.createdAt)}
+                            </p>
                           </div>
-                          <p className="text-sm leading-relaxed text-gray-700">{comment.content}</p>
+                          <p className="text-sm leading-relaxed text-gray-700">
+                            {comment.content}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -783,5 +593,4 @@ function ProductDetail() {
     </div>
   );
 }
-
 export default ProductDetail;

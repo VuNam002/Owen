@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { PaginationComponent } from "../../../helpers/pagination";
 import { MdAttachMoney, MdFavorite, MdFavoriteBorder } from "react-icons/md";
-import { FiGrid, FiList } from "react-icons/fi";
+import { FiGrid, FiFilter } from "react-icons/fi";
 
 interface Product {
   _id: string;
@@ -15,17 +15,6 @@ interface Product {
     _id: string;
     title: string;
   };
-}
-
-interface Comment {
-  _id: string;
-  fullNames: string;
-  content: string;
-  product_id: {
-    _id: string;
-    title: string;
-  };
-  email: string;
 }
 
 interface Category {
@@ -42,18 +31,15 @@ function Products() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage] = useState(9);
+  const [totalItems, setTotalItems] = useState(0);
+  const [itemsPerPage] = useState(6);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [showFilter] = useState(true);
+  const [showFilter, setShowFilter] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  const calculateDiscountedPrice = (
-    originalPrice: number,
-    discountPercentage: number
-  ): number => {
+  const calculateDiscountedPrice = (originalPrice: number, discountPercentage: number): number => {
     if (!discountPercentage || discountPercentage <= 0) return originalPrice;
     return originalPrice - (originalPrice * discountPercentage) / 100;
   };
@@ -62,10 +48,7 @@ function Products() {
     return !!(product.discountPercentage && product.discountPercentage > 0);
   };
 
-  const calculateSavings = (
-    originalPrice: number,
-    discountPercentage: number
-  ): number => {
+  const calculateSavings = (originalPrice: number, discountPercentage: number): number => {
     if (!discountPercentage || discountPercentage <= 0) return 0;
     return (originalPrice * discountPercentage) / 100;
   };
@@ -94,10 +77,8 @@ function Products() {
       });
   }, []);
 
-  // Fetch products
   useEffect(() => {
     setLoading(true);
-
     let url = `http://localhost:3000/api/v1/products?page=${currentPage}&limit=${itemsPerPage}`;
     if (selectedCategory) {
       url += `&product_category_id=${encodeURIComponent(selectedCategory)}`;
@@ -108,33 +89,10 @@ function Products() {
       .then((result) => {
         const data: Product[] = result.data || [];
         setProducts(data);
-
-        let calculatedTotalPages = 1;
-        let calculatedTotalItems = data.length;
-
-        if (result.totalPages) {
-          calculatedTotalPages = result.totalPages;
-        } else if (result.pagination?.totalPages) {
-          calculatedTotalPages = result.pagination.totalPages;
-        }
-
-        if (result.totalItems) {
-          calculatedTotalItems = result.totalItems;
-        } else if (result.pagination?.totalItems) {
-          calculatedTotalItems = result.pagination.totalItems;
-        } else if (result.total) {
-          calculatedTotalItems = result.total;
-        }
-
-        if (calculatedTotalItems > itemsPerPage) {
-          calculatedTotalPages = Math.ceil(calculatedTotalItems / itemsPerPage);
-        }
-
-        if (data.length === itemsPerPage && calculatedTotalPages === 1) {
-          calculatedTotalPages = currentPage + 1;
-        }
-
-        setTotalPages(calculatedTotalPages);
+        const totalPagesFromApi = result.pagination?.totalPages || result.totalPages || 1;
+        setTotalPages(totalPagesFromApi);
+        const totalItemsFromApi = result.pagination?.totalItems || result.totalItems || 0;
+        setTotalItems(totalItemsFromApi);
         setLoading(false);
       })
       .catch((error) => {
@@ -151,77 +109,47 @@ function Products() {
   const handleCategoryClick = (categoryTitle: string) => {
     setSelectedCategory(categoryTitle);
     setCurrentPage(1);
+    setShowFilter(false); // Close filter on mobile after selection
   };
 
   const handleShowAll = () => {
     setSelectedCategory("");
     setCurrentPage(1);
+    setShowFilter(false);
   };
 
-  const activeCategories = categories.filter(
-    (category) => category.status === "active"
-  );
-
+  const activeCategories = categories.filter((category) => category.status === "active");
   const filteredProducts = selectedCategory
-    ? products.filter(
-        (product) => product.product_category_id?.title === selectedCategory
-      )
+    ? products.filter((product) => product.product_category_id?.title === selectedCategory)
     : products;
-
   const activeProducts = filteredProducts.filter((p) => p.status === "active");
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header Section */}
+      {/* Header */}
       <div className="bg-white border-b">
-        <div className="container px-4 py-6 mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <div>
-                <h1 className="mb-2 text-3xl font-bold text-gray-900">
-                  Thời Trang
-                </h1>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex overflow-hidden border border-gray-200 rounded-lg shadow-sm">
-                <button
-                  onClick={() => setViewMode("grid")}
-                  className={`p-2 transition-all duration-200 ${
-                    viewMode === "grid"
-                      ? "bg-blue-500 text-white shadow-inner"
-                      : "bg-white text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  <FiGrid className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`p-2 transition-all duration-200 ${
-                    viewMode === "list"
-                      ? "bg-blue-500 text-white shadow-inner"
-                      : "bg-white text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  <FiList className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+        <div className="container px-4 py-4 mx-auto">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">Thời Trang</h1>
+            {/* Mobile Filter Toggle */}
+            <button
+              onClick={() => setShowFilter(!showFilter)}
+              className="flex items-center gap-2 px-3 py-2 text-sm transition-colors bg-gray-100 rounded-lg md:hidden hover:bg-gray-200"
+            >
+              <FiFilter className="w-4 h-4" />
+              {showFilter ? 'Ẩn' : 'Lọc'}
+            </button>
           </div>
-
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span className="transition-colors cursor-pointer hover:text-gray-700">
-              Trang chủ
-            </span>
+          
+          {/* Breadcrumb - Always show */}
+          <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+            <span className="cursor-pointer hover:text-gray-700">Trang chủ</span>
             <span>/</span>
-            <span className="transition-colors cursor-pointer hover:text-gray-700">
-              Sản phẩm
-            </span>
+            <span className="cursor-pointer hover:text-gray-700">Sản phẩm</span>
             {selectedCategory && (
               <>
                 <span>/</span>
-                <span className="font-medium text-[#DCB963]">
+                <span className="font-medium text-[#DCB963] break-words">
                   {selectedCategory}
                 </span>
               </>
@@ -230,183 +158,139 @@ function Products() {
         </div>
       </div>
 
-      <div className="container px-4 py-8 mx-auto">
-        <div className="flex gap-8">
-          {/* Simple Sidebar */}
-          {showFilter && (
-            <div className="flex-shrink-0 w-64">
-              <div className="sticky top-8">
-                <div className="space-y-1">
-                  {/* All Products */}
+      <div className="container px-4 py-6 mx-auto">
+        <div className="flex gap-6">
+          {/* Mobile/Desktop Sidebar */}
+          <div className={`${showFilter ? 'fixed inset-0 z-50 bg-black bg-opacity-50 md:relative md:bg-transparent' : 'hidden'} md:block md:w-64 md:flex-shrink-0`}>
+            <div className={`${showFilter ? 'fixed left-0 top-0 h-full w-80 bg-white shadow-lg overflow-y-auto' : ''} md:sticky md:top-8 md:w-64 md:shadow-none`}>
+              {/* Mobile Close Button */}
+              {showFilter && (
+                <div className="flex items-center justify-between p-4 border-b md:hidden">
+                  <h3 className="font-medium">Danh mục</h3>
+                  <button onClick={() => setShowFilter(false)} className="text-gray-500">✕</button>
+                </div>
+              )}
+              
+              <div className="p-4 space-y-1 md:p-0">
+                <button
+                  onClick={handleShowAll}
+                  className={`w-full text-left px-0 py-3 text-sm font-medium transition-colors ${
+                    !selectedCategory ? "text-gray-900 border-b border-gray-300" : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  Tất cả sản phẩm
+                </button>
+
+                {activeCategories.map((category) => (
                   <button
-                    onClick={handleShowAll}
+                    key={category._id}
+                    onClick={() => handleCategoryClick(category.title)}
                     className={`w-full text-left px-0 py-3 text-sm font-medium transition-colors ${
-                      !selectedCategory
+                      selectedCategory === category.title
                         ? "text-gray-900 border-b border-gray-300"
                         : "text-gray-600 hover:text-gray-900"
                     }`}
                   >
-                    Tất cả sản phẩm
+                    {category.title}
                   </button>
+                ))}
 
-                  {/* Categories */}
-                  {activeCategories.map((category) => (
-                    <button
-                      key={category._id}
-                      onClick={() => handleCategoryClick(category.title)}
-                      className={`w-full text-left px-0 py-3 text-sm font-medium transition-colors ${
-                        selectedCategory === category.title
-                          ? "text-gray-900 border-b border-gray-300"
-                          : "text-gray-600 hover:text-gray-900"
-                      }`}
-                    >
-                      {category.title}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Loading State */}
                 {loadingCategories && (
                   <div className="py-8 text-center">
                     <div className="w-6 h-6 mx-auto border-2 border-gray-300 rounded-full animate-spin border-t-gray-900"></div>
-                    <p className="mt-2 text-sm text-gray-500">
-                      Đang tải danh mục...
-                    </p>
+                    <p className="mt-2 text-sm text-gray-500">Đang tải...</p>
                   </div>
                 )}
               </div>
             </div>
-          )}
+          </div>
 
           {/* Main Content */}
           <div className="flex-1">
-            {!loading && activeProducts.length > 0 && (
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  {selectedCategory && (
-                    <span>
-                      trong danh mục{" "}
-                      <span className="font-medium text-[#DCB963] bg-yellow-50 px-2 py-1 rounded-md">
-                        {selectedCategory}
-                      </span>
-                    </span>
-                  )}
-                </div>
+            {!loading && activeProducts.length > 0 && selectedCategory && (
+              <div className="mb-4">
+                <span className="text-sm text-gray-600">
+                  trong danh mục{" "}
+                  <span className="font-medium text-[#DCB963] bg-yellow-50 px-2 py-1 rounded-md">
+                    {selectedCategory}
+                  </span>
+                </span>
               </div>
             )}
 
             {loading ? (
               <div className="flex items-center justify-center py-20">
                 <div className="text-center">
-                  <div className="relative">
-                    <div className="w-16 h-16 mx-auto mb-4 border-4 border-gray-200 rounded-full animate-spin border-t-blue-500"></div>
-                    <div className="absolute inset-0 w-10 h-10 mx-auto mt-3 border-2 border-transparent rounded-full border-t-blue-300 animate-spin"></div>
-                  </div>
-                  <p className="font-medium text-gray-500">Đang tải sản phẩm...</p>
+                  <div className="w-12 h-12 mx-auto mb-4 border-4 border-gray-200 rounded-full animate-spin border-t-blue-500"></div>
+                  <p className="text-gray-500">Đang tải...</p>
                 </div>
               </div>
             ) : (
               <>
-                <div
-                  className={`grid gap-6 mb-8 ${
-                    viewMode === "grid"
-                      ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3"
-                      : "grid-cols-1"
-                  }`}
-                >
+                <div className="grid grid-cols-2 gap-3 mb-8 sm:gap-4 md:grid-cols-3 lg:grid-cols-3">
                   {activeProducts.map((product) => (
-                    <a 
+                    <a
                       key={product._id}
                       href={`/products/detail/${product._id}`}
                       className="block transition-transform duration-200 "
                     >
-                      <div
-                        className={`bg-white shadow-sm transition-all duration-300 group overflow-hidden hover:shadow-lg ${
-                          viewMode === "list" ? "flex" : ""
-                        }`}
-                      >
-                        <div
-                          className={`relative overflow-hidden ${
-                            viewMode === "list"
-                              ? "w-[385px] h-[496px]"
-                              : "w-[385px] h-[496px]"
-                          }`}
-                        >
+                      <div className="overflow-hidden transition-all duration-300 bg-white shadow-sm group">
+                        <div className="relative overflow-hidden aspect-[3/4]">
                           <img
                             src={product.thumbnail}
                             alt={product.title}
-                            className="object-cover w-full h-full transition-transform duration-300"
+                            className="object-cover w-full h-full transition-transform duration-300 "
                           />
 
-                          <div className="absolute flex flex-col gap-2 top-3 left-3">
-                            {hasDiscount(product) && (
-                              <span className="px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-md shadow-sm">
-                                -{product.discountPercentage}%
-                              </span>
-                            )}
-                          </div>
+                          {hasDiscount(product) && (
+                            <span className="absolute px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-md top-2 left-2">
+                              -{product.discountPercentage}%
+                            </span>
+                          )}
 
-                          {/* Action Buttons */}
-                          <div className="absolute flex flex-col gap-2 transition-opacity duration-200 opacity-0 top-3 right-3 group-hover:opacity-100">
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault(); // Prevent navigation when clicking favorite
-                                e.stopPropagation();
-                                toggleFavorite(product._id);
-                              }}
-                              className="p-2 transition-all bg-white rounded-full shadow-md hover:bg-red-50 hover:scale-110"
-                            >
-                              {favorites.includes(product._id) ? (
-                                <MdFavorite className="w-4 h-4 text-red-500" />
-                              ) : (
-                                <MdFavoriteBorder className="w-4 h-4 text-gray-600" />
-                              )}
-                            </button>
-                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              toggleFavorite(product._id);
+                            }}
+                            className="absolute p-2 transition-opacity bg-white rounded-full shadow-md opacity-0 top-2 right-2 group-hover:opacity-100"
+                          >
+                            {favorites.includes(product._id) ? (
+                              <MdFavorite className="w-4 h-4 text-red-500" />
+                            ) : (
+                              <MdFavoriteBorder className="w-4 h-4 text-gray-600" />
+                            )}
+                          </button>
                         </div>
 
-                        <div
-                          className={`p-4 ${viewMode === "list" ? "flex-1" : ""}`}
-                        >
-                          <div className="mb-3">
-                            <h3 className="font-medium text-gray-900 transition-colors cursor-pointer line-clamp-2 hover:text-blue-600">
-                              {product.title}
-                            </h3>
-                          </div>
+                        <div className="p-3">
+                          <h3 className="mb-2 text-sm font-medium text-gray-900 line-clamp-2 md:text-base">
+                            {product.title}
+                          </h3>
 
-                          <div className="space-y-3">
-                            {hasDiscount(product) ? (
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-lg font-bold text-red-600">
-                                    {calculateDiscountedPrice(
-                                      product.price,
-                                      product.discountPercentage!
-                                    ).toLocaleString("vi-VN")}
-                                    ₫
-                                  </span>
-                                  <span className="text-sm text-gray-400 line-through">
-                                    {product.price.toLocaleString("vi-VN")}₫
-                                  </span>
-                                </div>
-                                <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-green-50">
-                                  <span className="flex items-center gap-1 text-xs font-medium text-green-700">
-                                    <MdAttachMoney className="w-3 h-3" />
-                                    Tiết kiệm{" "}
-                                    {calculateSavings(
-                                      product.price,
-                                      product.discountPercentage!
-                                    ).toLocaleString("vi-VN")}
-                                    ₫
-                                  </span>
-                                </div>
+                          {hasDiscount(product) ? (
+                            <div className="space-y-1">
+                              <div className="flex flex-wrap items-center gap-1">
+                                <span className="text-sm font-bold text-red-600 md:text-base">
+                                  {calculateDiscountedPrice(product.price, product.discountPercentage!).toLocaleString("vi-VN")}₫
+                                </span>
+                                <span className="text-xs text-gray-400 line-through md:text-sm">
+                                  {product.price.toLocaleString("vi-VN")}₫
+                                </span>
                               </div>
-                            ) : (
-                              <div className="text-lg font-bold text-gray-900">
-                                {product.price.toLocaleString("vi-VN")}₫
+                              <div className="px-2 py-1 rounded bg-green-50">
+                                <span className="flex items-center gap-1 text-xs font-medium text-green-700">
+                                  <MdAttachMoney className="w-3 h-3" />
+                                  Tiết kiệm {calculateSavings(product.price, product.discountPercentage!).toLocaleString("vi-VN")}₫
+                                </span>
                               </div>
-                            )}
-                          </div>
+                            </div>
+                          ) : (
+                            <div className="text-sm font-bold text-gray-900 md:text-base">
+                              {product.price.toLocaleString("vi-VN")}₫
+                            </div>
+                          )}
                         </div>
                       </div>
                     </a>
@@ -415,19 +299,15 @@ function Products() {
 
                 {activeProducts.length === 0 && (
                   <div className="py-20 text-center">
-                    <div className="flex items-center justify-center w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full">
-                      <FiGrid className="w-8 h-8 text-gray-400" />
+                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full">
+                      <FiGrid className="w-6 h-6 text-gray-400" />
                     </div>
-                    <h3 className="mb-2 text-lg font-medium text-gray-900">
-                      Không tìm thấy sản phẩm nào
-                    </h3>
-                    <p className="mb-4 text-gray-500">
-                      Hãy thử tìm kiếm với từ khóa khác hoặc xem tất cả sản phẩm
-                    </p>
+                    <h3 className="mb-2 text-lg font-medium text-gray-900">Không tìm thấy sản phẩm</h3>
+                    <p className="mb-4 text-gray-500">Hãy thử tìm kiếm với từ khóa khác</p>
                     {selectedCategory && (
                       <button
                         onClick={handleShowAll}
-                        className="px-6 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
+                        className="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                       >
                         Xem tất cả sản phẩm
                       </button>
@@ -436,20 +316,15 @@ function Products() {
                 )}
 
                 {activeProducts.length > 0 && (
-                  <div className="py-8 mt-12">
+                  <div className="py-6 mt-8">
                     <div className="max-w-4xl mx-auto">
-                      <div className="flex justify-center mb-4">
-                        <PaginationComponent
-                          currentPage={currentPage}
-                          totalPages={Math.max(
-                            totalPages,
-                            activeProducts.length === itemsPerPage
-                              ? currentPage + 1
-                              : 1
-                          )}
-                          onPageChange={handlePageChange}
-                        />
-                      </div>
+                      <PaginationComponent
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                        itemsPerPage={itemsPerPage}
+                        totalItems={totalItems}
+                      />
                     </div>
                   </div>
                 )}

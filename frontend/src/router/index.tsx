@@ -21,6 +21,7 @@ import Login from "../pages/admin/login";
 import PrivateRoutes from "../components/PrivateRoutes"; 
 import SearchPage from "../pages/client/Products/SearchPage"
 import ProductDetail from "../pages/client/Products/ProductDetail";
+import Cart from "../pages/client/cart/cart";
 
 
 export const routes = [
@@ -43,6 +44,10 @@ export const routes = [
             {
                 path: 'products/detail/:id',
                 element: <ProductDetail/>
+            },
+            {
+                path: 'cart',
+                element: <Cart/>
             },
             {
                 path: "*",
