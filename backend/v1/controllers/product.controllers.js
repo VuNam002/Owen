@@ -14,20 +14,29 @@ module.exports.index = async (req, res) => {
     let objectSearch = {
       keyword: "",
     };
-    
+
     // Tìm theo keyword
     if (req.query.keyword) {
       objectSearch.keyword = req.query.keyword;
       const regex = new RegExp(objectSearch.keyword, "i");
       objectSearch.regex = regex;
     }
+
     const filter = await buildSearchFilter(objectSearch, Category);
+
     if (req.query.brand) {
       filter.brand = new RegExp(req.query.brand, "i");
     }
 
+
     const sort = buildSortObject(req);
-    const pagination = await buildPagination(req, filter, Product, paginationHelper);
+    const countRecords = await Product.countDocuments(filter);
+
+    const pagination = paginationHelper(
+      { limitItems: parseInt(req.query.limit) || 6 }, 
+      req.query,
+      countRecords
+    );
 
     const products = await Product.find(filter)
       .populate("product_category_id", "title")
@@ -54,6 +63,7 @@ module.exports.index = async (req, res) => {
     handleError(res, error, "Lỗi khi lấy danh sách sản phẩm");
   }
 };
+
 
 module.exports.changeStatus = async (req, res) => {
     try {

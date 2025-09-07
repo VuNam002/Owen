@@ -6,6 +6,8 @@ const articeRoutes = require("../admin/articleRoutes")
 const accountRoutes = require("../admin/accountRoute")
 const myAccountRoutes = require("../admin/my-accountRoute")
 const authRoutes = require("../admin/authRoute")
+const cartRoutes = require("../admin/cartRoute")
+
 
 
 module.exports = (app) => {
@@ -19,5 +21,5 @@ module.exports = (app) => {
     app.use(version + "/accounts", accountRoutes);
     app.use(version + "/my-account", myAccountRoutes);
     app.use(version + "/auth", authRoutes);
-
+    app.use(version + "/carts", cartRoutes);
 };

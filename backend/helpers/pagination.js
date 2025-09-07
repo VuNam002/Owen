@@ -4,7 +4,7 @@
  * @param {object} objectPagination - Đối tượng phân trang ban đầu, cần có `limitItems`.
  * @param {object} query - Đối tượng query từ request, có thể chứa `page`.
  * @param {number} countRecords - Tổng số bản ghi cần phân trang.
- * @returns {object} Đối tượng phân trang đã được cập nhật với `currentPage`, `skip`, và `totalPage`.
+ * @returns {object} Đối tượng phân trang đã được cập nhật với `currentPage`, `skip`, và `totalPages`.
  */
 module.exports = (objectPagination, query, countRecords) => {
   // Đảm bảo limitItems là một số dương để tránh lỗi chia cho 0.
@@ -26,8 +26,9 @@ module.exports = (objectPagination, query, countRecords) => {
   objectPagination.skip = (currentPage - 1) * limitItems;
 
   // Tính toán tổng số trang.
-  const totalPage = Math.ceil(countRecords / limitItems);
-  objectPagination.totalPage = totalPage;
+  const totalPages = Math.ceil(countRecords / limitItems);
+  objectPagination.totalPages = totalPages;
 
   return objectPagination;
 };
+
