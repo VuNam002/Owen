@@ -23,6 +23,8 @@ This is a full-stack web application with a React frontend and a Node.js (Expres
 - **File Uploads:** Multer, Cloudinary
 - **Middleware:** CORS, body-parser, cookie-parser
 - **Runtime:** Node.js
+- **Languge:** JavaScript
+
 
 ## Getting Started
 
