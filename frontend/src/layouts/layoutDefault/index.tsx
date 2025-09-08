@@ -6,6 +6,7 @@ import Search from "../../helpers/search";
 import { FaFacebook } from "react-icons/fa";
 import { FaSquareInstagram } from "react-icons/fa6";
 import { FaYoutube } from "react-icons/fa";
+import { FaCartPlus } from "react-icons/fa";
 import vertify from "../../assets/vertify.webp";
 import logo from "../../assets/logo.svg";
 
@@ -56,21 +57,27 @@ function LayoutDefault() {
 
             {/* Desktop Navigation */}
             <nav className="items-center hidden space-x-2 lg:flex">
+              <div className="transition-all duration-300 ease-in-out">
+                <Search />
+              </div>
               <Link
                 to="/"
-                className="px-4 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative overflow-hidden group"
+                className="px-3 py-2.5 text-[16px] font-medium transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative overflow-hidden group"
               >
                 <span className="relative z-10">Trang chủ</span>
               </Link>
               <Link
                 to="/products"
-                className="px-4 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative overflow-hidden group"
+                className="px-3 py-2.5 text-[16px] font-medium transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative overflow-hidden group"
               >
                 <span className="relative z-10">Sản phẩm</span>
               </Link>
-              <div className="transition-all duration-300 ease-in-out">
-                <Search />
-              </div>
+              <Link
+                to="/cart"
+                className="px-3 py-2.5 text-[16px] font-medium transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative overflow-hidden group"
+              >
+                <FaCartPlus />
+              </Link>
             </nav>
           </div>
         </div>
@@ -93,7 +100,15 @@ function LayoutDefault() {
               >
                 Sản phẩm
               </Link>
-              
+
+              <Link
+                to="/cart"
+                className="block px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <FaCartPlus />
+              </Link>
+
               {/* Mobile Search */}
               <div className="px-4 py-2">
                 <Search />
