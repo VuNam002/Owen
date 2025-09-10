@@ -241,21 +241,46 @@ module.exports.index = async (req, res) => {
     }
 };
 
+// Hàm cập nhật trạng thái đơn hàng - đã sửa
 module.exports.changeStatus = async (req, res) => {
     try {
         const id = req.params.id;
         const status = req.params.status;
-        await Order.updateOne({
-            _id: id,
-            deleted: false,
-        }, {
-            status: status,
-        })
+        console.log("Updating order status:", { id, status });
+        const existingOrder = await Order.findById(id);
+        if (!existingOrder) {
+            return res.json({
+                code: 404,
+                message: "Không tìm thấy đơn hàng",
+            });
+        }
+        console.log("Order found:", existingOrder);
+        const result = await Order.updateOne(
+            { _id: id }, // Chỉ filter theo _id
+            { status: status }
+        );
+        console.log("Update result:", result);
+        if (result.matchedCount === 0) {
+            return res.json({
+                code: 404,
+                message: "Không tìm thấy đơn hàng để cập nhật",
+            });
+        }
+        if (result.modifiedCount === 0) {
+            return res.json({
+                code: 200,
+                message: "Trạng thái đã là giá trị mới, không cần cập nhật",
+            });
+        }
+        const updatedOrder = await Order.findById(id);
+        console.log("Updated order:", updatedOrder);
         res.json({
             code: 200,
             message: "Cập nhật trạng thái đơn hàng thành công",
-        })
+            data: updatedOrder 
+        });
     } catch (error) {
+        console.error("Error updating order status:", error);
         handleError(res, error, "Lỗi khi cập nhật trạng thái đơn hàng");
     }
-}
+};
