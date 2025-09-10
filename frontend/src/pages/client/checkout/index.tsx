@@ -177,14 +177,14 @@ const CheckoutPage = () => {
                         />
                       </td>
                       <td className="px-4 py-2">{item.productInfo.title}</td>
-                      <td className="px-4 py-2 font-bold text-red-600">
+                      <td className="px-4 py-2 font-bold text-[#323232]">
                         {new Intl.NumberFormat("vi-VN", {
                           style: "currency",
                           currency: "VND",
                         }).format(item.productInfo.priceNew)}
                       </td>
                       <td className="px-4 py-2 text-center">{item.quantity}</td>
-                      <td className="px-4 py-2 font-bold text-green-600">
+                      <td className="px-4 py-2 font-bold text-[#323232]">
                         {new Intl.NumberFormat("vi-VN", {
                           style: "currency",
                           currency: "VND",
@@ -198,7 +198,7 @@ const CheckoutPage = () => {
             <div className="mt-3 text-right">
               <h4 className="text-xl">
                 Tổng đơn hàng:
-                <span className="ml-2 font-bold text-blue-600">
+                <span className="ml-2 font-bold text-[#DCB963]">
                   {new Intl.NumberFormat("vi-VN", {
                     style: "currency",
                     currency: "VND",
@@ -211,7 +211,7 @@ const CheckoutPage = () => {
 
         <div className="max-w-3xl mx-auto mt-4">
           <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-4 text-white bg-blue-600 rounded-t-lg">
+            <div className="p-4 text-white bg-[#DCB963] rounded-t-lg">
               <h5 className="text-lg font-semibold">Thông tin giao hàng</h5>
             </div>
             <div className="p-4">
@@ -276,7 +276,7 @@ const CheckoutPage = () => {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex items-center justify-center w-full px-4 py-3 font-bold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center justify-center w-full px-4 py-3 font-bold text-white bg-[#323232] rounded disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {submitting ? (
                       <>

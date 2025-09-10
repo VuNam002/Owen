@@ -64,9 +64,8 @@ const CheckoutSuccessPage = () => {
                 } else {
                     setError(result.message || "Không thể tải thông tin đơn hàng.");
                 }
-            } catch (err: any) {
-                console.error("Fetch order error:", err);
-                setError(err.message || "Đã xảy ra lỗi. Vui lòng thử lại.");
+            } catch {
+                console.error("Fetch order error:");
             } finally {
                 setLoading(false);
             }
@@ -251,13 +250,13 @@ const CheckoutSuccessPage = () => {
                     <div className="text-center bg-white rounded-lg shadow">
                         <div className="p-4">
                             <div className="mb-3">
-                                <Truck className="w-8 h-8 mx-auto mb-2 text-blue-500" />
+                                <Truck className="w-8 h-8 mx-auto mb-2 text-[#323232]" />
                                 <h6 className="font-semibold">Thời gian giao hàng dự kiến</h6>
                                 <p className="text-sm text-gray-500">2-3 ngày làm việc</p>
                             </div>
                             {order.userInfo?.phone && (
                                 <div className="mb-3">
-                                    <Phone className="w-8 h-8 mx-auto mb-2 text-green-500" />
+                                    <Phone className="w-8 h-8 mx-auto mb-2 text-[#323232]" />
                                     <h6 className="font-semibold">Chúng tôi sẽ liên hệ</h6>
                                     <p className="text-sm text-gray-500">Qua số điện thoại {order.userInfo.phone} để xác nhận đơn hàng</p>
                                 </div>
@@ -270,12 +269,12 @@ const CheckoutSuccessPage = () => {
             {/* Action buttons */}
             <div className="mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <Link to="/" className="px-4 py-3 font-bold text-center text-white bg-blue-500 rounded hover:bg-blue-700">
+                    <Link to="/" className="px-4 py-3 font-bold text-center text-white bg-[#323232] rounded">
                         Tiếp tục mua sắm
                     </Link>
                     <button 
                         onClick={() => window.print()} 
-                        className="px-4 py-3 font-bold text-center text-blue-500 bg-white border border-blue-500 rounded hover:bg-blue-50"
+                        className="px-4 py-3 font-bold text-center text-[#323232] bg-white border border-[#DCB963] rounded hover:bg-blue-50"
                     >
                         In đơn hàng
                     </button>

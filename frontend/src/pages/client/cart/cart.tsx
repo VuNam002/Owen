@@ -184,7 +184,7 @@ export default function ShoppingCart() {
   }
 
   return (
-    <div className="min-h-screen py-6 bg-gray-50">
+    <div className="min-h-screen py-8 justify-center bg-gray-50 w-full">
       <div className="max-w-5xl px-4 mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -199,12 +199,12 @@ export default function ShoppingCart() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="space-y-3 lg:col-span-2">
+        <div className="grid grid-cols-1 gap-6  justify-center">
+          <div className="space-y-3 lg:col-span-2 j">
             {cartItems.length === 0 ? (
               <Card className="py-8 text-center">
                 <CardContent>
-                  <ShoppingBag className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <ShoppingBag className="w-12 h-12 mx-auto mb-3 text-gray-300 justify-center" />
                   <h3 className="mb-1 text-lg font-medium text-gray-900">
                     Giỏ hàng trống
                   </h3>
@@ -212,7 +212,7 @@ export default function ShoppingCart() {
                     Bạn chưa có sản phẩm nào trong giỏ hàng
                   </p>
                   <Link to="/products">
-                    <button className="px-4 py-2 text-sm text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700">
+                    <button className="px-4 py-2 text-sm text-white transition-colors bg-[#323232] rounded-lg ">
                       Tiếp tục mua sắm
                     </button>
                   </Link>
