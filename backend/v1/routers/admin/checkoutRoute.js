@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const controller = require("../../controllers/checkout.controllers")
+
+const controller = require("../../controllers/checkout.controllers");
+
 
 router.get("/", controller.index);
 router.post("/order", controller.order);

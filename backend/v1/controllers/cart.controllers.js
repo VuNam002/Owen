@@ -76,7 +76,8 @@ module.exports.index = async (req, res) => {
 
         const products = await Product.find({
             _id: { $in: productIds },
-            deleted: false
+            deleted: false,
+            status: "active"
         }).select("title thumbnail description price discountPercentage status");
 
         const productsMap = new Map(products.map(p => [p._id.toString(), p]));
