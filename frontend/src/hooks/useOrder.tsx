@@ -25,6 +25,7 @@ interface Order {
     userInfo: UserInfo;
     products: Product[];
     totalPrice: number;
+    status?: string; // Thêm trạng thái đơn hàng
 }
 
 interface CreateOrderData {
@@ -132,6 +133,58 @@ const useCheckout = () => {
         }
     }, []);
 
+    // PATCH - Thay đổi trạng thái đơn hàng
+    const updateOrderStatus = useCallback(async (
+        orderId: string,
+        newStatus: string
+    ): Promise<Order | null> => {
+        try {
+            // Không set loading = true để tránh hiển thị loading screen toàn trang
+            setError(null);
+
+            const response = await fetch(`${BASE_URL}/change-status/${newStatus}/${orderId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Không thể cập nhật trạng thái đơn hàng.");
+            }
+
+            const result = await response.json();
+            
+            // Kiểm tra response thành công
+            if (result.code === 200) {
+                // Nếu có data, trả về data. Nếu không có data nhưng thành công, tạo object giả
+                return result.data || { 
+                    _id: orderId, 
+                    status: newStatus, 
+                    userInfo: { fullName: '', phone: '' }, 
+                    products: [], 
+                    totalPrice: 0 
+                };
+            } else {
+                throw new Error(result.message || "Lỗi khi cập nhật trạng thái đơn hàng.");
+            }
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : "Đã xảy ra lỗi khi cập nhật trạng thái.";
+            setError(errorMessage);
+            throw new Error(errorMessage);
+        }
+    }, []);
+
+    // Hàm tiện ích để toggle trạng thái giữa active/inactive
+    const toggleOrderStatus = useCallback(async (
+        orderId: string,
+        currentStatus: string
+    ): Promise<Order | null> => {
+        const newStatus = currentStatus === "active" ? "inactive" : "active";
+        return updateOrderStatus(orderId, newStatus);
+    }, [updateOrderStatus]);
+
     // Reset error
     const clearError = useCallback(() => {
         setError(null);
@@ -143,6 +196,8 @@ const useCheckout = () => {
         createOrder,
         getOrderById,
         getAllOrders,
+        updateOrderStatus,
+        toggleOrderStatus,
         clearError,
     };
 };
