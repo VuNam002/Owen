@@ -317,11 +317,14 @@ export default function ShoppingCart() {
                     </span>
                   </div>
                 </CardContent>
+            
                 <CardFooter className="space-y-2">
+                  <a href="/checkout">
                   <button className="flex items-center justify-center w-full gap-2 py-3 text-white transition-colors bg-[#323232] rounded-lg hover:bg-[#323232]">
                     <CreditCard className="w-4 h-4" />
                     Thanh toán
                   </button>
+                  </a>
                   <Link to="/products">
                     <button className="w-full py-2 text-sm transition-colors border border-gray-300 rounded-lg hover:bg-gray-50">
                       Tiếp tục mua sắm

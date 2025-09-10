@@ -22,6 +22,8 @@ import PrivateRoutes from "../components/PrivateRoutes";
 import SearchPage from "../pages/client/Products/SearchPage"
 import ProductDetail from "../pages/client/Products/ProductDetail";
 import Cart from "../pages/client/cart/cart";
+import Check from "../pages/client/checkout/index"
+import Success from "../pages/client/checkout/success"
 
 
 export const routes = [
@@ -48,6 +50,14 @@ export const routes = [
             {
                 path: 'cart',
                 element: <Cart/>
+            },
+            {
+                path: 'checkout',
+                element: <Check/>
+            },
+            {
+                path: 'success',
+                element: <Success/>
             },
             {
                 path: "*",
