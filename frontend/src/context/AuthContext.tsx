@@ -26,18 +26,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Load user from localStorage or fetch from API on app load
     const storedUser = localStorage.getItem('user');
-    console.log("AuthContext: storedUser from localStorage:", storedUser);
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        console.log("AuthContext: parsedUser:", parsedUser);
         setUser(parsedUser);
       } catch (e) {
-        console.error("Failed to parse user from localStorage", e);
         localStorage.removeItem('user'); // Clear invalid data
       }
-    } else {
-      console.log("AuthContext: No user in localStorage");
     }
     setLoading(false); // Set loading to false after checking local storage
   }, []);
@@ -67,25 +62,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             permissions: userData.role.permissions,
           },
         };
-        console.log("AuthContext: setting user in login:", userToStore);
         setUser(userToStore);
         localStorage.setItem('user', JSON.stringify(userToStore));
         localStorage.setItem('token', token);
         return true; // Login successful
       } else {
-        console.error('Login failed:', data.message || 'Unknown error');
-        // You might want to set an error state here
-        return false; // Login failed
+        return false; 
       }
     } catch (error) {
-      console.error('Login API call error:', error);
-      // You might want to set an error state here
       return false; // Login failed due to network error or similar
     }
   };
 
   const logout = () => {
-    console.log("AuthContext: logging out user");
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');

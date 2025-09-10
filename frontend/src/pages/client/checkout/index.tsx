@@ -2,9 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ShoppingCart, User, Phone, MapPin } from "lucide-react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 
-// Define interfaces for the cart data (matching cart.tsx)
+// Define interfaces for the cart data
 interface ProductInfo {
   thumbnail: string;
   title: string;
@@ -19,6 +18,7 @@ interface CartProduct {
 }
 
 interface CartDetail {
+  _id?: string;
   products: CartProduct[];
   totalPrice: number;
 }
@@ -27,6 +27,7 @@ const CheckoutPage = () => {
   const [cartDetail, setCartDetail] = useState<CartDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const [userInfo, setUserInfo] = useState({
@@ -38,15 +39,17 @@ const CheckoutPage = () => {
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
+        // Sử dụng endpoint cũ cho đến khi backend được setup đúng
         const response = await fetch("http://localhost:3000/api/v1/carts", {
           cache: "no-store",
           credentials: "include",
         });
         const result = await response.json();
+        
         if (result.code === 200 && result.data) {
           setCartDetail(result.data);
         } else {
-          setError("Không thể tải giỏ hàng.");
+          setError(result.message || "Không thể tải giỏ hàng.");
         }
       } catch (err) {
         setError("Đã xảy ra lỗi khi tải giỏ hàng.");
@@ -66,23 +69,49 @@ const CheckoutPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!cartDetail) return;
+    
+    if (!cartDetail || cartDetail.products.length === 0) {
+      setError("Giỏ hàng trống, không thể đặt hàng.");
+      return;
+    }
+
+    // Validate form
+    if (!userInfo.fullName.trim() || !userInfo.phone.trim() || !userInfo.address.trim()) {
+      setError("Vui lòng điền đầy đủ thông tin giao hàng.");
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
 
     try {
       const response = await axios.post(
         "http://localhost:3000/api/v1/checkout/order",
         {
-          cartId: cartDetail._id, // Assuming cartDetail has an _id
+          cartId: cartDetail?._id,
           userInfo,
         },
         {
           withCredentials: true,
         }
       );
-      navigate("/success", { state: { order: response.data.data } });
-    } catch (error) {
+
+      console.log("Order response:", response.data);
+
+      if (response.data.code === 200) {
+        const order = response.data.data;
+        navigate(`/checkout/success/${order._id}`);
+      } else {
+        setError(response.data.message || "Đặt hàng thất bại.");
+      }
+    } catch (error: any) {
       console.error("Order submission failed:", error);
-      // You might want to show an error message to the user
+      setError(
+        error.response?.data?.message || 
+        "Đã xảy ra lỗi khi đặt hàng. Vui lòng thử lại."
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -93,14 +122,6 @@ const CheckoutPage = () => {
           <div className="w-8 h-8 mx-auto mb-3 border-2 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
           <p className="text-sm text-gray-600">Đang tải...</p>
         </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container p-4 mx-auto my-4 text-center text-red-600">
-        {error}
       </div>
     );
   }
@@ -122,6 +143,12 @@ const CheckoutPage = () => {
   return (
     <div className="container p-4 mx-auto my-4">
       <div className="mb-4 text-2xl font-bold">Đặt hàng</div>
+
+      {error && (
+        <div className="p-4 mb-4 text-red-700 bg-red-100 border border-red-400 rounded">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1">
         <div className="bg-white rounded-lg shadow-sm">
@@ -245,16 +272,24 @@ const CheckoutPage = () => {
                     className="block w-full px-3 py-2 mt-1 placeholder-gray-400 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
                 </div>
-                <Link to="/success">
-                  <div className="grid grid-cols-1 gap-2">
-                    <button
-                      type="submit"
-                      className="flex items-center justify-center w-full px-4 py-3 font-bold text-white bg-green-600 rounded-lg hover:bg-green-700"
-                    >
-                      <ShoppingCart className="w-5 h-5 mr-2" /> Đặt hàng ngay
-                    </button>
-                  </div>
-                </Link>
+                <div className="grid grid-cols-1 gap-2">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex items-center justify-center w-full px-4 py-3 font-bold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? (
+                      <>
+                        <div className="w-5 h-5 mr-2 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
+                        Đang xử lý...
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="w-5 h-5 mr-2" /> Đặt hàng ngay
+                      </>
+                    )}
+                  </button>
+                </div>
               </form>
             </div>
           </div>
