@@ -13,14 +13,13 @@ const AdminOrderListPage: React.FC = () => {
         clearError,
         filteredOrders,
         filterStatus,
-        availableStatuses,
         statusCount,
         setStatusFilter,
         clearStatusFilter,
         handlePageChange,
         handlePrePage,
         handleNextPage,
-        // Assuming these exist in your useCheckout hook for pagination
+ 
         currentPage,
         totalPages,
         totalItems,
@@ -34,8 +33,6 @@ const AdminOrderListPage: React.FC = () => {
     const calculatedCurrentPage = currentPage || 1;
     const calculatedTotalPages = totalPages || Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
     const calculatedTotalItems = totalItems || filteredOrders.length;
-
-    // Calculate paginated orders for display
     const startIndex = (calculatedCurrentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
     const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
@@ -249,14 +246,6 @@ const AdminOrderListPage: React.FC = () => {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-800">Quản lý Đơn hàng</h1>
                 </div>
-                <button 
-                    onClick={loadOrders}
-                    disabled={loading}
-                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                >
-                    {loading ? <Loader className="w-4 h-4 mr-2 animate-spin" /> : null}
-                    Làm mới
-                </button>
             </div>
 
             <FilterSection />
@@ -344,7 +333,7 @@ const AdminOrderListPage: React.FC = () => {
                                     </td>
                                     <td className="px-4 py-3 text-center">
                                         <Link 
-                                            to={`/admin/orders/${order._id}`}
+                                            to= {`/admin/orders/detail/${order._id}`}
                                             className="inline-flex items-center px-3 py-1 text-sm font-medium text-blue-600 border border-transparent rounded-md hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                         >
                                             <Eye className="w-4 h-4 mr-1" />
@@ -358,7 +347,6 @@ const AdminOrderListPage: React.FC = () => {
                 </div>
             )}
 
-            {/* Pagination Component - Only show if there are orders and multiple pages */}
             {filteredOrders.length > 0 && calculatedTotalPages > 1 && (
                 <div className="mt-6">
                     <Pagination
@@ -372,7 +360,6 @@ const AdminOrderListPage: React.FC = () => {
                 </div>
             )}
 
-            {/* Summary Statistics */}
             {filteredOrders.length > 0 && (
                 <div className="grid grid-cols-1 gap-6 mt-8 md:grid-cols-4">
                     <div className="p-6 border border-blue-200 rounded-lg bg-blue-50">

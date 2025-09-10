@@ -151,7 +151,7 @@ const CheckoutPage = () => {
       )}
 
       <div className="grid grid-cols-1">
-        <div className="bg-white rounded-lg shadow-sm">
+        <div className="bg-white shadow-sm">
           <div className="p-4">
             <div className="overflow-x-auto">
               <table className="min-w-full table-auto">

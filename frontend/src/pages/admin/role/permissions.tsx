@@ -52,8 +52,9 @@ const permissionConfig = [
     permissions: [
         { key: 'orders_view', label: 'Xem' },
         { key: 'orders_delete', label: 'Xóa' },
+        { key: 'orders_detail', label: 'Chi tiết' },
     ]
-  }
+  },
   // Thêm các nhóm quyền khác nếu cần
 ];
 
@@ -146,7 +147,7 @@ const PermissionsPage: React.FC = () => {
                             <tr>
                                 <th className="w-1/4 px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Tính năng</th>
                                 {roles.map(role => (
-                                    <th key={role._id} className="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase w-1/4">
+                                    <th key={role._id} className="w-1/4 px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">
                                         {role.title}
                                     </th>
                                 ))}

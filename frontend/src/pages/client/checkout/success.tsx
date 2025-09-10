@@ -118,7 +118,7 @@ const CheckoutSuccessPage = () => {
 
     return (
         <div className="container p-4 mx-auto my-3">
-            <div className="px-4 py-3 mb-4 text-green-900 bg-green-100 border-t-4 border-green-500 rounded-b shadow-md" role="alert">
+            <div className="px-4 py-3 mb-4 text-green-900 bg-green-100 border-t-4 border-green-500 shadow-md" role="alert">
                 <div className="flex items-center">
                     <div className="mr-3">
                         <CheckCircle className="w-10 h-10 text-green-500" />
@@ -140,7 +140,7 @@ const CheckoutSuccessPage = () => {
                         <div className="p-4">
                             <div className="flex mb-3">
                                 <strong className="w-1/3">Mã đơn hàng:</strong>
-                                <span className="w-2/3 text-gray-600 font-mono text-sm">{order._id}</span>
+                                <span className="w-2/3 font-mono text-sm text-gray-600">{order._id}</span>
                             </div>
                             <div className="flex mb-3">
                                 <strong className="w-1/3">Khách hàng:</strong>
@@ -173,7 +173,7 @@ const CheckoutSuccessPage = () => {
                                                 <tr key={item.product_id || index} className="border-b">
                                                     <td className="w-20 p-3">
                                                         <img 
-                                                            className="rounded object-cover" 
+                                                            className="object-cover rounded" 
                                                             src={item.productInfo?.thumbnail} 
                                                             alt={item.productInfo?.title || 'Product'} 
                                                             width="60" 
@@ -268,7 +268,7 @@ const CheckoutSuccessPage = () => {
 
             {/* Action buttons */}
             <div className="mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                     <Link to="/" className="px-4 py-3 font-bold text-center text-white bg-[#323232] rounded">
                         Tiếp tục mua sắm
                     </Link>

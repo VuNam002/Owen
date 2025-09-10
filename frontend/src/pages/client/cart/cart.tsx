@@ -184,7 +184,7 @@ export default function ShoppingCart() {
   }
 
   return (
-    <div className="min-h-screen py-8 justify-center bg-gray-50 w-full">
+    <div className="justify-center w-full min-h-screen py-8 bg-gray-50">
       <div className="max-w-5xl px-4 mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -199,12 +199,12 @@ export default function ShoppingCart() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6  justify-center">
+        <div className="grid justify-center grid-cols-1 gap-6">
           <div className="space-y-3 lg:col-span-2 j">
             {cartItems.length === 0 ? (
               <Card className="py-8 text-center">
                 <CardContent>
-                  <ShoppingBag className="w-12 h-12 mx-auto mb-3 text-gray-300 justify-center" />
+                  <ShoppingBag className="justify-center w-12 h-12 mx-auto mb-3 text-gray-300" />
                   <h3 className="mb-1 text-lg font-medium text-gray-900">
                     Giỏ hàng trống
                   </h3>
@@ -222,12 +222,12 @@ export default function ShoppingCart() {
               cartItems.map((item) => (
                 <Card key={item.product_id}>
                   <CardContent className="p-4">
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-center justify-between gap-4">
                       {/* Product Image */}
                       <img
                         src={item.productInfo?.thumbnail}
                         alt={item.productInfo?.title}
-                        className="flex-shrink-0 object-cover w-16 h-16 rounded-lg"
+                        className="flex-shrink-0 object-cover rounded-lg w-18 h-18"
                       />
 
                       {/* Product Info */}
@@ -317,16 +317,16 @@ export default function ShoppingCart() {
                     </span>
                   </div>
                 </CardContent>
-            
-                <CardFooter className="space-y-2">
-                  <a href="/checkout">
-                  <button className="flex items-center justify-center w-full gap-2 py-3 text-white transition-colors bg-[#323232] rounded-lg hover:bg-[#323232]">
-                    <CreditCard className="w-4 h-4" />
-                    Thanh toán
-                  </button>
-                  </a>
+
+                <CardFooter className="flex flex-col gap-3 p-4">
+                  <Link to="/checkout">
+                    <button className="flex items-center justify-center w-full gap-2 py-3 text-white transition-colors bg-[#323232] ">
+                      <CreditCard className="w-4 h-4" />
+                      Thanh toán
+                    </button>
+                  </Link>
                   <Link to="/products">
-                    <button className="w-full py-2 text-sm transition-colors border border-gray-300 rounded-lg hover:bg-gray-50">
+                    <button className="w-full py-2 text-sm transition-colors border border-gray-300 ">
                       Tiếp tục mua sắm
                     </button>
                   </Link>

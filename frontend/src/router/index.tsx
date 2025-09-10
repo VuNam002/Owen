@@ -22,9 +22,10 @@ import PrivateRoutes from "../components/PrivateRoutes";
 import SearchPage from "../pages/client/Products/SearchPage"
 import ProductDetail from "../pages/client/Products/ProductDetail";
 import Cart from "../pages/client/cart/cart";
-import Check from "../pages/client/checkout/index"
-import Success from "../pages/client/checkout/success"
-import Order from "../pages/admin/order/index"
+import Check from "../pages/client/checkout/index";
+import Success from "../pages/client/checkout/success";
+import Order from "../pages/admin/order/index";
+import DetailOrderPage from "../pages/admin/order/detail";
 
 
 export const routes = [
@@ -133,6 +134,10 @@ export const routes = [
                         path:"orders",
                         element: <PrivateRoutes requiredPermission="orders_view"><Order/></PrivateRoutes> 
                     },
+                    {
+                        path:"orders/detail/:orderId",
+                        element: <PrivateRoutes requiredPermission="orders_view"><DetailOrderPage/></PrivateRoutes> 
+                    }
                 ]
             }
         ]
