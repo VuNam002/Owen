@@ -226,8 +226,6 @@ module.exports.index = async (req, res) => {
                         product.totalPrice = product.priceNew * product.quantity;
                     }
                 }
-
-                // Tính tổng tiền đơn hàng
                 order.totalPrice = order.products.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
             }
         }
@@ -242,3 +240,22 @@ module.exports.index = async (req, res) => {
         handleError(res, error, "Lỗi khi lấy danh sách đơn hàng");
     }
 };
+
+module.exports.changeStatus = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const status = req.params.status;
+        await Order.updateOne({
+            _id: id,
+            deleted: false,
+        }, {
+            status: status,
+        })
+        res.json({
+            code: 200,
+            message: "Cập nhật trạng thái đơn hàng thành công",
+        })
+    } catch (error) {
+        handleError(res, error, "Lỗi khi cập nhật trạng thái đơn hàng");
+    }
+}
