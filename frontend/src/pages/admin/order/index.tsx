@@ -1,11 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useCheckout from '../../../hooks/useOrder';
-import { Loader, Eye, Package, User, Calendar, DollarSign, Check } from 'lucide-react';
+import { Loader, Eye, Package, User, Calendar, DollarSign, Check, Filter, X } from 'lucide-react';
 
 const AdminOrderListPage: React.FC = () => {
-    const { getAllOrders, updateOrderStatus, loading, error, clearError } = useCheckout();
-    const [orders, setOrders] = useState<any[]>([]);
+    const { 
+        getAllOrders, 
+        updateOrderStatus, 
+        loading, 
+        error, 
+        clearError,
+        filteredOrders,
+        filterStatus,
+        availableStatuses,
+        statusCount,
+        setStatusFilter,
+        clearStatusFilter
+    } = useCheckout();
+    
     const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
     const formatPrice = (price: number) => {
@@ -21,10 +33,7 @@ const AdminOrderListPage: React.FC = () => {
 
     const loadOrders = async () => {
         try {
-            const ordersData = await getAllOrders();
-            if (ordersData) {
-                setOrders(ordersData);
-            }
+            await getAllOrders();
         } catch (err) {
             console.error('Lỗi khi tải danh sách đơn hàng:', err);
         }
@@ -53,18 +62,7 @@ const AdminOrderListPage: React.FC = () => {
         try {
             setUpdatingStatus(orderId);
             const nextStatus = getNextStatus(currentStatus);
-            const updatedOrder = await updateOrderStatus(orderId, nextStatus);
-            
-            if (updatedOrder) {
-                // Cập nhật state local
-                setOrders(prevOrders => 
-                    prevOrders.map(order => 
-                        order._id === orderId 
-                            ? { ...order, status: nextStatus }
-                            : order
-                    )
-                );
-            }
+            await updateOrderStatus(orderId, nextStatus);
         } catch (err) {
             console.error('Lỗi khi cập nhật trạng thái:', err);
         } finally {
@@ -92,6 +90,74 @@ const AdminOrderListPage: React.FC = () => {
                     statusInfo.label
                 )}
             </button>
+        );
+    };
+
+    const FilterSection: React.FC = () => {
+        return (
+            <div className="mb-6">
+                <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <div className="flex items-center gap-2">
+                        <Filter className="w-5 h-5 text-gray-500" />
+                        <span className="font-medium text-gray-700">Lọc theo trạng thái:</span>
+                    </div>
+                    
+                    <button
+                        onClick={clearStatusFilter}
+                        className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${
+                            !filterStatus || filterStatus === 'all'
+                                ? 'bg-blue-100 text-blue-800 border-blue-200'
+                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                        }`}
+                    >
+                        Tất cả
+                        {(!filterStatus || filterStatus === 'all') && (
+                            <span className="ml-2 px-2 py-0.5 bg-blue-200 text-blue-800 text-xs rounded-full">
+                                {filteredOrders.length}
+                            </span>
+                        )}
+                    </button>
+
+                    {/* Các nút trạng thái */}
+                    {getStatusCycle().map((status) => {
+                        const count = statusCount[status.value] || 0;
+                        const isActive = filterStatus === status.value;
+                        
+                        return (
+                            <button
+                                key={status.value}
+                                onClick={() => setStatusFilter(status.value)}
+                                disabled={count === 0}
+                                className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                                    isActive
+                                        ? status.color.replace('hover:bg-', 'bg-').replace('100', '200')
+                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                }`}
+                            >
+                                {status.label}
+                                <span className={`ml-2 px-2 py-0.5 text-xs rounded-full ${
+                                    isActive 
+                                        ? 'bg-white bg-opacity-50'
+                                        : 'bg-gray-100 text-gray-600'
+                                }`}>
+                                    {count}
+                                </span>
+                            </button>
+                        );
+                    })}
+
+                    {/* Nút xóa filter */}
+                    {filterStatus && filterStatus !== 'all' && (
+                        <button
+                            onClick={clearStatusFilter}
+                            className="inline-flex items-center px-2 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                            title="Xóa bộ lọc"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    )}
+                </div>
+            </div>
         );
     };
 
@@ -135,7 +201,18 @@ const AdminOrderListPage: React.FC = () => {
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-800">Quản lý Đơn hàng</h1>
-                    <p className="mt-2 text-gray-600">Tổng số đơn hàng: {orders.length}</p>
+                    <div className="mt-2 text-gray-600">
+                        {filterStatus && filterStatus !== 'all' ? (
+                            <p>
+                                Hiển thị {filteredOrders.length} đơn hàng {getStatusDisplay(filterStatus).label.toLowerCase()} 
+                                <span className="ml-1 text-gray-400">
+                                    (Tổng: {statusCount[filterStatus] || 0})
+                                </span>
+                            </p>
+                        ) : (
+                            <p>Tổng số đơn hàng: {filteredOrders.length}</p>
+                        )}
+                    </div>
                 </div>
                 <button 
                     onClick={loadOrders}
@@ -147,11 +224,31 @@ const AdminOrderListPage: React.FC = () => {
                 </button>
             </div>
 
-            {orders.length === 0 ? (
+            <FilterSection />
+
+            {filteredOrders.length === 0 ? (
                 <div className="py-12 text-center rounded-lg bg-gray-50">
                     <Package className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                    <h3 className="mb-2 text-lg font-medium text-gray-900">Không có đơn hàng nào</h3>
-                    <p className="text-gray-500">Hiện tại chưa có đơn hàng nào được tạo.</p>
+                    <h3 className="mb-2 text-lg font-medium text-gray-900">
+                        {filterStatus && filterStatus !== 'all' 
+                            ? `Không có đơn hàng ${getStatusDisplay(filterStatus).label.toLowerCase()}`
+                            : 'Không có đơn hàng nào'
+                        }
+                    </h3>
+                    <p className="text-gray-500">
+                        {filterStatus && filterStatus !== 'all'
+                            ? 'Thử chọn trạng thái khác hoặc xóa bộ lọc.'
+                            : 'Hiện tại chưa có đơn hàng nào được tạo.'
+                        }
+                    </p>
+                    {filterStatus && filterStatus !== 'all' && (
+                        <button
+                            onClick={clearStatusFilter}
+                            className="inline-flex items-center px-4 py-2 mt-4 text-sm font-medium text-blue-600 bg-white border border-blue-300 rounded-md hover:bg-blue-50"
+                        >
+                            Hiển thị tất cả đơn hàng
+                        </button>
+                    )}
                 </div>
             ) : (
                 <div className="overflow-x-auto">
@@ -169,7 +266,7 @@ const AdminOrderListPage: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {orders.map((order, index) => (
+                            {filteredOrders.map((order, index) => (
                                 <tr key={order._id || index} className="border-b border-gray-200 hover:bg-gray-50 last:border-b-0">
                                     <td className="px-4 py-3">
                                         <div className="flex items-center">
@@ -227,14 +324,16 @@ const AdminOrderListPage: React.FC = () => {
             )}
 
             {/* Summary Statistics */}
-            {orders.length > 0 && (
+            {filteredOrders.length > 0 && (
                 <div className="grid grid-cols-1 gap-6 mt-8 md:grid-cols-4">
                     <div className="p-6 border border-blue-200 rounded-lg bg-blue-50">
                         <div className="flex items-center">
                             <Package className="w-8 h-8 mr-3 text-blue-500" />
                             <div>
-                                <p className="text-sm font-medium text-blue-600">Tổng đơn hàng</p>
-                                <p className="text-2xl font-bold text-blue-900">{orders.length}</p>
+                                <p className="text-sm font-medium text-blue-600">
+                                    {filterStatus && filterStatus !== 'all' ? 'Đơn hàng hiển thị' : 'Tổng đơn hàng'}
+                                </p>
+                                <p className="text-2xl font-bold text-blue-900">{filteredOrders.length}</p>
                             </div>
                         </div>
                     </div>
@@ -243,9 +342,11 @@ const AdminOrderListPage: React.FC = () => {
                         <div className="flex items-center">
                             <DollarSign className="w-8 h-8 mr-3 text-green-500" />
                             <div>
-                                <p className="text-sm font-medium text-green-600">Tổng doanh thu</p>
+                                <p className="text-sm font-medium text-green-600">
+                                    {filterStatus && filterStatus !== 'all' ? 'Doanh thu hiển thị' : 'Tổng doanh thu'}
+                                </p>
                                 <p className="text-2xl font-bold text-green-900">
-                                    {formatPrice(orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0))}
+                                    {formatPrice(filteredOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0))}
                                 </p>
                             </div>
                         </div>
@@ -257,7 +358,7 @@ const AdminOrderListPage: React.FC = () => {
                             <div>
                                 <p className="text-sm font-medium text-yellow-600">Khách hàng</p>
                                 <p className="text-2xl font-bold text-yellow-900">
-                                    {new Set(orders.map(order => order.userInfo?.phone)).size}
+                                    {new Set(filteredOrders.map(order => order.userInfo?.phone)).size}
                                 </p>
                             </div>
                         </div>
@@ -269,7 +370,7 @@ const AdminOrderListPage: React.FC = () => {
                             <div>
                                 <p className="text-sm font-medium text-purple-600">Đã hoàn thành</p>
                                 <p className="text-2xl font-bold text-purple-900">
-                                    {orders.filter(order => order.status === 'completed').length}
+                                    {filteredOrders.filter(order => order.status === 'completed').length}
                                 </p>
                             </div>
                         </div>

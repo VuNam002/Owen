@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 interface UserInfo {
     fullName: string;
@@ -25,7 +25,7 @@ interface Order {
     userInfo: UserInfo;
     products: Product[];
     totalPrice: number;
-    status?: string; // Thêm trạng thái đơn hàng
+    status?: string;
 }
 
 interface CreateOrderData {
@@ -37,6 +37,8 @@ interface CreateOrderData {
 const useCheckout = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [filterStatus, setFilterStatus] = useState<string>("");
+    const [orders, setOrders] = useState<Order[]>([]);
 
     const BASE_URL = 'http://localhost:3000/api/v1/checkout';
 
@@ -62,6 +64,8 @@ const useCheckout = () => {
             const result = await response.json();
             
             if (result.code === 200 && result.data) {
+                // Cập nhật danh sách orders sau khi tạo thành công
+                setOrders(prev => [result.data, ...prev]);
                 return result.data;
             } else {
                 throw new Error(result.message || "Lỗi khi tạo đơn hàng.");
@@ -120,6 +124,7 @@ const useCheckout = () => {
             const result = await response.json();
             
             if (result.code === 200 && result.data) {
+                setOrders(result.data);
                 return result.data;
             } else {
                 throw new Error(result.message || "Không tìm thấy danh sách đơn hàng.");
@@ -139,7 +144,6 @@ const useCheckout = () => {
         newStatus: string
     ): Promise<Order | null> => {
         try {
-            // Không set loading = true để tránh hiển thị loading screen toàn trang
             setError(null);
 
             const response = await fetch(`${BASE_URL}/change-status/${newStatus}/${orderId}`, {
@@ -156,9 +160,16 @@ const useCheckout = () => {
 
             const result = await response.json();
             
-            // Kiểm tra response thành công
             if (result.code === 200) {
-                // Nếu có data, trả về data. Nếu không có data nhưng thành công, tạo object giả
+                // Cập nhật trạng thái trong danh sách orders
+                setOrders(prev => 
+                    prev.map(order => 
+                        order._id === orderId 
+                            ? { ...order, status: newStatus }
+                            : order
+                    )
+                );
+
                 return result.data || { 
                     _id: orderId, 
                     status: newStatus, 
@@ -176,7 +187,6 @@ const useCheckout = () => {
         }
     }, []);
 
-    // Hàm tiện ích để toggle trạng thái giữa active/inactive
     const toggleOrderStatus = useCallback(async (
         orderId: string,
         currentStatus: string
@@ -185,7 +195,35 @@ const useCheckout = () => {
         return updateOrderStatus(orderId, newStatus);
     }, [updateOrderStatus]);
 
-    // Reset error
+    const filteredOrders = useMemo(() => {
+        if (!filterStatus || filterStatus === "all") {
+            return orders;
+        }
+        return orders.filter(order => order.status === filterStatus);
+    }, [orders, filterStatus]);
+
+    // Lấy danh sách các status có sẵn
+    const availableStatuses = useMemo(() => {
+        const statuses = Array.from(new Set(orders.map(order => order.status).filter(Boolean)));
+        return statuses.sort();
+    }, [orders]);
+    const statusCount = useMemo(() => {
+        const count: Record<string, number> = {};
+        orders.forEach(order => {
+            if (order.status) {
+                count[order.status] = (count[order.status] || 0) + 1;
+            }
+        });
+        return count;
+    }, [orders]);
+
+    const setStatusFilter = useCallback((status: string) => {
+        setFilterStatus(status);
+    }, []);
+
+    const clearStatusFilter = useCallback(() => {
+        setFilterStatus("");
+    }, []);
     const clearError = useCallback(() => {
         setError(null);
     }, []);
@@ -193,11 +231,19 @@ const useCheckout = () => {
     return {
         loading,
         error,
+        orders,
+        filteredOrders,
+        filterStatus,
+        availableStatuses,
+        statusCount,
+        
         createOrder,
         getOrderById,
         getAllOrders,
         updateOrderStatus,
         toggleOrderStatus,
+        setStatusFilter,
+        clearStatusFilter,
         clearError,
     };
 };
