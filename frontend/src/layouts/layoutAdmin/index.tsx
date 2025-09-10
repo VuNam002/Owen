@@ -8,7 +8,8 @@ import { BiSolidCategoryAlt } from "react-icons/bi";
 import { RiAccountCircleFill } from "react-icons/ri";
 import { HiUserGroup } from "react-icons/hi";
 import { FaAddressCard } from "react-icons/fa";
-import { useAuth } from "../../context/AuthContext"; // Import useAuth
+import { FaFolder } from "react-icons/fa";
+import { useAuth } from "../../context/AuthContext"; 
 
 function LayoutAdmin() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -100,6 +101,21 @@ function LayoutAdmin() {
               )}
             </Link>
           )}
+            {hasPermission("orders_view") && ( // Example for orders
+              
+            <Link
+              to="/admin/orders"
+              className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"
+            >
+              <FaFolder className="w-5 h-5" />
+              {sidebarOpen && (
+                <span className="transition-opacity duration-300">
+                  Đơn hàng
+                </span>
+              )}
+            </Link>
+            )}
+          
           {hasPermission("roles_view") && ( // Example for roles
             <Link
               to="/admin/roles"

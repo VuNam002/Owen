@@ -24,6 +24,7 @@ import ProductDetail from "../pages/client/Products/ProductDetail";
 import Cart from "../pages/client/cart/cart";
 import Check from "../pages/client/checkout/index"
 import Success from "../pages/client/checkout/success"
+import Order from "../pages/admin/order/index"
 
 
 export const routes = [
@@ -127,7 +128,11 @@ export const routes = [
                     {
                         path:"permissions",
                         element: <PrivateRoutes requiredPermission="roles_permissions"><PermissionsPage/></PrivateRoutes> 
-                    }
+                    },
+                    {
+                        path:"orders",
+                        element: <PrivateRoutes requiredPermission="orders_view"><Order/></PrivateRoutes> 
+                    },
                 ]
             }
         ]
