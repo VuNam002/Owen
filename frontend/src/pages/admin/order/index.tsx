@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useCheckout from '../../../hooks/useOrder';
 import { Loader, Eye, Package, User, Calendar, DollarSign, Check, Filter, X } from 'lucide-react';
+import { Pagination } from "../../../components/Products/Pagination"
 
 const AdminOrderListPage: React.FC = () => {
     const { 
@@ -15,10 +16,29 @@ const AdminOrderListPage: React.FC = () => {
         availableStatuses,
         statusCount,
         setStatusFilter,
-        clearStatusFilter
+        clearStatusFilter,
+        handlePageChange,
+        handlePrePage,
+        handleNextPage,
+        // Assuming these exist in your useCheckout hook for pagination
+        currentPage,
+        totalPages,
+        totalItems,
+        itemsPerPage
     } = useCheckout();
     
     const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+
+    // If pagination data isn't available from the hook, calculate it locally
+    const ITEMS_PER_PAGE = itemsPerPage ||5;
+    const calculatedCurrentPage = currentPage || 1;
+    const calculatedTotalPages = totalPages || Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
+    const calculatedTotalItems = totalItems || filteredOrders.length;
+
+    // Calculate paginated orders for display
+    const startIndex = (calculatedCurrentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('vi-VN', {
@@ -113,7 +133,7 @@ const AdminOrderListPage: React.FC = () => {
                         Tất cả
                         {(!filterStatus || filterStatus === 'all') && (
                             <span className="ml-2 px-2 py-0.5 bg-blue-200 text-blue-800 text-xs rounded-full">
-                                {filteredOrders.length}
+                                {calculatedTotalItems}
                             </span>
                         )}
                     </button>
@@ -161,6 +181,33 @@ const AdminOrderListPage: React.FC = () => {
         );
     };
 
+    // Pagination handlers
+    const handlePaginationChange = (page: number) => {
+        if (handlePageChange) {
+            handlePageChange(page);
+        }
+        // Scroll to top when page changes
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handlePrevPage = () => {
+        if (handlePrePage) {
+            handlePrePage();
+        } else if (calculatedCurrentPage > 1) {
+            handlePaginationChange(calculatedCurrentPage - 1);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleNext = () => {
+        if (handleNextPage) {
+            handleNextPage();
+        } else if (calculatedCurrentPage < calculatedTotalPages) {
+            handlePaginationChange(calculatedCurrentPage + 1);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     useEffect(() => {
         loadOrders();
     }, []);
@@ -201,18 +248,6 @@ const AdminOrderListPage: React.FC = () => {
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-800">Quản lý Đơn hàng</h1>
-                    <div className="mt-2 text-gray-600">
-                        {filterStatus && filterStatus !== 'all' ? (
-                            <p>
-                                Hiển thị {filteredOrders.length} đơn hàng {getStatusDisplay(filterStatus).label.toLowerCase()} 
-                                <span className="ml-1 text-gray-400">
-                                    (Tổng: {statusCount[filterStatus] || 0})
-                                </span>
-                            </p>
-                        ) : (
-                            <p>Tổng số đơn hàng: {filteredOrders.length}</p>
-                        )}
-                    </div>
                 </div>
                 <button 
                     onClick={loadOrders}
@@ -266,13 +301,13 @@ const AdminOrderListPage: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredOrders.map((order, index) => (
+                            {paginatedOrders.map((order, index) => (
                                 <tr key={order._id || index} className="border-b border-gray-200 hover:bg-gray-50 last:border-b-0">
                                     <td className="px-4 py-3">
                                         <div className="flex items-center">
                                             <Package className="w-4 h-4 mr-2 text-blue-500" />
                                             <span className="text-sm font-medium text-gray-900">
-                                                #{order._id?.substring(0, 8) || `ORD-${index + 1}`}
+                                                #{order._id?.substring(0, 8) || `ORD-${startIndex + index + 1}`}
                                             </span>
                                         </div>
                                     </td>
@@ -323,6 +358,20 @@ const AdminOrderListPage: React.FC = () => {
                 </div>
             )}
 
+            {/* Pagination Component - Only show if there are orders and multiple pages */}
+            {filteredOrders.length > 0 && calculatedTotalPages > 1 && (
+                <div className="mt-6">
+                    <Pagination
+                        currentPage={calculatedCurrentPage}
+                        totalPages={calculatedTotalPages}
+                        totalItems={calculatedTotalItems}
+                        onPageChange={handlePaginationChange}
+                        onPrevPage={handlePrevPage}
+                        onNextPage={handleNext}
+                    />
+                </div>
+            )}
+
             {/* Summary Statistics */}
             {filteredOrders.length > 0 && (
                 <div className="grid grid-cols-1 gap-6 mt-8 md:grid-cols-4">
@@ -333,7 +382,7 @@ const AdminOrderListPage: React.FC = () => {
                                 <p className="text-sm font-medium text-blue-600">
                                     {filterStatus && filterStatus !== 'all' ? 'Đơn hàng hiển thị' : 'Tổng đơn hàng'}
                                 </p>
-                                <p className="text-2xl font-bold text-blue-900">{filteredOrders.length}</p>
+                                <p className="text-2xl font-bold text-blue-900">{calculatedTotalItems}</p>
                             </div>
                         </div>
                     </div>

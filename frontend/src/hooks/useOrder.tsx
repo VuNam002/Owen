@@ -39,6 +39,8 @@ const useCheckout = () => {
     const [error, setError] = useState<string | null>(null);
     const [filterStatus, setFilterStatus] = useState<string>("");
     const [orders, setOrders] = useState<Order[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
 
     const BASE_URL = 'http://localhost:3000/api/v1/checkout';
 
@@ -228,6 +230,26 @@ const useCheckout = () => {
         setError(null);
     }, []);
 
+    const totalItems = filteredOrders.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
+    const handlePrePage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+
     return {
         loading,
         error,
@@ -236,7 +258,13 @@ const useCheckout = () => {
         filterStatus,
         availableStatuses,
         statusCount,
-        
+        currentPage,
+        totalPages,
+        totalItems,
+        itemsPerPage,
+        handlePageChange,
+        handlePrePage,
+        handleNextPage,
         createOrder,
         getOrderById,
         getAllOrders,
