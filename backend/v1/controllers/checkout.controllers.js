@@ -5,64 +5,64 @@ const handleError = require("../../helpers/handleError");
 const Order = require("../models/order.model");
 
 // GET /api/v1/checkout - Lấy thông tin giỏ hàng
-module.exports.index = async (req, res) => {
-    try {
-        const cartId = req.cookies.cartId; // Fixed: req.cookies thay vì req.cookie
+// module.exports.index = async (req, res) => {
+//     try {
+//         const cartId = req.cookies.cartId; // Fixed: req.cookies thay vì req.cookie
         
-        if (!cartId) {
-            return res.json({
-                code: 400,
-                message: "Không tìm thấy giỏ hàng",
-                data: {
-                    products: [],
-                    totalPrice: 0,
-                }
-            });
-        }
+//         if (!cartId) {
+//             return res.json({
+//                 code: 400,
+//                 message: "Không tìm thấy giỏ hàng",
+//                 data: {
+//                     products: [],
+//                     totalPrice: 0,
+//                 }
+//             });
+//         }
 
-        const cart = await Cart.findOne({
-            _id: cartId,
-        });
+//         const cart = await Cart.findOne({
+//             _id: cartId,
+//         });
 
-        if (!cart || cart.products.length === 0) {
-            return res.json({
-                code: 200,
-                message: "Giỏ hàng trống",
-                data: {
-                    products: [],
-                    totalPrice: 0,
-                }
-            });
-        }
+//         if (!cart || cart.products.length === 0) {
+//             return res.json({
+//                 code: 200,
+//                 message: "Giỏ hàng trống",
+//                 data: {
+//                     products: [],
+//                     totalPrice: 0,
+//                 }
+//             });
+//         }
 
-        // Populate thông tin sản phẩm
-        for (const item of cart.products) {
-            const productInfo = await Product.findOne({
-                _id: item.product_id,
-                deleted: false,
-                status: "active",
-            });
+//         // Populate thông tin sản phẩm
+//         for (const item of cart.products) {
+//             const productInfo = await Product.findOne({
+//                 _id: item.product_id,
+//                 deleted: false,
+//                 status: "active",
+//             });
             
-            if (productInfo) {
-                productInfo.priceNew = productHelper.calcNewPrice([productInfo])[0].priceNew;
-                item.productInfo = productInfo;
-                item.totalPrice = item.quantity * item.productInfo.priceNew;
-            }
-        }
+//             if (productInfo) {
+//                 productInfo.priceNew = productHelper.calcNewPrice([productInfo])[0].priceNew;
+//                 item.productInfo = productInfo;
+//                 item.totalPrice = item.quantity * item.productInfo.priceNew;
+//             }
+//         }
 
-        // Filter ra các sản phẩm không hợp lệ
-        cart.products = cart.products.filter(item => item.productInfo);
-        cart.totalPrice = cart.products.reduce((sum, item) => sum + item.totalPrice, 0);
+//         // Filter ra các sản phẩm không hợp lệ
+//         cart.products = cart.products.filter(item => item.productInfo);
+//         cart.totalPrice = cart.products.reduce((sum, item) => sum + item.totalPrice, 0);
 
-        res.json({
-            code: 200,
-            message: "Lấy danh sách sản phẩm thành công",
-            data: cart,
-        });
-    } catch (error) {
-        handleError(res, error, "Lỗi khi lấy danh sách sản phẩm");
-    }
-};
+//         res.json({
+//             code: 200,
+//             message: "Lấy danh sách sản phẩm thành công",
+//             data: cart,
+//         });
+//     } catch (error) {
+//         handleError(res, error, "Lỗi khi lấy danh sách sản phẩm");
+//     }
+// };
 
 // POST /api/v1/checkout/order - Tạo đơn hàng
 module.exports.order = async (req, res) => {
@@ -118,10 +118,11 @@ module.exports.order = async (req, res) => {
             products.push(objectProduct);
         }
 
-        const objectOrder = {
+                const objectOrder = {
             cart_id: cartId,
             userInfo: userInfo,
             products: products,
+            status: "pending",
         };
 
         const order = new Order(objectOrder);
@@ -195,5 +196,49 @@ module.exports.success = async (req, res) => {
         });
     } catch (error) {
         handleError(res, error, "Lỗi khi lấy thông tin đơn hàng");
+    }
+};
+
+// GET /api/v1/checkout/orders - Lấy danh sách tất cả đơn hàng
+module.exports.index = async (req, res) => {
+    try {
+        const orders = await Order.find({}).lean();
+
+        if (!orders || orders.length === 0) {
+            return res.json({
+                code: 200,
+                message: "Không có đơn hàng nào",
+                data: []
+            });
+        }
+
+        // Populate thông tin sản phẩm cho từng đơn hàng
+        for (const order of orders) {
+            if (Array.isArray(order.products)) {
+                for (const product of order.products) {
+                    const productInfo = await Product.findOne({
+                        _id: product.product_id,
+                    }).select("title thumbnail");
+
+                    if (productInfo) {
+                        product.productInfo = productInfo;
+                        product.priceNew = (product.price * (100 - product.discountPercentage)) / 100;
+                        product.totalPrice = product.priceNew * product.quantity;
+                    }
+                }
+
+                // Tính tổng tiền đơn hàng
+                order.totalPrice = order.products.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+            }
+        }
+
+        res.json({
+            code: 200,
+            message: "Lấy danh sách đơn hàng thành công",
+            data: orders,
+        });
+
+    } catch (error) {
+        handleError(res, error, "Lỗi khi lấy danh sách đơn hàng");
     }
 };
