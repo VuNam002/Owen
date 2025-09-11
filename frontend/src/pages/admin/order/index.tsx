@@ -334,7 +334,7 @@ const AdminOrderListPage: React.FC = () => {
                                     <td className="px-4 py-3 text-center">
                                         <Link 
                                             to= {`/admin/orders/detail/${order._id}`}
-                                            className="inline-flex items-center px-3 py-1 text-sm font-medium text-blue-600 border border-transparent rounded-md hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                            className="inline-flex items-center px-3 py-1 text-sm font-medium text-blue-600 border border-transparent rounded-md focus:outline-none focus:ring-offset-2 "
                                         >
                                             <Eye className="w-4 h-4 mr-1" />
                                             Xem chi tiết

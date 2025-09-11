@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Editor } from "@tinymce/tinymce-react";
+import { toast } from "react-toastify";
 
 interface Category { _id: number; title: string; }
 interface Product {
@@ -97,7 +98,7 @@ function EditProduct(): JSX.Element {
         method: id ? "PATCH" : "POST",
         body: JSON.stringify(product)
       });
-      alert(id ? "Cập nhật thành công!" : "Tạo sản phẩm thành công!");
+      toast.success(id ? "Cập nhật thành công!" : "Tạo sản phẩm thành công!");
       navigate("/admin/products");
     } catch (error) {
       setError(id ? "Không thể cập nhật sản phẩm" : "Không thể tạo sản phẩm");

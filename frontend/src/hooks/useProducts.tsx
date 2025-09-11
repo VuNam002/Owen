@@ -1,6 +1,7 @@
 // hooks/useProducts.ts
 import { useState, useEffect, useMemo, useCallback } from "react";
 
+type Featured = 0 | 1;
 interface Product {
   _id: string;
   position: number;
@@ -13,6 +14,7 @@ interface Product {
     _id: string;
     title: string;
     position: number;
+    featured: Featured;
   }
   createdBy: {
     account_id: string;

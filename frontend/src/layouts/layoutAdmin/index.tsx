@@ -13,11 +13,10 @@ import { useAuth } from "../../context/AuthContext";
 
 function LayoutAdmin() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { user, logout, hasPermission } = useAuth(); // Use the useAuth hook
-  console.log("LayoutAdmin user:", user); // Add this line
+  const { user, logout, hasPermission } = useAuth(); 
 
   const handleLogout = () => {
-    logout(); // Use the logout function from context
+    logout();
     window.location.href = "/admin/login";
   };
 
