@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 type Featured = "0" | "1";
 
-interface Product {
+export interface Product {
   _id: string;
   title: string;
   thumbnail: string;
@@ -27,10 +27,10 @@ interface Category {
   deleted: boolean;
   parent_id: string;
   position?: number;
-  products?: Product[]; 
+  products?: Product[];
 }
 
-interface Article {
+export interface Article {
   _id: string;
   title: string;
   description?: string;
@@ -63,11 +63,11 @@ const apiRequest = async (
     headers: { "Content-type": "application/json" },
     ...options,
   });
-  
+
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
-  
+
   return response.json();
 };
 
@@ -78,8 +78,17 @@ export const HooksHome = () => {
   const [articlesFeatured, setArticlesFeatured] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<string[]>([]);
 
   const loadingRef = useRef(false);
+
+  const toggleFavorite = (productId: string) => {
+    setFavorites((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
+  };
 
   const fetchHome = useCallback(async () => {
     if (loadingRef.current) return;
@@ -90,7 +99,7 @@ export const HooksHome = () => {
 
     try {
       const result = await apiRequest(API_BASE);
-      
+
       if (result.success) {
         setProductsFeatured(result.data.productsFeatured || []);
         setProductsNew(result.data.productsNew || []);
@@ -99,9 +108,9 @@ export const HooksHome = () => {
       } else {
         throw new Error("API trả về không thành công");
       }
-
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Có lỗi xảy ra khi tải dữ liệu";
+      const errorMessage =
+        err instanceof Error ? err.message : "Có lỗi xảy ra khi tải dữ liệu";
       setError(errorMessage);
       console.error("Lỗi khi tải dữ liệu home:", err);
     } finally {
@@ -116,41 +125,59 @@ export const HooksHome = () => {
   }, [fetchHome]);
 
   // Utility functions
-  const getProductsByCategory = useCallback((categoryId: string) => {
-    const category = categories.find(cat => cat._id === categoryId);
-    return category?.products || [];
-  }, [categories]);
+  const getProductsByCategory = useCallback(
+    (categoryId: string) => {
+      const category = categories.find((cat) => cat._id === categoryId);
+      return category?.products || [];
+    },
+    [categories]
+  );
 
-  const getCategoryById = useCallback((categoryId: string) => {
-    return categories.find(category => category._id === categoryId);
-  }, [categories]);
+  const getCategoryById = useCallback(
+    (categoryId: string) => {
+      return categories.find((category) => category._id === categoryId);
+    },
+    [categories]
+  );
 
-  const getProductById = useCallback((productId: string) => {
-    const allProducts = [
-      ...productsFeatured,
-      ...productsNew,
-      ...categories.flatMap(cat => cat.products || [])
-    ];
-    return allProducts.find(product => product._id === productId);
-  }, [productsFeatured, productsNew, categories]);
+  const getProductById = useCallback(
+    (productId: string) => {
+      const allProducts = [
+        ...productsFeatured,
+        ...productsNew,
+        ...categories.flatMap((cat) => cat.products || []),
+      ];
+      return allProducts.find((product) => product._id === productId);
+    },
+    [productsFeatured, productsNew, categories]
+  );
 
-  const getArticleById = useCallback((articleId: string) => {
-    return articlesFeatured.find(article => article._id === articleId);
-  }, [articlesFeatured]);
+    const calculateSavings = (originalPrice: number, discountPercentage: number): number => {
+    if (!discountPercentage || discountPercentage <= 0) return 0;
+    return (originalPrice * discountPercentage) / 100;
+  };
+
+  const getArticleById = useCallback(
+    (articleId: string) => {
+      return articlesFeatured.find((article) => article._id === articleId);
+    },
+    [articlesFeatured]
+  );
 
   // Get all unique products (tránh trùng lặp)
   const getAllProducts = useCallback(() => {
     const allProducts = [
       ...productsFeatured,
       ...productsNew,
-      ...categories.flatMap(cat => cat.products || [])
+      ...categories.flatMap((cat) => cat.products || []),
     ];
-    
+
     // Loại bỏ sản phẩm trùng lặp dựa trên _id
-    const uniqueProducts = allProducts.filter((product, index, arr) => 
-      arr.findIndex(p => p._id === product._id) === index
+    const uniqueProducts = allProducts.filter(
+      (product, index, arr) =>
+        arr.findIndex((p) => p._id === product._id) === index
     );
-    
+
     return uniqueProducts;
   }, [productsFeatured, productsNew, categories]);
 
@@ -162,7 +189,7 @@ export const HooksHome = () => {
   return {
     // Main data từ API
     productsFeatured,
-    productsNew, 
+    productsNew,
     categories,
     articlesFeatured,
 
@@ -180,6 +207,12 @@ export const HooksHome = () => {
     getCategoryById,
     getArticleById,
     getAllProducts,
+    toggleFavorite,
+    calculateSavings,
+
+    // Favorites
+    favorites,
+
 
     // Statistics
     stats: {
@@ -188,8 +221,10 @@ export const HooksHome = () => {
       totalCategories: categories.length,
       totalFeaturedArticles: articlesFeatured.length,
       totalUniqueProducts: getAllProducts().length,
-      categoriesWithProducts: categories.filter(cat => cat.products && cat.products.length > 0).length,
-    }
+      categoriesWithProducts: categories.filter(
+        (cat) => cat.products && cat.products.length > 0
+      ).length,
+    },
   };
 };
 
