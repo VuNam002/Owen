@@ -10,7 +10,7 @@ const getSubCategory = async (parentId) => {
   let allSub = [...subs];
 
   for (const sub of subs) {
-    const childs = await getSubCategory(sub.id);
+    const childs = await getSubCategory(sub._id);
     allSub = allSub.concat(childs);
   }
 

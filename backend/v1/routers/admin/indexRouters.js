@@ -8,6 +8,7 @@ const myAccountRoutes = require("../admin/my-accountRoute");
 const authRoutes = require("../admin/authRoute");
 const cartRoutes = require("../admin/cartRoute");
 const checkoutRoutes = require("../admin/checkoutRoute");
+const homeRoutes = require("../admin/homeRoute");
 
 module.exports = (app) => {
     //admin
@@ -22,4 +23,5 @@ module.exports = (app) => {
     app.use(version + "/auth", authRoutes);
     app.use(version + "/carts", cartRoutes);
     app.use(version + "/checkout", checkoutRoutes);
+    app.use(version + "/home", homeRoutes);
 };
