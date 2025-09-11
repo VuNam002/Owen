@@ -15,7 +15,7 @@ module.exports.index = async (req, res) => {
     const productsNew = await Product.find({
         status: "active",
         deleted: false,
-    }).sort({ createdAt: "desc" }).limit(8);
+    }).sort({ position: "desc" }).limit(8);
     const newProductsNew = productHelper.calcNewPrice(productsNew);
 
     const categories = await ProductCategory.find({
