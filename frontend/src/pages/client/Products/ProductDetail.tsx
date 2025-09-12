@@ -1,6 +1,7 @@
 import { Heart,ShoppingCart,Minus,Plus,Truck,RotateCcw,Shield,MessageCircle,Send,User,} from "lucide-react";
 import { useProductDetail } from "../../../hooks/useDetail";
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 function ProductDetail() {
   const {product,loading, error,selectedSize, selectedColor,  quantity,  selectedImage,  isWishlisted,  comments,  commentForm,  isSubmittingComment,
@@ -8,6 +9,10 @@ function ProductDetail() {
   calculateSavings,  getDiscountPercent,  handleQuantityChange,  handleAddToCart,  handleWishlistToggle,  handleCommentSubmit,  handleCommentFormChange,
   toggleCommentForm,setSelectedSize,setSelectedColor,setSelectedImage} = useProductDetail();
   const navigate = useNavigate()
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Loading state
   if (loading) {

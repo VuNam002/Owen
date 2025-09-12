@@ -63,6 +63,10 @@ function Products() {
     );
   };
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [selectedCategory]);
+
   // Fetch categories
   useEffect(() => {
     setLoadingCategories(true);
@@ -300,7 +304,7 @@ function Products() {
                 </div>
 
                 {products.length === 0 && (
-                  <div className="py-20 text-center">
+                  <div className="py-20 text-center flex flex-col items-center">
                     <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full">
                       <FiGrid className="w-6 h-6 text-gray-400" />
                     </div>

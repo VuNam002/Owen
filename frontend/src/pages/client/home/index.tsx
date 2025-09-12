@@ -95,7 +95,7 @@ const HomePage = () => {
           <img
             src={product.thumbnail}
             alt={product.title}
-            className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+            className="object-cover w-full h-full transition-transform duration-300 "
             loading="lazy"
           />
           {hasDiscount(product) && (
@@ -158,7 +158,7 @@ const HomePage = () => {
   // Article Card Component
   const ArticleCard = ({ article }: { article: Article }) => (
     <Link to={`/articles/${article._id}`}>
-      <div className="overflow-hidden transition-shadow duration-300 bg-white rounded-lg shadow-md hover:shadow-lg">
+      <div className="overflow-hidden transition-shadow duration-300 bg-white rounded-lg shadow-md ">
         <div className="bg-gray-200 aspect-w-16 aspect-h-9">
           <img
             src={article.thumbnail || "/placeholder-article.jpg"}
