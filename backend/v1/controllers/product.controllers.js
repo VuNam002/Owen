@@ -24,10 +24,15 @@ module.exports.index = async (req, res) => {
 
     const filter = await buildSearchFilter(objectSearch, Category);
 
+    // Lọc theo danh mục
+    if (req.query.category) {
+      filter.product_category_id = req.query.category;
+    }
+
+    // Lọc theo brand
     if (req.query.brand) {
       filter.brand = new RegExp(req.query.brand, "i");
     }
-
 
     const sort = buildSortObject(req);
     const countRecords = await Product.countDocuments(filter);
