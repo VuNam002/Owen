@@ -77,7 +77,7 @@ module.exports.index = async (req, res) => {
       featured: "1",
       deleted: false,
       status: "active",
-    }).limit(6);
+    }).limit(4);
     const newProductsFeatured = productHelper.calcNewPrice(productsFeatured);
 
     const productsNew = await Product.find({
@@ -85,7 +85,7 @@ module.exports.index = async (req, res) => {
       deleted: false,
     })
       .sort({ position: "desc" })
-      .limit(6);
+      .limit(4);
     const newProductsNew = productHelper.calcNewPrice(productsNew);
 
     const categories = await ProductCategory.find({
