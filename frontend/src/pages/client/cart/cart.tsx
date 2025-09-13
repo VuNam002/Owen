@@ -116,6 +116,10 @@ export default function ShoppingCart() {
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     fetchCartItems();
   }, []);
 
@@ -221,13 +225,13 @@ export default function ShoppingCart() {
             ) : (
               cartItems.map((item) => (
                 <Card key={item.product_id}>
-                  <CardContent className="p-4">
+                  <CardContent className="p-2">
                     <div className="flex items-center justify-between gap-4">
                       {/* Product Image */}
                       <img
                         src={item.productInfo?.thumbnail}
                         alt={item.productInfo?.title}
-                        className="flex-shrink-0 object-cover rounded-lg w-18 h-18"
+                        className="object-cover rounded-lg flex-shrink-1 w-18 h-18 "
                       />
 
                       {/* Product Info */}
@@ -235,9 +239,6 @@ export default function ShoppingCart() {
                         <h3 className="font-medium text-gray-900 line-clamp-1">
                           {item.productInfo?.title}
                         </h3>
-                        <p className="mt-1 text-xs text-gray-500 line-clamp-2">
-                          {item.productInfo?.description}
-                        </p>
                         <p className="mt-2 text-sm font-semibold text-[#333F48]">
                           {formatPrice(item.totalPrice)}
                         </p>

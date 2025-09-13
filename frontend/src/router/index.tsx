@@ -42,6 +42,10 @@ export const routes = [
                 element: <Products/>
             },
             {
+                path: 'category/:id',
+                element: <Products/>
+            },
+            {
                 path: 'search',
                 element: <SearchPage/>
             },

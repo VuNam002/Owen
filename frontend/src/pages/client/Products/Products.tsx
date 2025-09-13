@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useParams } from "react-router-dom";
 import { PaginationComponent } from "../../../helpers/pagination";
 import { MdAttachMoney, MdFavorite, MdFavoriteBorder } from "react-icons/md";
 import { FiGrid, FiFilter } from "react-icons/fi";
@@ -29,13 +29,14 @@ interface Category {
 
 function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { id: categoryIdFromParams } = useParams<{ id: string }>();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page") || "1"));
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [itemsPerPage] = useState(6);
-  const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get("category") || "");
+  const [selectedCategory, setSelectedCategory] = useState<string>(categoryIdFromParams || searchParams.get("category") || "");
   const [loading, setLoading] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [showFilter, setShowFilter] = useState(false);

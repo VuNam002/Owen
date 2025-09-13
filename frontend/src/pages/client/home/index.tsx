@@ -2,6 +2,8 @@ import { HooksHome } from "../../../hooks/useHome";
 import { MdFavorite, MdFavoriteBorder, MdAttachMoney } from "react-icons/md";
 import { Link } from "react-router-dom";
 import Slide from "../../../components/slide/index";
+import Postert from "../../../assets/poster_tre_con.webp"
+import Postert_giay from "../../../assets/poster_giay.webp"
 
 // Type definitions (sử dụng từ hook)
 interface Product {
@@ -215,12 +217,12 @@ const HomePage = () => {
                 <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">
                   SẢN PHẨM NỔI BẬT
                 </h2>
-                <Link
+                {/* <Link
                   to="/products?featured=1"
                   className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
                 >
                   Xem tất cả
-                </Link>
+                </Link> */}
               </div>
               <div className="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {productsFeatured.map((product) => (
@@ -237,12 +239,12 @@ const HomePage = () => {
                 <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">
                   SẢN PHẨM MỚI NHẤT
                 </h2>
-                <Link
+                {/* <Link
                   to="/products?sort=newest"
                   className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
                 >
                   Xem tất cả
-                </Link>
+                </Link> */}
               </div>
               <div className="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {productsNew.map((product) => (
@@ -272,7 +274,7 @@ const HomePage = () => {
                       )}
                     </div>
                     <Link
-                      to={`/products?category=${category._id}`}
+                      to={`/category/${category._id}`}
                       className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
                     >
                       Xem tất cả
@@ -293,6 +295,17 @@ const HomePage = () => {
               ))}
             </section>
           )}
+        <Link to="/category/68c4d82c588c67384bdbd53e">
+          <section className="mb-8 sm:mb-12">
+            <img src={Postert} alt="áo trẻ em" />
+          </section>
+        </Link>
+
+        <Link to="/category/68c4ec6e588c67384bdbd8a3">
+          <section className="mb-8 sm:mb-12">
+            <img src={Postert_giay} alt="giày dep" />
+          </section>
+        </Link>
 
           {/* Brands Section - SỬA ĐỔI CHÍNH */}
           {brandCounts.length > 0 && (

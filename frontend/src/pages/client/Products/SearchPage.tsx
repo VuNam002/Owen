@@ -163,13 +163,7 @@ function SearchResultsPage() {
                     <h3 className="mb-2 text-lg font-semibold text-gray-800 line-clamp-2">
                       {product.title}
                     </h3>
-
-                    {product.description && (
-                      <p className="mb-3 text-sm text-gray-600 line-clamp-2">
-                        {product.description}
-                      </p>
-                    )}
-                    
+                  
                     <div className="flex items-end justify-between mt-4">
                       <div className="flex flex-col">
                         {product.discountPercentage > 0 ? (
@@ -188,11 +182,6 @@ function SearchResultsPage() {
                         )}
                       </div>
 
-                      {product.product_category_id && (
-                        <span className="px-2 py-1 text-xs text-gray-500 bg-gray-100 rounded">
-                          {product.product_category_id.title}
-                        </span>
-                      )}
                     </div>
                   </div>
                 </div>
