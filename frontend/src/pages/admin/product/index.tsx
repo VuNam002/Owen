@@ -4,8 +4,10 @@ import { ProductFilters } from "../../../components/Products/ProductFilters ";
 import { ProductActions } from "../../../components/Products/ProductActions";
 import { Pagination } from "../../../components/Products/Pagination";
 import { ErrorAlert } from "../../../components/ErrorAlert/ErrorAlert";
+import { useAuth } from "../../../context/AuthContext";
 
 function Products() {
+  const { hasPermission } = useAuth();
   const {
     loading,
     error,
@@ -213,18 +215,22 @@ function Products() {
                     </td>
                     <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => window.location.href = `/admin/products/edit/${product._id}`}
-                          className="text-blue-600 transition-colors hover:text-blue-900"
-                        >
-                          Sửa
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(product._id)}
-                          className="text-red-600 transition-colors hover:text-red-900"
-                        >
-                          Xóa
-                        </button>
+                        {hasPermission('product_edit') && (
+                          <button
+                            onClick={() => window.location.href = `/admin/products/edit/${product._id}`}
+                            className="text-blue-600 transition-colors hover:text-blue-900"
+                          >
+                            Sửa
+                          </button>
+                        )}
+                        {hasPermission('product_delete') && (
+                          <button
+                            onClick={() => handleDeleteProduct(product._id)}
+                            className="text-red-600 transition-colors hover:text-red-900"
+                          >
+                            Xóa
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

@@ -1,7 +1,7 @@
 // components/ProductActions.tsx
 import type { FC } from 'react';
 import { Link } from 'react-router-dom';
-
+import { useAuth } from '../../context/AuthContext';
 
 interface ProductActionsProps {
   selectedProductsCount: number;
@@ -22,23 +22,29 @@ export const ProductActions: FC<ProductActionsProps> = ({
   endIndex,
   totalItems
 }) => {
+  const { hasPermission } = useAuth();
+
   return (
     <div className="flex items-center gap-3 px-6 py-4">
-      <Link
-        to="/admin/products/create"
-        className="px-4 py-2 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
-      >
-        Thêm sản phẩm
-      </Link>
+      {hasPermission('product_create') && (
+        <Link
+          to="/admin/products/create"
+          className="px-4 py-2 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
+        >
+          Thêm sản phẩm
+        </Link>
+      )}
 
       {selectedProductsCount > 0 && (
         <>
-          <button
-            onClick={onBulkDelete}
-            className="px-4 py-2 text-white transition-colors bg-red-600 rounded-md hover:bg-red-700"
-          >
-            Xóa đã chọn ({selectedProductsCount})
-          </button>
+          {hasPermission('product_delete') && (
+            <button
+              onClick={onBulkDelete}
+              className="px-4 py-2 text-white transition-colors bg-red-600 rounded-md hover:bg-red-700"
+            >
+              Xóa đã chọn ({selectedProductsCount})
+            </button>
+          )}
           <button
             onClick={onSavePosition}
             className="px-4 py-2 text-white transition-colors bg-green-600 rounded-md hover:bg-green-700"

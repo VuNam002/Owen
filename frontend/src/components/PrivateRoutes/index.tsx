@@ -19,7 +19,7 @@ function PrivateRoutes({ requiredPermission, children }: PrivateRoutesProps) {
 
     if (requiredPermission && !hasPermission(requiredPermission)) {
         console.log("PrivateRoutes: Redirecting to dashboard (no permission)");
-        return <Navigate to="/admin/dashboard" replace />;
+        return <Navigate to="*" replace />;
     }
     return children ? <>{children}</> : <Outlet />;
 }
