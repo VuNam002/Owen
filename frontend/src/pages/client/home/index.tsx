@@ -295,13 +295,13 @@ const HomePage = () => {
               ))}
             </section>
           )}
-        <Link to="/category/68c4d82c588c67384bdbd53e">
+        <Link to="/category/68c5caed30ea155ad538ee91">
           <section className="mb-8 sm:mb-12">
             <img src={Postert} alt="áo trẻ em" />
           </section>
         </Link>
 
-        <Link to="/category/68c4ec6e588c67384bdbd8a3">
+        <Link to="/category/68c5cd2030ea155ad538f02f">
           <section className="mb-8 sm:mb-12">
             <img src={Postert_giay} alt="giày dep" />
           </section>

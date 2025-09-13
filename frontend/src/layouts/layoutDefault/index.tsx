@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FiPhoneCall, FiMenu, FiX } from "react-icons/fi";
+import { FiPhoneCall, FiMenu, FiX, FiChevronDown } from "react-icons/fi";
 import { Link, Outlet } from "react-router-dom";
 import Logo from "../../assets/logo.svg";
 import Search from "../../helpers/search";
@@ -8,9 +8,20 @@ import { FaSquareInstagram } from "react-icons/fa6";
 import vertify from "../../assets/vertify.webp";
 import logo from "../../assets/logo.svg";
 
+interface Category {
+  _id: string;
+  title: string;
+  parent_id: string | null;
+  status: string;
+  children?: Category[];
+}
+
 function LayoutDefault() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<Category[]>([]); 
+  const [allCategories, setAllCategories] = useState<Category[]>([]); 
+  const [openCategory, setOpenCategory] = useState<string | null>(null); 
+  const [openMobileCategory, setOpenMobileCategory] = useState<string | null>(null); 
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -21,9 +32,8 @@ function LayoutDefault() {
         }
         const result = await response.json();
         if (result.success && Array.isArray(result.data)) {
-          // Filter for active, top-level categories only
-          const topLevelCategories = result.data.filter(cat => cat.status === 'active' && cat.title && !cat.parent_id);
-          setCategories(topLevelCategories);
+          console.log("API Result Data:", result.data); 
+          setAllCategories(result.data); 
         }
       } catch (error) {
         console.error("Failed to fetch categories:", error);
@@ -33,51 +43,124 @@ function LayoutDefault() {
     fetchCategories();
   }, []);
 
+  useEffect(() => {
+    if (allCategories.length > 0) {
+      const buildCategoryTree = (categories: Category[], currentParentId: string | null = null): Category[] => {
+        return categories
+          .filter(category => {
+            if (currentParentId === null) {
+              return category.status === 'active' && category.title && (category.parent_id === '' || category.parent_id === null);
+            } else {
+              const parentCategory = allCategories.find(p => p._id === currentParentId);
+              return category.status === 'active' && category.title && category.parent_id === parentCategory?.title;
+            }
+          })
+          .map(category => ({
+            ...category,
+            children: buildCategoryTree(categories, category._id)
+          }));
+      };
+
+      const nested = buildCategoryTree(allCategories, null); 
+      console.log("Nested Categories (after build):", nested); 
+      setCategories(nested); 
+    }
+  }, [allCategories]);
+
   return (
     <>
-      {/* Top Bar */}
-      <div className="hidden md:block text-[#323232] bg-white border-b border-gray-200 transition-all duration-300 ease-in-out">
+      {/* Header hỗ trợ khách hàng */}
+      <div className="hidden md:block text-[#323232] bg-gradient-to-r from-gray-50 to-white border-b border-gray-200 transition-all duration-300 ease-in-out">
         <div className="flex items-center justify-center px-4 py-3">
           <span className="flex items-center gap-2 text-sm transition-all duration-300 ease-in-out">
-            <FiPhoneCall className="w-5 h-5 transition-transform duration-300 ease-in-out hover:rotate-12" />
-            <span className="font-bold">Hỗ trợ khách hàng:</span>{" "}
-            <span className="text-[#DCB963] font-bold transition-colors duration-300 ease-in-out hover:text-[#B8A157]">
+            <FiPhoneCall className="w-5 h-5 text-[#DCB963] transition-transform duration-300 ease-in-out hover:rotate-12" />
+            <span className="font-semibold text-gray-700">Hỗ trợ khách hàng:</span>
+            <span className="text-[#DCB963] font-bold transition-colors duration-300 ease-in-out hover:text-[#B8A157] hover:underline cursor-pointer">
               0986067213
             </span>
           </span>
         </div>
       </div>
 
-      <header className="sticky top-0 z-50 transition-all duration-500 ease-in-out bg-white shadow">
+      <header className="sticky top-0 z-50 transition-all duration-500 ease-in-out bg-white border-b border-gray-100 shadow-lg">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-[72px]">
+          <div className="flex justify-between items-center h-[80px]">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-gray-600 lg:hidden hover:text-gray-900"
+              className="p-2 text-gray-600 transition-all duration-200 rounded-lg lg:hidden hover:text-gray-900 hover:bg-gray-100"
             >
               {mobileMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
             </button>
-
             <Link to="/" className="flex items-center gap-2 text-white transition-all duration-300 ease-in-out group">
-              <img src={Logo} alt="Logo" className="object-contain w-auto h-8 transition-all duration-300 ease-in-out group-hover:brightness-110" />
+              <img 
+                src={Logo} 
+                alt="Logo" 
+                className="object-contain w-auto h-10 transition-all duration-300 ease-in-out " 
+              />
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="items-center hidden space-x-2 lg:flex">
-              <div className="transition-all duration-300 ease-in-out"><Search /></div>
-              {/* Dynamic Categories for Desktop */}
+            <nav className="items-center hidden space-x-0 lg:flex">
+              <div className="transition-all duration-300 ease-in-out ">
+                <Search />
+              </div>
               {categories.map((category) => (
-                <Link
+                <div
                   key={category._id}
-                  to={`/category/${category._id}`}
-                  className="px-3 py-2.5 text-[16px] font-medium transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative overflow-hidden group"
+                  className="relative group"
+                  onMouseEnter={() => setOpenCategory(category._id)}
+                  onMouseLeave={() => setOpenCategory(null)}
                 >
-                  <span className="relative z-10">{category.title}</span>
-                </Link>
+                  {category.children && category.children.length > 0 ? (
+                    <div className="flex items-center gap-1 px-4 py-3 text-[15px] font-medium text-gray-700 transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg cursor-pointer relative group">
+                      <span className="relative z-10">{category.title}</span>
+                      <FiChevronDown className="w-4 h-4 transition-transform duration-300 " />
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#DCB963]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
+                    </div>
+                  ) : (
+                    <Link
+                      to={`/category/${category._id}`}
+                      className="flex items-center gap-1 px-4 py-3 text-[15px] font-medium text-gray-700 transition-all duration-300 ease-in-out hover:text-[#DCB963]  rounded-lg relative group"
+                    >
+                      <span className="relative z-10">{category.title}</span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#DCB963]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
+                    </Link>
+                  )}
+                  
+                  {/* Dropdown menu */}
+                  {category.children && category.children.length > 0 && openCategory === category._id && (
+                    <div className="absolute left-0 z-20 w-56 py-2 mt-1 transition-all duration-300 ease-in-out transform scale-100 bg-white border border-gray-100 shadow-xl opacity-100 rounded-xl">
+                      {/* Dropdown arrow */}
+                      <div className="absolute w-4 h-4 rotate-45 bg-white border-t border-l border-gray-100 -top-2 left-6"></div>
+                      
+                      {category.children.map((child, index) => (
+                        <Link
+                          key={child._id}
+                          to={`/category/${child._id}`}
+                          className={`block px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-[#DCB963]/10 hover:to-transparent hover:text-[#DCB963] transition-all duration-200 relative group ${
+                            index === 0 ? 'rounded-t-xl' : ''
+                          } ${
+                            index === category.children.length - 1 ? 'rounded-b-xl' : ''
+                          }`}
+                          onClick={() => setOpenCategory(null)}
+                        >
+                          <span className="flex items-center justify-between">
+                            {child.title}
+                            <span className="w-0 group-hover:w-2 h-0.5 bg-[#DCB963] transition-all duration-300 rounded-full"></span>
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
 
-              <Link to="/cart" className="px-3 py-2.5 text-[16px] font-medium transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative overflow-hidden group">
-                <FaCartPlus />
+              {/* Cart */}
+              <Link 
+                to="/cart" 
+                className="flex items-center justify-center w-12 h-12 text-gray-700 transition-all duration-300 ease-in-out hover:text-[#DCB963]  rounded-lg relative group ml-2"
+              >
+                <FaCartPlus className="w-5 h-5" />
+                <div className="absolute inset-0 transition-opacity duration-300 rounded-lg opacity-0 bg-gradient-to-r to-transparent group-hover:opacity-100"></div>
               </Link>
             </nav>
           </div>
@@ -85,36 +168,91 @@ function LayoutDefault() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden">
-            <div className="px-4 py-3 space-y-3 bg-white border-t border-gray-200">
-              <Link to="/" className="block px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg" onClick={() => setMobileMenuOpen(false)}>
-                Trang chủ
+          <div className="bg-white border-t border-gray-100 shadow-lg lg:hidden">
+            <div className="px-4 py-4 space-y-1 overflow-y-auto max-h-96">
+              {/* Home link */}
+              <Link 
+                to="/" 
+                className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg transition-all duration-200" 
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span>Trang chủ</span>
               </Link>
 
               {/* Dynamic Categories for Mobile */}
               {categories.map(category => (
-                <Link
-                  key={category._id}
-                  to={`/category/${category._id}`}
-                  className="block px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {category.title}
-                </Link>
+                <div key={category._id} className="border-b border-gray-50 last:border-b-0">
+                  <div
+                    className="flex justify-between items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg cursor-pointer transition-all duration-200"
+                    onClick={() => {
+                      if (category.children && category.children.length > 0) {
+                        setOpenMobileCategory(openMobileCategory === category._id ? null : category._id);
+                      } else {
+                        setMobileMenuOpen(false);
+                      }
+                    }}
+                  >
+                    {category.children && category.children.length > 0 ? (
+                      <span className="flex-1">{category.title}</span>
+                    ) : (
+                      <Link 
+                        to={`/category/${category._id}`} 
+                        onClick={() => setMobileMenuOpen(false)} 
+                        className="flex-1"
+                      >
+                        {category.title}
+                      </Link>
+                    )}
+                    {category.children && category.children.length > 0 && (
+                      <FiChevronDown className={`w-4 h-4 transition-transform duration-300 ${
+                        openMobileCategory === category._id ? 'rotate-180 text-[#DCB963]' : ''
+                      }`} />
+                    )}
+                  </div>
+                  
+                  {/* Subcategories */}
+                  {category.children && category.children.length > 0 && openMobileCategory === category._id && (
+                    <div className="pl-6 ml-4 border-l-2 border-[#DCB963]/20 bg-gray-50/50 rounded-r-lg">
+                      {category.children.map(child => (
+                        <Link
+                          key={child._id}
+                          to={`/category/${child._id}`}
+                          className="flex items-center px-4 py-3 text-sm text-gray-600 hover:text-[#DCB963] hover:bg-white rounded-lg transition-all duration-200 relative"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <span className="w-2 h-2 bg-[#DCB963]/30 rounded-full mr-3"></span>
+                          {child.title}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
 
-              <Link to="/cart" className="block px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg" onClick={() => setMobileMenuOpen(false)}>
-                <FaCartPlus />
+              {/* Cart for mobile */}
+              <Link 
+                to="/cart" 
+                className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg transition-all duration-200" 
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <FaCartPlus className="w-4 h-4 mr-2" />
+                <span>Giỏ hàng</span>
               </Link>
 
-              <div className="px-4 py-2"><Search /></div>
+              {/* Search for mobile */}
+              <div className="px-4 py-3 rounded-lg bg-gray-50">
+                <Search />
+              </div>
             </div>
           </div>
         )}
       </header>
 
-      <main className="transition-all duration-500 ease-in-out"><Outlet /></main>
+      <main className="transition-all duration-500 ease-in-out">
+        <Outlet />
+      </main>
 
+      {/* Footer giữ nguyên */}
       <footer className="px-6 py-12 transition-all duration-500 ease-in-out bg-gray-100">
         <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-4">

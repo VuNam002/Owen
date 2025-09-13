@@ -197,15 +197,6 @@ function Products() {
               )}
               
               <div className="p-4 space-y-1 md:p-0">
-                <button
-                  onClick={handleShowAll}
-                  className={`w-full text-left px-0 py-3 text-sm font-medium transition-colors ${
-                    !selectedCategory ? "text-gray-900 border-b border-gray-300" : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  Tất cả sản phẩm
-                </button>
-
                 {categories.map((category) => (
                   <button
                     key={category._id}
@@ -311,7 +302,7 @@ function Products() {
                 </div>
 
                 {products.length === 0 && (
-                  <div className="py-20 text-center flex flex-col items-center">
+                  <div className="flex flex-col items-center py-20 text-center">
                     <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full">
                       <FiGrid className="w-6 h-6 text-gray-400" />
                     </div>
