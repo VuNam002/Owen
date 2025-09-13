@@ -1,21 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiPhoneCall, FiMenu, FiX } from "react-icons/fi";
 import { Link, Outlet } from "react-router-dom";
 import Logo from "../../assets/logo.svg";
 import Search from "../../helpers/search";
-import { FaFacebook } from "react-icons/fa";
+import { FaFacebook, FaYoutube, FaCartPlus } from "react-icons/fa";
 import { FaSquareInstagram } from "react-icons/fa6";
-import { FaYoutube } from "react-icons/fa";
-import { FaCartPlus } from "react-icons/fa";
 import vertify from "../../assets/vertify.webp";
 import logo from "../../assets/logo.svg";
 
 function LayoutDefault() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/v1/categorys');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const result = await response.json();
+        if (result.success && Array.isArray(result.data)) {
+          // Filter for active, top-level categories only
+          const topLevelCategories = result.data.filter(cat => cat.status === 'active' && cat.title && !cat.parent_id);
+          setCategories(topLevelCategories);
+        }
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   return (
     <>
-      {/* Top Bar - Hidden on mobile */}
+      {/* Top Bar */}
       <div className="hidden md:block text-[#323232] bg-white border-b border-gray-200 transition-all duration-300 ease-in-out">
         <div className="flex items-center justify-center px-4 py-3">
           <span className="flex items-center gap-2 text-sm transition-all duration-300 ease-in-out">
@@ -31,51 +51,32 @@ function LayoutDefault() {
       <header className="sticky top-0 z-50 transition-all duration-500 ease-in-out bg-white shadow">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[72px]">
-            {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-gray-600 lg:hidden hover:text-gray-900"
             >
-              {mobileMenuOpen ? (
-                <FiX className="w-6 h-6" />
-              ) : (
-                <FiMenu className="w-6 h-6" />
-              )}
+              {mobileMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
             </button>
 
-            {/* Logo */}
-            <Link
-              to="/"
-              className="flex items-center gap-2 text-white transition-all duration-300 ease-in-out group"
-            >
-              <img
-                src={Logo}
-                alt="Logo"
-                className="object-contain w-auto h-8 transition-all duration-300 ease-in-out group-hover:brightness-110"
-              />
+            <Link to="/" className="flex items-center gap-2 text-white transition-all duration-300 ease-in-out group">
+              <img src={Logo} alt="Logo" className="object-contain w-auto h-8 transition-all duration-300 ease-in-out group-hover:brightness-110" />
             </Link>
 
             {/* Desktop Navigation */}
             <nav className="items-center hidden space-x-2 lg:flex">
-              <div className="transition-all duration-300 ease-in-out">
-                <Search />
-              </div>
-              <Link
-                to="/"
-                className="px-3 py-2.5 text-[16px] font-medium transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative overflow-hidden group"
-              >
-                <span className="relative z-10">Trang chủ</span>
-              </Link>
-              <Link
-                to="/products"
-                className="px-3 py-2.5 text-[16px] font-medium transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative overflow-hidden group"
-              >
-                <span className="relative z-10">Sản phẩm</span>
-              </Link>
-              <Link
-                to="/cart"
-                className="px-3 py-2.5 text-[16px] font-medium transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative overflow-hidden group"
-              >
+              <div className="transition-all duration-300 ease-in-out"><Search /></div>
+              {/* Dynamic Categories for Desktop */}
+              {categories.map((category) => (
+                <Link
+                  key={category._id}
+                  to={`/category/${category._id}`}
+                  className="px-3 py-2.5 text-[16px] font-medium transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative overflow-hidden group"
+                >
+                  <span className="relative z-10">{category.title}</span>
+                </Link>
+              ))}
+
+              <Link to="/cart" className="px-3 py-2.5 text-[16px] font-medium transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative overflow-hidden group">
                 <FaCartPlus />
               </Link>
             </nav>
@@ -86,242 +87,91 @@ function LayoutDefault() {
         {mobileMenuOpen && (
           <div className="lg:hidden">
             <div className="px-4 py-3 space-y-3 bg-white border-t border-gray-200">
-              <Link
-                to="/"
-                className="block px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg"
-                onClick={() => setMobileMenuOpen(false)}
-              >
+              <Link to="/" className="block px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg" onClick={() => setMobileMenuOpen(false)}>
                 Trang chủ
               </Link>
-              <Link
-                to="/products"
-                className="block px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Sản phẩm
-              </Link>
 
-              <Link
-                to="/cart"
-                className="block px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg"
-                onClick={() => setMobileMenuOpen(false)}
-              >
+              {/* Dynamic Categories for Mobile */}
+              {categories.map(category => (
+                <Link
+                  key={category._id}
+                  to={`/category/${category._id}`}
+                  className="block px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {category.title}
+                </Link>
+              ))}
+
+              <Link to="/cart" className="block px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg" onClick={() => setMobileMenuOpen(false)}>
                 <FaCartPlus />
               </Link>
 
-              {/* Mobile Search */}
-              <div className="px-4 py-2">
-                <Search />
-              </div>
+              <div className="px-4 py-2"><Search /></div>
             </div>
           </div>
         )}
       </header>
 
-      <main className="transition-all duration-500 ease-in-out">
-        <Outlet />
-      </main>
+      <main className="transition-all duration-500 ease-in-out"><Outlet /></main>
 
       <footer className="px-6 py-12 transition-all duration-500 ease-in-out bg-gray-100">
         <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
             <div className="transition-all duration-300 ease-in-out md:col-span-1 hover:transform">
-              <div className="flex items-center mb-4 group">
-                <img src={logo} alt="" />
-              </div>
+              <div className="flex items-center mb-4 group"><img src={logo} alt="" /></div>
               <div className="space-y-2 text-sm text-gray-600">
-                <p className="font-semibold transition-colors duration-300 ease-in-out hover:text-gray-800">
-                  CÔNG TY CỔ PHẦN THỜI TRANG KOWIL VIỆT NAM
-                </p>
-                <p className="transition-colors duration-300 ease-in-out hover:text-[#DCB963]">
-                  Hotline: 1900 8079
-                </p>
-                <p className="transition-colors duration-300 ease-in-out hover:text-gray-800">
-                  8:30 - 19:00 tất cả các ngày trong tuần.
-                </p>
-
+                <p className="font-semibold transition-colors duration-300 ease-in-out hover:text-gray-800">CÔNG TY CỔ PHẦN THỜI TRANG KOWIL VIỆT NAM</p>
+                <p className="transition-colors duration-300 ease-in-out hover:text-[#DCB963]">Hotline: 1900 8079</p>
+                <p className="transition-colors duration-300 ease-in-out hover:text-gray-800">8:30 - 19:00 tất cả các ngày trong tuần.</p>
                 <div className="mt-4 space-y-2">
-                  <p className="transition-colors duration-300 ease-in-out hover:text-gray-800">
-                    <strong>VP Phía Bắc:</strong> Tầng 17 tòa nhà Viwaseen, 48
-                    Phố Tô Hiệu, Trung Văn, Nam Từ Liêm, Hà Nội.
-                  </p>
-                  <p className="transition-colors duration-300 ease-in-out hover:text-gray-800">
-                    <strong>VP Phía Nam:</strong> 186A Nam Kỳ Khởi Nghĩa, Phường
-                    Võ Thị Sáu, Quận 3, TP.HCM
-                  </p>
+                  <p className="transition-colors duration-300 ease-in-out hover:text-gray-800"><strong>VP Phía Bắc:</strong> Tầng 17 tòa nhà Viwaseen, 48 Phố Tô Hiệu, Trung Văn, Nam Từ Liêm, Hà Nội.</p>
+                  <p className="transition-colors duration-300 ease-in-out hover:text-gray-800"><strong>VP Phía Nam:</strong> 186A Nam Kỳ Khởi Nghĩa, Phường Võ Thị Sáu, Quận 3, TP.HCM</p>
                 </div>
               </div>
             </div>
-
             <div className="transition-all duration-300 ease-in-out hover:transform">
-              <h3 className="mb-4 font-semibold text-gray-900 transition-colors duration-300 ease-in-out hover:text-[#DCB963]">
-                GIỚI THIỆU OWEN
-              </h3>
+              <h3 className="mb-4 font-semibold text-gray-900 transition-colors duration-300 ease-in-out hover:text-[#DCB963]">GIỚI THIỆU OWEN</h3>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li>
-                  <a
-                    href="#"
-                    className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block"
-                  >
-                    Giới thiệu
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block"
-                  >
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block"
-                  >
-                    Hệ thống cửa hàng
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block"
-                  >
-                    Liên hệ với Owen
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block"
-                  >
-                    Chính sách bảo mật
-                  </a>
-                </li>
+                <li><a href="#" className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block">Giới thiệu</a></li>
+                <li><a href="#" className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block">Blog</a></li>
+                <li><a href="#" className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block">Hệ thống cửa hàng</a></li>
+                <li><a href="#" className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block">Liên hệ với Owen</a></li>
+                <li><a href="#" className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block">Chính sách bảo mật</a></li>
               </ul>
             </div>
-
             <div className="transition-all duration-300 ease-in-out hover:transform">
-              <h3 className="mb-4 font-semibold text-gray-900 transition-colors duration-300 ease-in-out hover:text-[#DCB963]">
-                HỖ TRỢ KHÁCH HÀNG
-              </h3>
+              <h3 className="mb-4 font-semibold text-gray-900 transition-colors duration-300 ease-in-out hover:text-[#DCB963]">HỖ TRỢ KHÁCH HÀNG</h3>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li>
-                  <a
-                    href="#"
-                    className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block"
-                  >
-                    Hỏi đáp
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block"
-                  >
-                    Chính sách khách hàng thân thiết
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block"
-                  >
-                    Chính sách vận chuyển
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block"
-                  >
-                    Hướng dẫn chọn kích cỡ
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block"
-                  >
-                    Hướng dẫn thanh toán
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block"
-                  >
-                    Quy định mua hàng
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block"
-                  >
-                    Hướng dẫn mua hàng
-                  </a>
-                </li>
+                <li><a href="#" className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block">Hỏi đáp</a></li>
+                <li><a href="#" className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block">Chính sách khách hàng thân thiết</a></li>
+                <li><a href="#" className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block">Chính sách vận chuyển</a></li>
+                <li><a href="#" className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block">Hướng dẫn chọn kích cỡ</a></li>
+                <li><a href="#" className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block">Hướng dẫn thanh toán</a></li>
+                <li><a href="#" className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block">Quy định mua hàng</a></li>
+                <li><a href="#" className="transition-all duration-300 ease-in-out hover:text-[#DCB963] hover:translate-x-2 hover:font-medium inline-block">Hướng dẫn mua hàng</a></li>
               </ul>
             </div>
-
-            {/* Connect & Payment */}
             <div className="transition-all duration-300 ease-in-out hover:transform">
-              <h3 className="mb-4 font-semibold text-gray-900 transition-colors duration-300 ease-in-out hover:text-[#DCB963]">
-                KẾT NỐI
-              </h3>
+              <h3 className="mb-4 font-semibold text-gray-900 transition-colors duration-300 ease-in-out hover:text-[#DCB963]">KẾT NỐI</h3>
               <div className="flex mb-6 space-x-3">
-                <a
-                  href="#"
-                  className="flex items-center justify-center w-8 h-8 transition-all duration-300 ease-in-out bg-gray-800 rounded hover:bg-[#1877f2] hover:scale-110 hover:rotate-12 transform"
-                >
-                  <FaFacebook className="w-4 h-4 text-white transition-all duration-300 ease-in-out" />
-                </a>
-                <a
-                  href="#"
-                  className="flex items-center justify-center w-8 h-8 transition-all duration-300 ease-in-out transform bg-gray-800 rounded hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 hover:scale-110 hover:rotate-12"
-                >
-                  <FaSquareInstagram className="w-4 h-4 text-white transition-all duration-300 ease-in-out" />
-                </a>
-                <a
-                  href="#"
-                  className="flex items-center justify-center w-8 h-8 transition-all duration-300 ease-in-out transform bg-gray-800 rounded hover:bg-red-600 hover:scale-110 hover:rotate-12"
-                >
-                  <FaYoutube className="w-4 h-4 text-white transition-all duration-300 ease-in-out" />
-                </a>
+                <a href="#" className="flex items-center justify-center w-8 h-8 transition-all duration-300 ease-in-out bg-gray-800 rounded hover:bg-[#1877f2] hover:scale-110 hover:rotate-12 transform"><FaFacebook className="w-4 h-4 text-white transition-all duration-300 ease-in-out" /></a>
+                <a href="#" className="flex items-center justify-center w-8 h-8 transition-all duration-300 ease-in-out transform bg-gray-800 rounded hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 hover:scale-110 hover:rotate-12"><FaSquareInstagram className="w-4 h-4 text-white transition-all duration-300 ease-in-out" /></a>
+                <a href="#" className="flex items-center justify-center w-8 h-8 transition-all duration-300 ease-in-out transform bg-gray-800 rounded hover:bg-red-600 hover:scale-110 hover:rotate-12"><FaYoutube className="w-4 h-4 text-white transition-all duration-300 ease-in-out" /></a>
               </div>
-
-              <h3 className="mb-4 font-semibold text-gray-900 transition-colors duration-300 ease-in-out hover:text-[#DCB963]">
-                PHƯƠNG THỨC THANH TOÁN
-              </h3>
+              <h3 className="mb-4 font-semibold text-gray-900 transition-colors duration-300 ease-in-out hover:text-[#DCB963]">PHƯƠNG THỨC THANH TOÁN</h3>
               <div className="grid grid-cols-2 gap-2 mb-4">
-                <div className="p-2 text-xs font-medium text-center bg-white border rounded transition-all duration-300 ease-in-out hover:bg-[#DCB963] hover:text-white hover:scale-105 hover:shadow-md cursor-pointer">
-                  ATM
-                </div>
-                <div className="p-2 text-xs font-medium text-center bg-white border rounded transition-all duration-300 ease-in-out hover:bg-[#DCB963] hover:text-white hover:scale-105 hover:shadow-md cursor-pointer">
-                  VISA
-                </div>
-                <div className="p-2 text-xs font-medium text-center bg-white border rounded transition-all duration-300 ease-in-out hover:bg-[#DCB963] hover:text-white hover:scale-105 hover:shadow-md cursor-pointer">
-                  MASTER
-                </div>
-                <div className="p-2 text-xs font-medium text-center bg-white border rounded transition-all duration-300 ease-in-out hover:bg-[#DCB963] hover:text-white hover:scale-105 hover:shadow-md cursor-pointer">
-                  JCB
-                </div>
+                <div className="p-2 text-xs font-medium text-center bg-white border rounded transition-all duration-300 ease-in-out hover:bg-[#DCB963] hover:text-white hover:scale-105 hover:shadow-md cursor-pointer">ATM</div>
+                <div className="p-2 text-xs font-medium text-center bg-white border rounded transition-all duration-300 ease-in-out hover:bg-[#DCB963] hover:text-white hover:scale-105 hover:shadow-md cursor-pointer">VISA</div>
+                <div className="p-2 text-xs font-medium text-center bg-white border rounded transition-all duration-300 ease-in-out hover:bg-[#DCB963] hover:text-white hover:scale-105 hover:shadow-md cursor-pointer">MASTER</div>
+                <div className="p-2 text-xs font-medium text-center bg-white border rounded transition-all duration-300 ease-in-out hover:bg-[#DCB963] hover:text-white hover:scale-105 hover:shadow-md cursor-pointer">JCB</div>
               </div>
-
-              <div className="mt-4">
-                <div>
-                  <img src={vertify} alt="" />
-                </div>
-              </div>
+              <div className="mt-4"><div><img src={vertify} alt="" /></div></div>
             </div>
           </div>
         </div>
-
         <div className="pt-6 mt-8 text-center transition-all duration-300 ease-in-out border-t border-gray-200">
-          <p className="text-sm text-gray-600 transition-colors duration-300 ease-in-out hover:text-gray-800">
-            © 2020 by Kowil Fashion - Phú Thái Holdings
-          </p>
+          <p className="text-sm text-gray-600 transition-colors duration-300 ease-in-out hover:text-gray-800">© 2020 by Kowil Fashion - Phú Thái Holdings</p>
         </div>
       </footer>
     </>

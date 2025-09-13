@@ -68,6 +68,12 @@ function Products() {
     window.scrollTo(0, 0);
   }, [selectedCategory]);
 
+  // Update selected category when URL parameter changes
+  useEffect(() => {
+    setSelectedCategory(categoryIdFromParams || "");
+    setCurrentPage(1); // Reset to first page when category changes
+  }, [categoryIdFromParams]);
+
   // Fetch categories
   useEffect(() => {
     setLoadingCategories(true);
