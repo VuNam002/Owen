@@ -28,6 +28,7 @@ module.exports = (objectPagination, query, countRecords) => {
   // Tính toán tổng số trang.
   const totalPages = Math.ceil(countRecords / limitItems);
   objectPagination.totalPages = totalPages;
+  objectPagination.totalItems = countRecords; // Add this line
 
   return objectPagination;
 };

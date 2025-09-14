@@ -39,7 +39,7 @@ module.exports.index = async (req, res) => {
     const countRecords = await Product.countDocuments(filter);
 
     const pagination = paginationHelper(
-      { limitItems: parseInt(req.query.limit) || 6 }, 
+      { limitItems: req.query.limit }, 
       req.query,
       countRecords
     );
