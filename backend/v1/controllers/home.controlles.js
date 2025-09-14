@@ -50,7 +50,7 @@ module.exports.index = async (req, res) => {
       const sort = buildSortObject(req);
       const countRecords = await Product.countDocuments(filter);
       const pagination = paginationHelper(
-        { limitItems: parseInt(req.query.limit) || 6 },
+        { limitItems: parseInt(req.query.limit) || 4 },
         req.query,
         countRecords
       );
@@ -106,7 +106,7 @@ module.exports.index = async (req, res) => {
           status: "active",
         })
         .sort({ position: "desc" })
-        .limit(6);
+        .limit(4);
         
         return {
           ...category.toObject(),
