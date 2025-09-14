@@ -204,7 +204,7 @@ export default function ShoppingCart() {
         </div>
 
         <div className="grid justify-center grid-cols-1 gap-6">
-          <div className="space-y-3 lg:col-span-2 j">
+          <div className="space-y-3 lg:col-span-2 ">
             {cartItems.length === 0 ? (
               <Card className="py-8 text-center">
                 <CardContent>
@@ -215,7 +215,7 @@ export default function ShoppingCart() {
                   <p className="mb-4 text-sm text-gray-500">
                     Bạn chưa có sản phẩm nào trong giỏ hàng
                   </p>
-                  <Link to="/products">
+                  <Link to="/">
                     <button className="px-4 py-2 text-sm text-white transition-colors bg-[#323232] rounded-lg ">
                       Tiếp tục mua sắm
                     </button>
@@ -294,8 +294,8 @@ export default function ShoppingCart() {
 
           {/* Order Summary */}
           {cartItems.length > 0 && cart && (
-            <div className="lg:col-span-1">
-              <Card className="sticky top-6">
+            <div className="space-y-3 lg:col-span-2 j ">
+              <Card className="sticky top-6 ">
                 <CardHeader>
                   <CardTitle>Tổng đơn hàng</CardTitle>
                 </CardHeader>

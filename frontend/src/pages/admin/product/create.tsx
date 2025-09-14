@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Editor } from "@tinymce/tinymce-react";
+import { toast } from 'react-toastify';
 
 interface Category {
   _id: number;
@@ -901,7 +902,7 @@ function CreateProductPage(): JSX.Element {
         body: JSON.stringify(product)
       });
 
-      alert(isEditMode ? "Cập nhật sản phẩm thành công!" : "Tạo sản phẩm thành công!");
+      toast.success(isEditMode ? "Cập nhật sản phẩm thành công!" : "Tạo sản phẩm thành công!");
       navigate("/admin/products");
     } catch (error) {
       console.error("Submit error:", error);

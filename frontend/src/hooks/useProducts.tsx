@@ -59,7 +59,7 @@ export const useProducts = () => {
   const [selectAll, setSelectAll] = useState<boolean>(false);
   const [positions, setPositions] = useState<{ [key: string]: number }>({});
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage] = useState<number>(10);
+  const [itemsPerPage] = useState<number>(5);
   const [totalItemsBackend, setTotalItemsBackend] = useState<number>(0);
   const [totalPagesBackend, setTotalPagesBackend] = useState<number>(1);
 
