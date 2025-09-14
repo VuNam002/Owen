@@ -24,7 +24,13 @@ interface Product {
 }
 interface ApiResponse {
   data: Product[];
-  // Có thể thêm các thuộc tính khác như metadata, pagination...
+  pagination: {
+    currentPage: number;
+    limitItems: number;
+    skip: number;
+    totalPages: number;
+    totalItems: number;
+  };
 }
 
 const API_BASE = "http://localhost:3000/api/v1/products";
@@ -53,74 +59,88 @@ export const useProducts = () => {
   const [selectAll, setSelectAll] = useState<boolean>(false);
   const [positions, setPositions] = useState<{ [key: string]: number }>({});
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage] = useState<number>(5);
+  const [itemsPerPage] = useState<number>(10);
+  const [totalItemsBackend, setTotalItemsBackend] = useState<number>(0);
+  const [totalPagesBackend, setTotalPagesBackend] = useState<number>(1);
+
+  // Tạo query string cho API
+  const buildQueryString = useCallback(() => {
+    const params = new URLSearchParams();
+    params.append('page', currentPage.toString());
+    params.append('limit', itemsPerPage.toString());
+    
+    if (filterStatus) {
+      params.append('status', filterStatus);
+    }
+    
+    if (keyword.trim()) {
+      params.append('keyword', keyword.trim());
+    }
+    
+    if (sortBy) {
+      params.append('sortBy', sortBy);
+    }
+    
+    if (sortOrder) {
+      params.append('sortOrder', sortOrder);
+    }
+    
+    return params.toString();
+  }, [currentPage, itemsPerPage, filterStatus, keyword, sortBy, sortOrder]);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await apiRequest(API_BASE);
+      const queryString = buildQueryString();
+      const result = await apiRequest(`${API_BASE}?${queryString}`);
       setProducts(result.data);
+      setTotalItemsBackend(result.pagination.totalItems);
+      setTotalPagesBackend(result.pagination.totalPages);
+      
+      // Cập nhật positions từ dữ liệu mới
       const initialPositions: { [key: string]: number } = {};
       result.data.forEach((product: Product) => {
         initialPositions[product._id] = product.position;
       });
-      setPositions(initialPositions);
+      setPositions(prevPositions => ({
+        ...prevPositions,
+        ...initialPositions
+      }));
     } catch {
       setError("Không thể tải dữ liệu sản phẩm");
     } finally {
       setLoading(false);
     }
-  }, [setLoading, setError, setProducts, setPositions]);
+  }, [buildQueryString]);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
+  // Chỉ sử dụng products trực tiếp từ API (đã được filter và sort ở backend)
   const filteredProducts = useMemo(() => {
-    return products
-      .filter((product: Product) => {
-        const matchesStatus = !filterStatus || product.status === filterStatus;
-        const matchesKeyword =
-          !keyword ||
-          product.title.toLowerCase().includes(keyword.toLowerCase());
-        return matchesStatus && matchesKeyword;
-      })
-      .sort((a: Product, b: Product) => {
-        const getValue = (product: Product, field: string) => {
-          switch (field) {
-            case "title":
-              return product.title.toLowerCase();
-            case "price":
-              return product.price;
-            case "position":
-              return positions[product._id] ?? product.position;
-            case "createdAt":
-              return new Date(product.createdAt || "");
-            default:
-              return positions[product._id] ?? product.position;
-          }
-        };
+    // Nếu backend đã xử lý filter và sort, chỉ cần return products
+    // Chỉ cần cập nhật position từ state positions nếu có thay đổi
+    return products.map(product => ({
+      ...product,
+      position: positions[product._id] ?? product.position
+    }));
+  }, [products, positions]);
 
-        const aValue = getValue(a, sortBy);
-        const bValue = getValue(b, sortBy);
-
-        if (sortOrder === "asc") {
-          return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-        } else {
-          return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
-        }
-      });
-  }, [products, filterStatus, keyword, sortBy, sortOrder, positions]);
-
-  const totalItems = filteredProducts.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const totalItems = totalItemsBackend;
+  const totalPages = totalPagesBackend;
+  
+  // Sử dụng trực tiếp filteredProducts vì pagination đã được xử lý ở backend
+  const paginatedProducts = filteredProducts;
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+  const endIndex = startIndex + filteredProducts.length;
 
+  // Reset về trang 1 khi thay đổi filter/search/sort
   useEffect(() => {
-    setCurrentPage(1);
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
     setSelectedProducts([]);
     setSelectAll(false);
   }, [filterStatus, keyword, sortBy, sortOrder]);
@@ -196,13 +216,8 @@ export const useProducts = () => {
       await apiRequest(`${API_BASE}/change-status/${newStatus}/${productId}`, {
         method: "PATCH",
       });
-      setProducts((prev) =>
-        prev.map((product) =>
-          product._id === productId
-            ? { ...product, status: newStatus }
-            : product
-        )
-      );
+      // Refresh dữ liệu để đảm bảo đồng bộ
+      await fetchProducts();
     } catch {
       setError("Không thể thay đổi trạng thái sản phẩm");
     }
@@ -218,12 +233,8 @@ export const useProducts = () => {
         method: "PATCH",
         body: JSON.stringify(positions),
       });
-      setProducts((prev) =>
-        prev.map((product) => ({
-          ...product,
-          position: positions[product._id] || product.position,
-        }))
-      );
+      // Refresh dữ liệu sau khi lưu position
+      await fetchProducts();
     } catch {
       setError("Không thể lưu vị trí sản phẩm");
     }
@@ -236,10 +247,9 @@ export const useProducts = () => {
       await apiRequest(`${API_BASE}/delete/${productId}`, {
         method: "DELETE",
       });
-      setProducts((prev) =>
-        prev.filter((product) => product._id !== productId)
-      );
       setSelectedProducts((prev) => prev.filter((id) => id !== productId));
+      // Refresh dữ liệu sau khi xóa
+      await fetchProducts();
     } catch {
       setError("Không thể xóa sản phẩm");
     }
@@ -260,11 +270,10 @@ export const useProducts = () => {
           method: "DELETE",
         });
       }
-      setProducts((prev) =>
-        prev.filter((product) => !selectedProducts.includes(product._id))
-      );
       setSelectedProducts([]);
       setSelectAll(false);
+      // Refresh dữ liệu sau khi xóa bulk
+      await fetchProducts();
     } catch {
       setError("Không thể xóa các sản phẩm đã chọn");
     }
@@ -287,7 +296,7 @@ export const useProducts = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading, setLoading, setError, fetchProducts]);
+  }, [loading, fetchProducts]);
 
   return {
     loading,
