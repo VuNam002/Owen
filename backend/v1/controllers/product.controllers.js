@@ -110,6 +110,13 @@ module.exports.changePosition = async (req, res) => {
 }
 module.exports.create = async (req, res) => {
   try {
+    if (req.body.position === undefined || req.body.position === null || req.body.position === '') {
+      const lastProduct = await Product.findOne().sort({ position: -1 });
+      req.body.position = lastProduct ? lastProduct.position + 1 : 1;
+    } else {
+      req.body.position = parseInt(req.body.position, 10);
+    }
+
     const product = new Product(req.body);
     await product.save();
     res.status(201).json({
