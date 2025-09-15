@@ -347,7 +347,7 @@ function ProductDetail() {
           <div className="px-8 pb-6">
             <div className="pt-6 border-t border-gray-200">
               <h3 className="mb-4 text-lg font-semibold text-gray-900">
-                Thông số kỹ thuật
+                Thông số sản phẩm
               </h3>
               <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="p-4 rounded-lg bg-gray-50">

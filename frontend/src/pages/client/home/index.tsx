@@ -2,8 +2,8 @@ import { HooksHome } from "../../../hooks/useHome";
 import { MdFavorite, MdFavoriteBorder, MdAttachMoney } from "react-icons/md";
 import { Link } from "react-router-dom";
 import Slide from "../../../components/slide/index";
-import Postert from "../../../assets/poster_tre_con.webp"
-import Postert_giay from "../../../assets/poster_giay.webp"
+import Postert from "../../../assets/poster_tre_con.webp";
+import Postert_giay from "../../../assets/poster_giay.webp";
 
 // Type definitions (sử dụng từ hook)
 interface Product {
@@ -112,7 +112,11 @@ const HomePage = () => {
               toggleFavorite(product._id);
             }}
             className="absolute p-1.5 sm:p-2 transition-all duration-200 bg-white rounded-full shadow-md opacity-0 top-1 sm:top-2 right-1 sm:right-2 group-hover:opacity-100 hover:bg-gray-50"
-            aria-label={favorites.includes(product._id) ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
+            aria-label={
+              favorites.includes(product._id)
+                ? "Bỏ yêu thích"
+                : "Thêm vào yêu thích"
+            }
           >
             {favorites.includes(product._id) ? (
               <MdFavorite className="w-3 h-3 text-red-500 sm:w-4 sm:h-4" />
@@ -179,7 +183,9 @@ const HomePage = () => {
             </p>
           )}
           <div className="flex items-center justify-between text-xs text-gray-500">
-            <span>{new Date(article.createdAt).toLocaleDateString("vi-VN")}</span>
+            <span>
+              {new Date(article.createdAt).toLocaleDateString("vi-VN")}
+            </span>
             {article.featured === "1" && (
               <span className="px-2 py-1 text-blue-800 bg-blue-100 rounded-full">
                 Nổi bật
@@ -254,6 +260,24 @@ const HomePage = () => {
             </section>
           )}
 
+          {/* <div className="relative mb-8 overflow-hidden sm:mb-12">
+            <div>
+              <video
+                src="https://image.uniqlo.com/UQ/CMS/video/jp/2025/HOME/GL_Aseets/Collaboration/CDC/home_women_01_pc.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full"
+                temporal-contrast="200%"
+              />
+              <div className="absolute inset-0 flex justify-center">
+                <div className="text-2xl font-light text-white ">Ấn phẩm LifeWear Thu và Đông 2025 - Xin chào</div>
+                <p>Rivisiting Classic - Tìm Lại Vẻ Đẹp Kinh Điển Khám Phá phong cách mùa với bộ sưu tập thu đông "Today" của </p>
+              </div>
+            </div>
+          </div> */}
+
           {/* Categories with Products Section */}
           {categories.length > 0 && (
             <section className="mb-8 sm:mb-12">
@@ -295,17 +319,17 @@ const HomePage = () => {
               ))}
             </section>
           )}
-        <Link to="/category/68c5caed30ea155ad538ee91">
-          <section className="mb-8 sm:mb-12">
-            <img src={Postert} alt="áo trẻ em" />
-          </section>
-        </Link>
+          <Link to="/category/68c5caed30ea155ad538ee91">
+            <section className="mb-8 sm:mb-12">
+              <img src={Postert} alt="áo trẻ em" />
+            </section>
+          </Link>
 
-        <Link to="/category/68c5cd2030ea155ad538f02f">
-          <section className="mb-8 sm:mb-12">
-            <img src={Postert_giay} alt="giày dep" />
-          </section>
-        </Link>
+          <Link to="/category/68c5cd2030ea155ad538f02f">
+            <section className="mb-8 sm:mb-12">
+              <img src={Postert_giay} alt="giày dep" />
+            </section>
+          </Link>
 
           {/* Brands Section - SỬA ĐỔI CHÍNH */}
           {brandCounts.length > 0 && (
@@ -362,7 +386,9 @@ const HomePage = () => {
             categories.length === 0 &&
             articlesFeatured.length === 0 && (
               <div className="py-12 text-center sm:py-16">
-                <div className="mb-4 text-4xl text-gray-400 sm:text-6xl">📦</div>
+                <div className="mb-4 text-4xl text-gray-400 sm:text-6xl">
+                  📦
+                </div>
                 <h3 className="mb-2 text-lg font-semibold text-gray-700 sm:text-xl">
                   Chưa có dữ liệu
                 </h3>

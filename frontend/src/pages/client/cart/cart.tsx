@@ -294,7 +294,7 @@ export default function ShoppingCart() {
 
           {/* Order Summary */}
           {cartItems.length > 0 && cart && (
-            <div className="space-y-3 lg:col-span-2 j ">
+            <div className="space-y-3 lg:col-span-2">
               <Card className="sticky top-6 ">
                 <CardHeader>
                   <CardTitle>Tổng đơn hàng</CardTitle>

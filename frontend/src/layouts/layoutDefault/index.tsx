@@ -7,6 +7,7 @@ import { FaFacebook, FaYoutube, FaCartPlus } from "react-icons/fa";
 import { FaSquareInstagram } from "react-icons/fa6";
 import vertify from "../../assets/vertify.webp";
 import logo from "../../assets/logo.svg";
+import pay from "../../assets/pay.webp"
 
 interface Category {
   _id: string;
@@ -298,18 +299,15 @@ function LayoutDefault() {
                 <a href="#" className="flex items-center justify-center w-8 h-8 transition-all duration-300 ease-in-out transform bg-gray-800 rounded hover:bg-red-600 hover:scale-110 hover:rotate-12"><FaYoutube className="w-4 h-4 text-white transition-all duration-300 ease-in-out" /></a>
               </div>
               <h3 className="mb-4 font-semibold text-gray-900 transition-colors duration-300 ease-in-out hover:text-[#DCB963]">PHƯƠNG THỨC THANH TOÁN</h3>
-              <div className="grid grid-cols-2 gap-2 mb-4">
-                <div className="p-2 text-xs font-medium text-center bg-white border rounded transition-all duration-300 ease-in-out hover:bg-[#DCB963] hover:text-white hover:scale-105 hover:shadow-md cursor-pointer">ATM</div>
-                <div className="p-2 text-xs font-medium text-center bg-white border rounded transition-all duration-300 ease-in-out hover:bg-[#DCB963] hover:text-white hover:scale-105 hover:shadow-md cursor-pointer">VISA</div>
-                <div className="p-2 text-xs font-medium text-center bg-white border rounded transition-all duration-300 ease-in-out hover:bg-[#DCB963] hover:text-white hover:scale-105 hover:shadow-md cursor-pointer">MASTER</div>
-                <div className="p-2 text-xs font-medium text-center bg-white border rounded transition-all duration-300 ease-in-out hover:bg-[#DCB963] hover:text-white hover:scale-105 hover:shadow-md cursor-pointer">JCB</div>
+              <div className="grid w-[500px] grid-cols-2 gap-2 mb-4">
+                <img className="w-[213px] h-auto" src={pay} alt="thanh toán" />
               </div>
-              <div className="mt-4"><div><img src={vertify} alt="" /></div></div>
+              <div className="mt-4"><div><img src={vertify} alt="xác thực" /></div></div>
             </div>
           </div>
         </div>
         <div className="pt-6 mt-8 text-center transition-all duration-300 ease-in-out border-t border-gray-200">
-          <p className="text-sm text-gray-600 transition-colors duration-300 ease-in-out hover:text-gray-800">© 2020 by Kowil Fashion - Phú Thái Holdings</p>
+          <p className="text-sm text-gray-600 transition-colors duration-300 ease-in-out hover:text-gray-800">© 2025 by Kowil Fashion - Vũ Nam Holdings</p>
         </div>
       </footer>
     </>
