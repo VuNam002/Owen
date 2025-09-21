@@ -8,6 +8,7 @@ import { FaSquareInstagram } from "react-icons/fa6";
 import vertify from "../../assets/vertify.webp";
 import logo from "../../assets/logo.svg";
 import pay from "../../assets/pay.webp"
+import { FaUser } from "react-icons/fa";
 
 interface Category {
   _id: string;
@@ -83,87 +84,52 @@ function LayoutDefault() {
         </div>
       </div>
 
-      <header className="sticky top-0 z-50 transition-all duration-500 ease-in-out bg-white border-b border-gray-100 shadow-lg">
+      {/* Header chính - Phần trên: Logo và Icons */}
+      <header className="sticky top-0 z-50 transition-all duration-500 ease-in-out bg-[#F8F1E4] border-gray-100 shadow-sm">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-[80px]">
+          <div className="flex justify-between items-center h-[70px]">
+            {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-gray-600 transition-all duration-200 rounded-lg lg:hidden hover:text-gray-900 hover:bg-gray-100"
             >
               {mobileMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
             </button>
+
+            {/* Logo */}
             <Link to="/" className="flex items-center gap-2 text-white transition-all duration-300 ease-in-out group">
               <img 
                 src={Logo} 
                 alt="Logo" 
-                className="object-contain w-auto h-10 transition-all duration-300 ease-in-out " 
+                className="object-contain w-auto h-10 transition-all duration-300 ease-in-out" 
               />
             </Link>
 
-            <nav className="items-center hidden space-x-0 lg:flex">
-              <div className="transition-all duration-300 ease-in-out ">
+            {/* Icons: Search, Cart, User */}
+            <div className="flex items-center space-x-2">
+              {/* Search */}
+              <div className="hidden transition-all duration-300 ease-in-out lg:block">
                 <Search />
               </div>
-              {categories.map((category) => (
-                <div
-                  key={category._id}
-                  className="relative group"
-                  onMouseEnter={() => setOpenCategory(category._id)}
-                  onMouseLeave={() => setOpenCategory(null)}
-                >
-                  {category.children && category.children.length > 0 ? (
-                    <div className="flex items-center gap-1 px-4 py-3 text-[15px] font-medium text-gray-700 transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg cursor-pointer relative group">
-                      <span className="relative z-10">{category.title}</span>
-                      <FiChevronDown className="w-4 h-4 transition-transform duration-300 " />
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#DCB963]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                    </div>
-                  ) : (
-                    <Link
-                      to={`/category/${category._id}`}
-                      className="flex items-center gap-1 px-4 py-3 text-[15px] font-medium text-gray-700 transition-all duration-300 ease-in-out hover:text-[#DCB963]  rounded-lg relative group"
-                    >
-                      <span className="relative z-10">{category.title}</span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#DCB963]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                    </Link>
-                  )}
-                  
-                  {/* Dropdown menu */}
-                  {category.children && category.children.length > 0 && openCategory === category._id && (
-                    <div className="absolute left-0 z-20 w-56 py-2 mt-1 transition-all duration-300 ease-in-out transform scale-100 bg-white border border-gray-100 shadow-xl opacity-100 rounded-xl">
-                      {/* Dropdown arrow */}
-                      <div className="absolute w-4 h-4 rotate-45 bg-white border-t border-l border-gray-100 -top-2 left-6"></div>
-                      
-                      {category.children.map((child, index) => (
-                        <Link
-                          key={child._id}
-                          to={`/category/${child._id}`}
-                          className={`block px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-[#DCB963]/10 hover:to-transparent hover:text-[#DCB963] transition-all duration-200 relative group ${
-                            index === 0 ? 'rounded-t-xl' : ''
-                          } ${
-                            index === category.children.length - 1 ? 'rounded-b-xl' : ''
-                          }`}
-                          onClick={() => setOpenCategory(null)}
-                        >
-                          <span className="flex items-center justify-between">
-                            {child.title}
-                            <span className="w-0 group-hover:w-2 h-0.5 bg-[#DCB963] transition-all duration-300 rounded-full"></span>
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-
+              
               {/* Cart */}
               <Link 
                 to="/cart" 
-                className="flex items-center justify-center w-12 h-12 text-gray-700 transition-all duration-300 ease-in-out hover:text-[#DCB963]  rounded-lg relative group ml-2"
+                className="flex items-center justify-center w-12 h-12 text-gray-700 transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative group"
               >
                 <FaCartPlus className="w-5 h-5" />
                 <div className="absolute inset-0 transition-opacity duration-300 rounded-lg opacity-0 bg-gradient-to-r to-transparent group-hover:opacity-100"></div>
               </Link>
-            </nav>
+              
+              {/* User */}
+              <Link 
+                to="/loginClient" 
+                className="flex items-center justify-center w-12 h-12 text-gray-700 transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative group"
+              >
+                <FaUser className="w-5 h-5" />
+                <div className="absolute inset-0 transition-opacity duration-300 rounded-lg opacity-0 bg-gradient-to-r to-transparent group-hover:opacity-100"></div>
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -171,15 +137,6 @@ function LayoutDefault() {
         {mobileMenuOpen && (
           <div className="bg-white border-t border-gray-100 shadow-lg lg:hidden">
             <div className="px-4 py-4 space-y-1 overflow-y-auto max-h-96">
-              {/* Home link */}
-              <Link 
-                to="/" 
-                className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg transition-all duration-200" 
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span>Trang chủ</span>
-              </Link>
-
               {/* Dynamic Categories for Mobile */}
               {categories.map(category => (
                 <div key={category._id} className="border-b border-gray-50 last:border-b-0">
@@ -248,6 +205,65 @@ function LayoutDefault() {
           </div>
         )}
       </header>
+
+      {/* Navigation Menu - Phần dưới: Menu danh mục */}
+      <nav className="hidden lg:block bg-white  border-gray-100 shadow-sm sticky top-[70px] z-50">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center space-x-0">
+            {/* Categories */}
+            {categories.map((category) => (
+              <div
+                key={category._id}
+                className="relative group"
+                onMouseEnter={() => setOpenCategory(category._id)}
+                onMouseLeave={() => setOpenCategory(null)}
+              >
+                {category.children && category.children.length > 0 ? (
+                  <div className="flex items-center gap-1 px-4 py-3 text-[15px] font-medium text-gray-700 transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg cursor-pointer relative group">
+                    <span className="relative z-10">{category.title}</span>
+                    <FiChevronDown className="w-4 h-4 transition-transform duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#DCB963]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
+                  </div>
+                ) : (
+                  <Link
+                    to={`/category/${category._id}`}
+                    className="flex items-center gap-1 px-4 py-3 text-[15px] font-medium text-gray-700 transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative group"
+                  >
+                    <span className="relative z-10">{category.title}</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#DCB963]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
+                  </Link>
+                )}
+                
+                {/* Dropdown menu */}
+                {category.children && category.children.length > 0 && openCategory === category._id && (
+                  <div className="absolute left-0 z-20 w-56 py-2 mt-1 transition-all duration-300 ease-in-out transform scale-100 bg-white border border-gray-100 shadow-xl opacity-100 rounded-xl">
+                    {/* Dropdown arrow */}
+                    <div className="absolute w-4 h-4 rotate-45 bg-white border-t border-l border-gray-100 -top-2 left-6"></div>
+                    
+                    {category.children.map((child, index) => (
+                      <Link
+                        key={child._id}
+                        to={`/category/${child._id}`}
+                        className={`block px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-[#DCB963]/10 hover:to-transparent hover:text-[#DCB963] transition-all duration-200 relative group ${
+                          index === 0 ? 'rounded-t-xl' : ''
+                        } ${
+                          index === category.children.length - 1 ? 'rounded-b-xl' : ''
+                        }`}
+                        onClick={() => setOpenCategory(null)}
+                      >
+                        <span className="flex items-center justify-between">
+                          {child.title}
+                          <span className="w-0 group-hover:w-2 h-0.5 bg-[#DCB963] transition-all duration-300 rounded-full"></span>
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </nav>
 
       <main className="transition-all duration-500 ease-in-out">
         <Outlet />
