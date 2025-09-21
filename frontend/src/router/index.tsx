@@ -26,6 +26,7 @@ import Check from "../pages/client/checkout/index";
 import Success from "../pages/client/checkout/success";
 import Order from "../pages/admin/order/index";
 import DetailOrderPage from "../pages/admin/order/detail";
+import LoginU from "../pages/client/user/Login"
 
 
 export const routes = [
@@ -60,6 +61,10 @@ export const routes = [
             {
                 path: 'checkout',
                 element: <Check/>
+            },
+            {
+                path: 'loginClient',
+                element: <LoginU/>
             },
             {
                 path: 'checkout/success/:orderId',
