@@ -18,7 +18,7 @@ module.exports.requireAuth = async (req, res, next) => {
     const userId = decoded.id; // Get user ID from decoded token
     console.log("Middleware: Decoded userId:", userId);
 
-    const user = await Account.findById(userId).select("-password"); // Find user by ID
+        const user = await Account.findById(userId).select("-password").populate("role_id"); // Find user by ID and populate role
     console.log("Middleware: User found:", !!user);
     if (!user) {
       return res.status(401).json({ message: "Invalid token." });

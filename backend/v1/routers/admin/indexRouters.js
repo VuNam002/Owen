@@ -9,6 +9,8 @@ const authRoutes = require("../admin/authRoute");
 const cartRoutes = require("../admin/cartRoute");
 const checkoutRoutes = require("../admin/checkoutRoute");
 const homeRoutes = require("../admin/homeRoute");
+const userRoutes = require("../admin/userRoute");
+
 
 module.exports = (app) => {
     //admin
@@ -24,4 +26,5 @@ module.exports = (app) => {
     app.use(version + "/carts", cartRoutes);
     app.use(version + "/checkout", checkoutRoutes);
     app.use(version + "/home", homeRoutes);
+    app.use(version + "/users", userRoutes);
 };
