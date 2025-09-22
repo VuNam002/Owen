@@ -1,4 +1,4 @@
-// hooks/useAuth.ts
+
 import { useState, useCallback } from 'react';
 
 interface User {

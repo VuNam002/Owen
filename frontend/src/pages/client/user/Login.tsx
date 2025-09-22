@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { useUser } from '../../../context/userContext';
+import { useUser } from '../../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import Logo from "../../../assets/logo.svg";
 
@@ -10,9 +10,18 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  
+
   const { login, loading } = useUser();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const isRemembered = localStorage.getItem('rememberMe') === 'true';
+    if (isRemembered) {
+      const savedEmail = localStorage.getItem('email') || '';
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +40,10 @@ const LoginPage: React.FC = () => {
         // Save remember me preference
         if (rememberMe) {
           localStorage.setItem('rememberMe', 'true');
+          localStorage.setItem('email', email);
+        } else {
+          localStorage.removeItem('rememberMe');
+          localStorage.removeItem('email');
         }
         // Redirect to dashboard or home page
         navigate('/');
