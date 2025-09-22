@@ -37,7 +37,6 @@ const LoginPage: React.FC = () => {
       
       if (result.success) {
         toast.success(result.message || 'Đăng nhập thành công!');
-        // Save remember me preference
         if (rememberMe) {
           localStorage.setItem('rememberMe', 'true');
           localStorage.setItem('email', email);
@@ -45,7 +44,6 @@ const LoginPage: React.FC = () => {
           localStorage.removeItem('rememberMe');
           localStorage.removeItem('email');
         }
-        // Redirect to dashboard or home page
         navigate('/');
       } else {
         toast.error(result.message || 'Đăng nhập thất bại');
@@ -80,10 +78,9 @@ const LoginPage: React.FC = () => {
           <p className="text-gray-600">Đăng nhập vào tài khoản của bạn</p>
         </div>
 
-        {/* Login Form */}
+
         <div className="p-8 bg-white shadow-xl rounded-2xl">
           <form onSubmit={handleLogin} className="space-y-6">
-            {/* Email Field */}
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-700">
                 Email
@@ -94,7 +91,7 @@ const LoginPage: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full py-3 pl-12 pr-4 transition-all border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full py-3 pl-12 pr-4 transition-all border border-gray-300 rounded-lg outline-none focus:ring-2 focus:[#323232] focus:border-transparent"
                   placeholder="Nhập địa chỉ email"
                   required
                   disabled={loading}
@@ -113,7 +110,7 @@ const LoginPage: React.FC = () => {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full py-3 pl-12 pr-12 transition-all border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full py-3 pl-12 pr-12 transition-all border border-gray-300 rounded-lg outline-none focus:ring-2 focus:[#323232] focus:border-transparent"
                   placeholder="Nhập mật khẩu"
                   required
                   disabled={loading}
@@ -144,7 +141,7 @@ const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleForgotPassword}
-                className="text-sm font-medium text-indigo-600 hover:text-indigo-500 disabled:cursor-not-allowed"
+                className="text-sm font-medium text-[#323232] disabled:cursor-not-allowed"
                 disabled={loading}
               >
                 Quên mật khẩu?
@@ -155,7 +152,7 @@ const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center justify-center w-full px-4 py-3 font-medium text-white transition-colors bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed"
+              className="flex items-center justify-center w-full px-4 py-3 font-medium text-white transition-colors bg-[#323232] hover:[#323232] disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -213,7 +210,7 @@ const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={handleRegister}
-              className="font-medium text-indigo-600 hover:text-indigo-500 disabled:cursor-not-allowed"
+              className="font-medium text-[#323232]  disabled:cursor-not-allowed"
               disabled={loading}
             >
               Đăng ký ngay

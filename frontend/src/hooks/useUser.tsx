@@ -45,7 +45,7 @@ export const useAuth = () => {
 
   const setToken = useCallback((token: string) => {
     try {
-      sessionStorage.setItem('token', token);
+      localStorage.setItem('token', token);
     } catch (error) {
       console.error('Error saving token:', error);
     }

@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Check auth status khi component mount
   useEffect(() => {
     auth.checkAuthStatus();
-  }, [auth]);
+  }, [auth.checkAuthStatus]);
 
   // Wrapper functions để kết nối hooks với context
   const login = async (email: string, password: string) => {

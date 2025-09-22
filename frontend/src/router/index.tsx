@@ -27,6 +27,8 @@ import Success from "../pages/client/checkout/success";
 import Order from "../pages/admin/order/index";
 import DetailOrderPage from "../pages/admin/order/detail";
 import LoginU from "../pages/client/user/Login"
+import RegisterPage from "../pages/client/user/Register"
+import ForgotPasswordPage from "../pages/client/user/forgot-password";
 
 
 export const routes = [
@@ -59,6 +61,10 @@ export const routes = [
                 element: <Cart/>
             },
             {
+                path: 'register',
+                element: <RegisterPage/>
+            },
+            {
                 path: 'checkout',
                 element: <Check/>
             },
@@ -69,6 +75,10 @@ export const routes = [
             {
                 path: 'checkout/success/:orderId',
                 element: <Success/>
+            },
+            {
+                path: 'forgot-password',
+                element: <ForgotPasswordPage/>
             },
             {
                 path: "*",

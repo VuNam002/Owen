@@ -107,7 +107,7 @@ export default function ShoppingCart() {
         setCartItems([]);
       }
     } catch (error) {
-      console.error("Error fetching cart items:", error);
+      console.error(error);
       setCart(null);
       setCartItems([]);
     } finally {
@@ -142,7 +142,7 @@ export default function ShoppingCart() {
         fetchCartItems();
       }
     } catch (error) {
-      console.error("Error updating quantity:", error);
+      console.error( error);
     } finally {
       setUpdating((prev) => ({ ...prev, [productId]: false }));
     }
@@ -159,7 +159,7 @@ export default function ShoppingCart() {
         await fetchCartItems();
       }
     } catch (error) {
-      console.error("Error removing item:", error);
+      console.error( error);
     } finally {
       setUpdating((prev) => ({ ...prev, [productId]: false }));
     }

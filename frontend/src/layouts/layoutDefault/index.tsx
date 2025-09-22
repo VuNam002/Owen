@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { FiPhoneCall, FiMenu, FiX, FiChevronDown } from "react-icons/fi";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.svg";
 import Search from "../../helpers/search";
 import { FaFacebook, FaYoutube, FaCartPlus } from "react-icons/fa";
@@ -9,6 +9,8 @@ import vertify from "../../assets/vertify.webp";
 import logo from "../../assets/logo.svg";
 import pay from "../../assets/pay.webp";
 import { FaUser } from "react-icons/fa";
+import { useUser } from "../../context/UserContext";
+import { toast } from "react-toastify";
 
 interface Category {
   _id: string;
@@ -20,6 +22,26 @@ interface Category {
 
 function LayoutDefault() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { isAuthenticated, user, logout } = useUser();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      const result = await logout();
+      if (result.success) {
+        toast.success('Đăng xuất thành công!');
+        navigate('/'); // Redirect to home after logout
+      } else {
+        toast.error(result.message || 'Đăng xuất thất bại.');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Có lỗi xảy ra khi đăng xuất.');
+    }
+    setDropdownOpen(false);
+  };
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
@@ -36,11 +58,11 @@ function LayoutDefault() {
         }
         const result = await response.json();
         if (result.success && Array.isArray(result.data)) {
-          console.log("API Result Data:", result.data);
+
           setAllCategories(result.data);
         }
       } catch (error) {
-        console.error("Failed to fetch categories:", error);
+        console.error(error);
       }
     };
 
@@ -79,7 +101,6 @@ function LayoutDefault() {
       };
 
       const nested = buildCategoryTree(allCategories, null);
-      console.log("Nested Categories (after build):", nested);
       setCategories(nested);
     }
   }, [allCategories]);
@@ -141,16 +162,50 @@ function LayoutDefault() {
                 <div className="absolute inset-0 transition-opacity duration-300 rounded-lg opacity-0 bg-gradient-to-r from-[#DCB963]/10 to-transparent group-hover:opacity-100"></div>
               </Link>
 
-              <Link
-                to="/loginClient"
-                className="relative flex items-center gap-2 px-4 py-2 text-gray-700 transition-all duration-300 ease-in-out rounded-lg bg-white/70 group "
-              >
-                <FaUser className="w-4 h-8" />
-                <span className="hidden text-sm font-medium sm:inline-block">
-                  Đăng nhập
-                </span>
-                <div className="absolute inset-0 transition-opacity duration-300 rounded-lg opacity-0 bg-gradient-to-r from-[#DCB963] to-[#C9A96E] "></div>
-              </Link>
+              {isAuthenticated ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
+                    className="relative flex items-center gap-2 px-4 py-2 text-gray-700 transition-all duration-300 ease-in-out rounded-lg bg-white/70 group"
+                  >
+                    <FaUser className="w-4 h-8" />
+                    <span className="hidden text-sm font-medium sm:inline-block">
+                      {user?.name || 'Tài khoản'}
+                    </span>
+                    <FiChevronDown className={`w-4 h-4 transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {dropdownOpen && (
+                    <div 
+                      className="absolute right-0 z-20 w-48 py-2 mt-2 bg-white border border-gray-100 shadow-xl rounded-xl"
+                    >
+                      <Link
+                        to="/profile"
+                        className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        Tài khoản của tôi
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                      >
+                        Đăng xuất
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  to="/loginClient"
+                  className="relative flex items-center gap-2 px-4 py-2 text-gray-700 transition-all duration-300 ease-in-out rounded-lg bg-white/70 group "
+                >
+                  <FaUser className="w-4 h-8" />
+                  <span className="hidden text-sm font-medium sm:inline-block">
+                    Đăng nhập
+                  </span>
+                </Link>
+              )}
             </div>
           </div>
         </div>
