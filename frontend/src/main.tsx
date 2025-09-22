@@ -4,8 +4,8 @@ import App from "./App.tsx";
 import "./index.css";
 import { BrowserRouter } from "react-router-dom";
 import { ToastContainer } from 'react-toastify'; 
-import 'react-toastify/dist/ReactToastify.css'; 
- 
+import 'react-toastify/dist/ReactToastify.css';
+import { AuthProvider } from './context/userContext';
 
 const container = document.getElementById("root");
 if (container) {
@@ -13,8 +13,10 @@ if (container) {
   root.render(
     <StrictMode>
       <BrowserRouter>
-        <App />
-        <ToastContainer /> 
+        <AuthProvider>
+          <App />
+          <ToastContainer /> 
+        </AuthProvider>
       </BrowserRouter>
     </StrictMode>
   );

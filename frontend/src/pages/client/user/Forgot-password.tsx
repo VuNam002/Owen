@@ -3,11 +3,11 @@ import { Mail, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import Logo from "../../../assets/logo.svg";
-import { useUser } from '../../../context/UserContext'; // Assuming UserContext has forgotPassword
+import { useUser } from '../../../context/UserContext';
 
 const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
-  const { forgotPassword, loading } = useUser(); // Assuming forgotPassword function and loading state are in UserContext
+  const { forgotPassword, loading } = useUser(); 
   const navigate = useNavigate();
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -20,7 +20,7 @@ const ForgotPasswordPage: React.FC = () => {
 
     try {
       toast.success('Yêu cầu đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra email của bạn.');
-      navigate('/login');
+      navigate('/loginClient');
 
     } catch (error) {
       console.error('Forgot password error:', error);
@@ -29,7 +29,7 @@ const ForgotPasswordPage: React.FC = () => {
   };
 
   const handleLogin = () => {
-    navigate('/login');
+    navigate('/loginClient');
   };
 
   return (

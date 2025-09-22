@@ -1,3 +1,4 @@
+import { Outlet } from "react-router-dom";
 import LayoutDefault from "../layouts/layoutDefault";
 import Home from "../pages/client/home";
 import Error from "../pages/client/Error";
@@ -11,25 +12,25 @@ import Category from "../pages/admin/category";
 import CreateCategory from "../pages/admin/category/create";
 import EditCategoryPage from "../pages/admin/category/edit";
 import Account from "../pages/admin/account";
-import CreateAccount from "../pages/admin/account/create"
-import EditAccount from "../pages/admin/account/edit"; 
+import CreateAccount from "../pages/admin/account/create";
+import EditAccount from "../pages/admin/account/edit";
 import Role from "../pages/admin/role";
 import CreateRole from "../pages/admin/role/create";
 import EditRole from "../pages/admin/role/edit";
 import PermissionsPage from "../pages/admin/role/permissions";
 import Login from "../pages/admin/login";
-import PrivateRoutes from "../components/PrivateRoutes"; 
-import SearchPage from "../pages/client/Products/SearchPage"
+import PrivateRoutes from "../components/PrivateRoutes";
+import SearchPage from "../pages/client/Products/SearchPage";
 import ProductDetail from "../pages/client/Products/ProductDetail";
 import Cart from "../pages/client/cart/cart";
 import Check from "../pages/client/checkout/index";
 import Success from "../pages/client/checkout/success";
 import Order from "../pages/admin/order/index";
 import DetailOrderPage from "../pages/admin/order/detail";
-import LoginU from "../pages/client/user/Login"
-import RegisterPage from "../pages/client/user/Register"
-import ForgotPasswordPage from "../pages/client/user/forgot-password";
-
+import LoginU from "../pages/client/user/Login";
+import RegisterPage from "../pages/client/user/Register";
+import ForgotPasswordPage from "../pages/client/user/Forgot-password";
+import User from "../pages/admin/user/index";
 
 export const routes = [
     {
@@ -80,18 +81,20 @@ export const routes = [
                 path: 'forgot-password',
                 element: <ForgotPasswordPage/>
             },
-            {
-                path: "*",
-                element: <Error/>
-            },
         ]
     },
     {
         path: 'admin',
-        element: <PrivateRoutes />,
+        element: <Outlet />, // Use Outlet to render nested admin routes
         children: [
             {
-                element: <LayoutAdmin/>,
+                path: 'login',
+                element: <Login />
+            },
+            {
+                // All other admin routes are protected
+                path: '',
+                element: <PrivateRoutes><LayoutAdmin /></PrivateRoutes>,
                 children: [
                     {
                         path: "dashboard",
@@ -156,13 +159,17 @@ export const routes = [
                     {
                         path:"orders/detail/:orderId",
                         element: <PrivateRoutes requiredPermission="orders_view"><DetailOrderPage/></PrivateRoutes> 
+                    },
+                    {
+                        path:"users",
+                        element: <PrivateRoutes requiredPermission="users_view"><User/></PrivateRoutes> 
                     }
                 ]
             }
         ]
     },
     {
-        path: "admin/login",
-        element: <Login/>
-    }
+        path: "*",
+        element: <Error/>
+    },
 ]

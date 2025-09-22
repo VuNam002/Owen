@@ -100,7 +100,7 @@ function LayoutAdmin() {
               )}
             </Link>
           )}
-            {hasPermission("orders_view") && ( // Example for orders
+            {hasPermission("orders_view") && ( 
               
             <Link
               to="/admin/orders"
