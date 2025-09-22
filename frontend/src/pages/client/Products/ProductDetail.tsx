@@ -58,13 +58,6 @@ function ProductDetail() {
             Trang chủ
           </a>
           <span>/</span>
-          <a
-            href="/products"
-            className="transition-colors hover:text-indigo-600"
-          >
-            Sản phẩm
-          </a>
-          <span>/</span>
           <span className="text-gray-900">
             {product.product_category_id.title}
           </span>

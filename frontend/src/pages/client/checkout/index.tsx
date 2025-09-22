@@ -96,7 +96,6 @@ const CheckoutPage = () => {
         }
       );
 
-      console.log("Order response:", response.data);
 
       if (response.data.code === 200) {
         const order = response.data.data;
@@ -104,8 +103,7 @@ const CheckoutPage = () => {
       } else {
         setError(response.data.message || "Đặt hàng thất bại.");
       }
-    } catch (error: any) {
-      console.error("Order submission failed:", error);
+    } catch (error) {
       setError(
         error.response?.data?.message || 
         "Đã xảy ra lỗi khi đặt hàng. Vui lòng thử lại."
