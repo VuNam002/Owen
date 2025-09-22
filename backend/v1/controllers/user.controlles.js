@@ -47,8 +47,7 @@ module.exports.login = async (req, res, next) => {
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Email hoặc mật khẩu không đúng' });
     }
-
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: '1d',
     });
 
@@ -60,7 +59,7 @@ module.exports.login = async (req, res, next) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role,
+
       },
     });
   } catch (error) {
