@@ -8,12 +8,9 @@ import { FaSquareInstagram } from "react-icons/fa6";
 import vertify from "../../assets/vertify.webp";
 import logo from "../../assets/logo.svg";
 import pay from "../../assets/pay.webp";
-<<<<<<< HEAD
-=======
 import { FaUser } from "react-icons/fa";
 import { useUser } from "../../context/UserContext";
 import { toast } from "react-toastify";
->>>>>>> feature-x
 
 interface Category {
   _id: string;
@@ -25,8 +22,6 @@ interface Category {
 
 function LayoutDefault() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-<<<<<<< HEAD
-=======
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { isAuthenticated, user, logout } = useUser();
   const navigate = useNavigate();
@@ -47,7 +42,6 @@ function LayoutDefault() {
     setDropdownOpen(false);
   };
 
->>>>>>> feature-x
   const [categories, setCategories] = useState<Category[]>([]);
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
@@ -64,11 +58,7 @@ function LayoutDefault() {
         }
         const result = await response.json();
         if (result.success && Array.isArray(result.data)) {
-<<<<<<< HEAD
-          console.log("API Result Data:", result.data);
-=======
 
->>>>>>> feature-x
           setAllCategories(result.data);
         }
       } catch (error) {
@@ -111,10 +101,6 @@ function LayoutDefault() {
       };
 
       const nested = buildCategoryTree(allCategories, null);
-<<<<<<< HEAD
-      console.log("Nested Categories (after build):", nested);
-=======
->>>>>>> feature-x
       setCategories(nested);
     }
   }, [allCategories]);
@@ -150,11 +136,8 @@ function LayoutDefault() {
                 <FiMenu className="w-6 h-6" />
               )}
             </button>
-<<<<<<< HEAD
-=======
 
             {/* Logo */}
->>>>>>> feature-x
             <Link
               to="/"
               className="flex items-center gap-2 text-white transition-all duration-300 ease-in-out group"
@@ -162,11 +145,7 @@ function LayoutDefault() {
               <img
                 src={Logo}
                 alt="Logo"
-<<<<<<< HEAD
-                className="object-contain w-auto h-10 transition-all duration-300 ease-in-out "
-=======
                 className="object-contain w-auto h-10 transition-all duration-300 ease-in-out"
->>>>>>> feature-x
               />
             </Link>
 
@@ -200,54 +179,6 @@ function LayoutDefault() {
                     <div 
                       className="absolute right-0 z-20 w-48 py-2 mt-2 bg-white border border-gray-100 shadow-xl rounded-xl"
                     >
-<<<<<<< HEAD
-                      <span className="relative z-10">{category.title}</span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#DCB963]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                    </Link>
-                  )}
-
-                  {/* Dropdown menu */}
-                  {category.children &&
-                    category.children.length > 0 &&
-                    openCategory === category._id && (
-                      <div className="absolute left-0 z-20 w-56 py-2 mt-1 transition-all duration-300 ease-in-out transform scale-100 bg-white border border-gray-100 shadow-xl opacity-100 rounded-xl">
-                        {/* Dropdown arrow */}
-                        <div className="absolute w-4 h-4 rotate-45 bg-white border-t border-l border-gray-100 -top-2 left-6"></div>
-
-                        {category.children.map((child, index) => (
-                          <Link
-                            key={child._id}
-                            to={`/category/${child._id}`}
-                            className={`block px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-[#DCB963]/10 hover:to-transparent hover:text-[#DCB963] transition-all duration-200 relative group ${
-                              index === 0 ? "rounded-t-xl" : ""
-                            } ${
-                              index === category.children.length - 1
-                                ? "rounded-b-xl"
-                                : ""
-                            }`}
-                            onClick={() => setOpenCategory(null)}
-                          >
-                            <span className="flex items-center justify-between">
-                              {child.title}
-                              <span className="w-0 group-hover:w-2 h-0.5 bg-[#DCB963] transition-all duration-300 rounded-full"></span>
-                            </span>
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                </div>
-              ))}
-
-              {/* Cart */}
-              <Link
-                to="/cart"
-                className="flex items-center justify-center w-12 h-12 text-gray-700 transition-all duration-300 ease-in-out hover:text-[#DCB963]  rounded-lg relative group ml-2"
-              >
-                <FaCartPlus className="w-5 h-5" />
-                <div className="absolute inset-0 transition-opacity duration-300 rounded-lg opacity-0 bg-gradient-to-r to-transparent group-hover:opacity-100"></div>
-              </Link>
-            </nav>
-=======
                       <Link
                         to="/profile"
                         className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
@@ -276,25 +207,12 @@ function LayoutDefault() {
                 </Link>
               )}
             </div>
->>>>>>> feature-x
           </div>
         </div>
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="bg-white border-t border-gray-100 shadow-lg lg:hidden">
             <div className="px-4 py-4 space-y-1 overflow-y-auto max-h-96">
-<<<<<<< HEAD
-              {/* Home link */}
-              <Link
-                to="/"
-                className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-[#DCB963] hover:bg-gray-50 rounded-lg transition-all duration-200"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span>Trang chủ</span>
-              </Link>
-
-=======
->>>>>>> feature-x
               {/* Dynamic Categories for Mobile */}
               {categories.map((category) => (
                 <div
