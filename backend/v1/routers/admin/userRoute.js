@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
+const { requireAuth } = require("../../middlewares/auth.middleware");
 
 const controllers = require("../../controllers/user.controlles")
 
 router.post("/register", controllers.register);
 router.post("/login", controllers.login);
-router.get("/profile", controllers.getProfile)// lấy thông tin cá nhân
+router.get("/profile", requireAuth, controllers.getProfile)// lấy thông tin cá nhân
 router.get("/logout", controllers.logout);
 router.post("/forgot-password", controllers.forgotPassword);
 router.post("/otp-password", controllers.otpPassword);
