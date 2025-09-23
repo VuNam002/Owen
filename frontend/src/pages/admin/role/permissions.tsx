@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useRole } from "../../../hooks/useRole"; 
 
-
 interface Role {
   _id: string;
   title: string;
@@ -55,6 +54,15 @@ const permissionConfig = [
         { key: 'orders_detail', label: 'Chi tiết' },
     ]
   },
+  {
+    name: 'Người dùng',
+    permissions: [
+        { key: 'users_view', label: 'Xem' },
+        { key: 'users_edit', label: 'Chỉnh sửa' },
+        { key: 'users_delete', label: 'Xóa' },
+        { key: 'users_detail', label: 'Chi tiết'}
+    ]
+  }
   // Thêm các nhóm quyền khác nếu cần
 ];
 

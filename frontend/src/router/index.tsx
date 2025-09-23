@@ -92,7 +92,6 @@ export const routes = [
                 element: <Login />
             },
             {
-                // All other admin routes are protected
                 path: '',
                 element: <PrivateRoutes><LayoutAdmin /></PrivateRoutes>,
                 children: [
