@@ -131,8 +131,7 @@ export const register = async (req, res) => {
             { expiresIn: '1h' }
         );
 
-        newUser.token = token;
-        await newUser.save();
+        
 
         const { password: _, ...userWithoutPassword } = newUser.toObject();
 
