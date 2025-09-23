@@ -206,6 +206,10 @@ export const useUserClient = () => {
         }
     }, [fetchUserClients]);
 
+    const clearError = useCallback(() => {
+        setError(null);
+    }, []);
+
     return {
         // State
         userClients,
@@ -234,6 +238,6 @@ export const useUserClient = () => {
         deleteUserClient,
         
         // Utility
-        clearError: () => setError(null),
+        clearError,
     };
 };

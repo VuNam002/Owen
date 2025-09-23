@@ -31,6 +31,7 @@ import LoginU from "../pages/client/user/Login";
 import RegisterPage from "../pages/client/user/Register";
 import ForgotPasswordPage from "../pages/client/user/Forgot-password";
 import User from "../pages/admin/user/index";
+import UserDetail from "../pages/admin/user/detail";
 
 export const routes = [
     {
@@ -162,6 +163,10 @@ export const routes = [
                     {
                         path:"users",
                         element: <PrivateRoutes requiredPermission="users_view"><User/></PrivateRoutes> 
+                    },
+                    {
+                        path:"users/detail/:userId",
+                        element: <PrivateRoutes requiredPermission="users_view"><UserDetail/></PrivateRoutes> 
                     }
                 ]
             }
