@@ -9,7 +9,7 @@ import {
 } from "../ui/card"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
-import { useAuth } from "../../context/AuthContext" 
+import { useAdminAuth } from "../../context/AuthContext" 
 import { useState } from "react"
 import type { FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
@@ -21,7 +21,7 @@ export function LoginForm({
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { login, loading, error } = useAuth()
+  const { login, loading, error } = useAdminAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: FormEvent) => {

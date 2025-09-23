@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, Loader2, User as UserIcon } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { useUser } from '../../../context/UserContext';
+import { useUserAuth } from '../../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import Logo from "../../../assets/logo.svg";
 
@@ -13,7 +13,7 @@ const RegisterPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const { register, loading } = useUser();
+  const { register, loading } = useUserAuth();
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {

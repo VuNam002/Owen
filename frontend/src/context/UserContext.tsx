@@ -42,9 +42,9 @@ interface AuthContextType {
   resetPassword: (password: string) => Promise<{ success: boolean; message?: string }>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Sử dụng các hooks
   const auth = useAuth();
   const loginHook = useLogin();
@@ -104,19 +104,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <UserContext.Provider value={value}>
       {children}
-    </AuthContext.Provider>
+    </UserContext.Provider>
   );
 };
 
 // Custom hook để sử dụng context
-export const useUser = () => {
-  const context = useContext(AuthContext);
+export const useUserAuth = () => {
+  const context = useContext(UserContext);
   if (context === undefined) {
-    throw new Error('useUser must be used within an AuthProvider');
+    throw new Error('useUserAuth must be used within a UserProvider');
   }
   return context;
 };
 
-export default AuthContext;
+export default UserContext;

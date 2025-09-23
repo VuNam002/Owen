@@ -4,10 +4,10 @@ import { ProductFilters } from "../../../components/Products/ProductFilters ";
 import { ProductActions } from "../../../components/Products/ProductActions";
 import { Pagination } from "../../../components/Products/Pagination";
 import { ErrorAlert } from "../../../components/ErrorAlert/ErrorAlert";
-import { useAuth } from "../../../context/AuthContext";
+import { useAdminAuth } from "../../../context/AuthContext";
 
 function Products() {
-  const { hasPermission } = useAuth();
+  const { hasPermission } = useAdminAuth();
   const {
     loading,
     error,

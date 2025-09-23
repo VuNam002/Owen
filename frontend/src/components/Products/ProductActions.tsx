@@ -1,7 +1,7 @@
 // components/ProductActions.tsx
 import type { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAdminAuth } from '../../context/AuthContext';
 
 interface ProductActionsProps {
   selectedProductsCount: number;
@@ -22,7 +22,7 @@ export const ProductActions: FC<ProductActionsProps> = ({
   endIndex,
   totalItems
 }) => {
-  const { hasPermission } = useAuth();
+  const { hasPermission } = useAdminAuth();
 
   return (
     <div className="flex items-center gap-3 px-6 py-4">

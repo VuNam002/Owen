@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { useUser } from '../../../context/UserContext';
+import { useUserAuth } from '../../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import Logo from "../../../assets/logo.svg";
 
@@ -11,7 +11,7 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const { login, loading } = useUser();
+  const { login, loading } = useUserAuth();
   const navigate = useNavigate();
 
   useEffect(() => {

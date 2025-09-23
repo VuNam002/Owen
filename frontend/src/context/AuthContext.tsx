@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-interface User {
+interface Admin {
   id: string;
   username: string;
   role: {
@@ -9,29 +9,29 @@ interface User {
   };
 }
 
-interface AuthContextType {
-  user: User | null;
+interface AdminContextType {
+  admin: Admin | null;
   loading: boolean; // Add loading state
   login: (email: string, password: string) => Promise<boolean>; // Changed return type and parameters
   logout: () => void;
   hasPermission: (permission: string) => boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [admin, setAdmin] = useState<Admin | null>(null);
   const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
-    // Load user from localStorage or fetch from API on app load
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    // Load admin from localStorage or fetch from API on app load
+    const storedAdmin = localStorage.getItem('admin');
+    if (storedAdmin) {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
+        const parsedAdmin = JSON.parse(storedAdmin);
+        setAdmin(parsedAdmin);
       } catch (e) {
-        localStorage.removeItem('user'); // Clear invalid data
+        localStorage.removeItem('admin'); // Clear invalid data
       }
     }
     setLoading(false); // Set loading to false after checking local storage
@@ -51,20 +51,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.ok && data.success) {
         // Assuming your backend returns user data and token on successful login
-        const userData = data.data; // Adjust based on your backend response structure
-        const token = userData.token; // Adjust based on your backend response structure
+        const adminData = data.data; // Adjust based on your backend response structure
+        const token = adminData.token; // Adjust based on your backend response structure
 
-        const userToStore = {
-          id: userData._id,
-          username: userData.fullName,
+        const adminToStore = {
+          id: adminData._id,
+          username: adminData.fullName,
           role: {
-            name: userData.role.name,
-            permissions: userData.role.permissions,
+            name: adminData.role.name,
+            permissions: adminData.role.permissions,
           },
         };
-        setUser(userToStore);
-        localStorage.setItem('user', JSON.stringify(userToStore));
-        localStorage.setItem('token', token);
+        setAdmin(adminToStore);
+        localStorage.setItem('admin', JSON.stringify(adminToStore));
+        localStorage.setItem('admin_token', token);
         return true; // Login successful
       } else {
         return false; 
@@ -75,26 +75,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    setAdmin(null);
+    localStorage.removeItem('admin');
+    localStorage.removeItem('admin_token');
   };
 
   const hasPermission = (permission: string): boolean => {
-    return user?.role?.permissions.includes(permission) || false;
+    return admin?.role?.permissions.includes(permission) || false;
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, hasPermission }}>
+    <AdminContext.Provider value={{ admin, loading, login, logout, hasPermission }}>
       {children}
-    </AuthContext.Provider>
+    </AdminContext.Provider>
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
+export const useAdminAuth = () => {
+  const context = useContext(AdminContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAdminAuth must be used within an AdminProvider');
   }
   return context;
 };

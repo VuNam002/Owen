@@ -3,11 +3,11 @@ import { Mail, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import Logo from "../../../assets/logo.svg";
-import { useUser } from '../../../context/UserContext';
+import { useUserAuth } from '../../../context/UserContext';
 
 const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
-  const { forgotPassword, loading } = useUser(); 
+  const { forgotPassword, loading } = useUserAuth(); 
   const navigate = useNavigate();
 
   const handleForgotPassword = async (e: React.FormEvent) => {

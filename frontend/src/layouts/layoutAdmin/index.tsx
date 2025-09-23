@@ -9,11 +9,11 @@ import { RiAccountCircleFill } from "react-icons/ri";
 import { HiUserGroup } from "react-icons/hi";
 import { FaAddressCard } from "react-icons/fa";
 import { FaFolder } from "react-icons/fa";
-import { useAuth } from "../../context/AuthContext"; 
+import { useAdminAuth } from "../../context/AuthContext"; 
 
 function LayoutAdmin() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { user, logout, hasPermission } = useAuth(); 
+  const { admin, logout, hasPermission } = useAdminAuth(); 
 
   const handleLogout = () => {
     logout();
@@ -159,10 +159,10 @@ function LayoutAdmin() {
                 <User className="w-8 h-8 text-gray-400" />
                 <div>
                   <p className="text-sm font-medium">
-                    {user?.username || "Admin User"}
+                    {admin?.username || "Admin User"}
                   </p>{" "}
                   {/* Display username from context */}
-                  <p>{user?.role?.title}</p>
+                  <p>{admin?.role?.title}</p>
                   <button
                     onClick={handleLogout}
                     className="text-xs text-red-600 hover:underline"

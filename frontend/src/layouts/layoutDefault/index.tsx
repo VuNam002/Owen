@@ -9,7 +9,7 @@ import vertify from "../../assets/vertify.webp";
 import logo from "../../assets/logo.svg";
 import pay from "../../assets/pay.webp";
 import { FaUser } from "react-icons/fa";
-import { useUser } from "../../context/UserContext";
+import { useUserAuth } from "../../context/UserContext";
 import { toast } from "react-toastify";
 
 interface Category {
@@ -23,7 +23,7 @@ interface Category {
 function LayoutDefault() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { isAuthenticated, user, logout } = useUser();
+  const { isAuthenticated, user, logout } = useUserAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {

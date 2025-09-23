@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext"; // Import useAuth
+import { useAdminAuth } from "../../context/AuthContext"; // Import useAdminAuth
 import React from "react"; // Import React
 
 interface PrivateRoutesProps {
@@ -8,12 +8,12 @@ interface PrivateRoutesProps {
 }
 
 function PrivateRoutes({ requiredPermission, children }: PrivateRoutesProps) {
-    const { user, loading, hasPermission } = useAuth(); 
+    const { admin, loading, hasPermission } = useAdminAuth(); 
     if (loading) {
         return <div>Loading...</div>; // Or a spinner component
     }
-    if (!user) {
-        console.log("PrivateRoutes: Redirecting to login (no user)");
+    if (!admin) {
+        console.log("PrivateRoutes: Redirecting to login (no admin)");
         return <Navigate to="/admin/login" replace />;
     }
 

@@ -5,7 +5,8 @@ import "./index.css";
 import { BrowserRouter } from "react-router-dom";
 import { ToastContainer } from 'react-toastify'; 
 import 'react-toastify/dist/ReactToastify.css';
-import { AuthProvider } from './context/userContext';
+import { AdminProvider } from './context/AuthContext.tsx';
+import { UserProvider } from './context/UserContext.tsx';
 
 const container = document.getElementById("root");
 if (container) {
@@ -13,10 +14,12 @@ if (container) {
   root.render(
     <StrictMode>
       <BrowserRouter>
-        <AuthProvider>
-          <App />
-          <ToastContainer /> 
-        </AuthProvider>
+        <AdminProvider>
+          <UserProvider>
+            <App />
+            <ToastContainer /> 
+          </UserProvider>
+        </AdminProvider>
       </BrowserRouter>
     </StrictMode>
   );
