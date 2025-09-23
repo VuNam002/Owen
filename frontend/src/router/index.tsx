@@ -85,7 +85,7 @@ export const routes = [
     },
     {
         path: 'admin',
-        element: <Outlet />, // Use Outlet to render nested admin routes
+        element: <Outlet />, 
         children: [
             {
                 path: 'login',

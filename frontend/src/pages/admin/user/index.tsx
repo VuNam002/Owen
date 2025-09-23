@@ -294,9 +294,6 @@ function UserList() {
                                     Email
                                 </th>
                                 <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                    Số điện thoại
-                                </th>
-                                <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                     Trạng thái
                                 </th>
                                 <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
@@ -328,11 +325,6 @@ function UserList() {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-900">{user.email}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-900">
-                                            {user.phone || <span className="italic text-gray-400">Chưa có</span>}
-                                        </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <button

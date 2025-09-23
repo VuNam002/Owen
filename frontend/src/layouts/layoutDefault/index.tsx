@@ -31,7 +31,7 @@ function LayoutDefault() {
       const result = await logout();
       if (result.success) {
         toast.success('Đăng xuất thành công!');
-        navigate('/'); // Redirect to home after logout
+        navigate('/'); 
       } else {
         toast.error(result.message || 'Đăng xuất thất bại.');
       }
@@ -123,7 +123,7 @@ function LayoutDefault() {
       </div>
 
       {/* Header chính - Phần trên: Logo và Icons */}
-      <header className="sticky top-0 z-50 transition-all duration-500 ease-in-out bg-white border-gray-100 shadow-sm">
+      <header className="sticky top-0 z-[9999] transition-all duration-500 ease-in-out bg-white border-gray-100 shadow-sm">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[70px]">
             <button
@@ -138,8 +138,8 @@ function LayoutDefault() {
             </button>
 
             {/* Logo */}
-            <Link
-              to="/"
+            <a
+              href="/"
               className="flex items-center gap-2 text-white transition-all duration-300 ease-in-out group"
             >
               <img
@@ -147,7 +147,7 @@ function LayoutDefault() {
                 alt="Logo"
                 className="object-contain w-auto h-10 transition-all duration-300 ease-in-out"
               />
-            </Link>
+            </a>
 
             <div className="flex items-center space-x-3">
               <div className="hidden transition-all duration-300 ease-in-out lg:block">
@@ -156,7 +156,7 @@ function LayoutDefault() {
 
               <Link
                 to="/cart"
-                className="flex items-center justify-center w-12 h-12 text-gray-700 transition-all duration-300 ease-in-out hover:text-[#DCB963] rounded-lg relative group hover:bg-white/50"
+                className="flex items-center justify-center w-12 h-12 text-gray-700 transition-all duration-300 ease-in-out hover:text-[#DCB963] relative "
               >
                 <FaCartPlus className="w-5 h-5" />
                 <div className="absolute inset-0 transition-opacity duration-300 rounded-lg opacity-0 bg-gradient-to-r from-[#DCB963]/10 to-transparent group-hover:opacity-100"></div>
@@ -167,7 +167,7 @@ function LayoutDefault() {
                   <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                     onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
-                    className="relative flex items-center gap-2 px-4 py-2 text-gray-700 transition-all duration-300 ease-in-out rounded-lg bg-white/70 group"
+                    className="relative flex items-center gap-2 px-4 py-2 text-gray-700 transition-all duration-300 ease-in-out bg-white/70 group"
                   >
                     <FaUser className="w-4 h-8" />
                     <span className="hidden text-sm font-medium sm:inline-block">
@@ -177,18 +177,11 @@ function LayoutDefault() {
                   </button>
                   {dropdownOpen && (
                     <div 
-                      className="absolute right-0 z-20 w-48 py-2 mt-2 bg-white border border-gray-100 shadow-xl rounded-xl"
+                      className="absolute right-0 z-[9999] w-48 py-2 mt-2 bg-white border border-gray-100 shadow-xl rounded-sm"
                     >
-                      <Link
-                        to="/profile"
-                        className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
-                        onClick={() => setDropdownOpen(false)}
-                      >
-                        Tài khoản của tôi
-                      </Link>
                       <button
                         onClick={handleLogout}
-                        className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                        className="relative w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
                       >
                         Đăng xuất
                       </button>
