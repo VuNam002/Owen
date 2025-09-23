@@ -9,11 +9,11 @@ import { RiAccountCircleFill } from "react-icons/ri";
 import { HiUserGroup } from "react-icons/hi";
 import { FaAddressCard } from "react-icons/fa";
 import { FaFolder } from "react-icons/fa";
-import { useAdminAuth } from "../../context/AuthContext"; 
+import { useAdminAuth } from "../../context/AuthContext";
 
 function LayoutAdmin() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { admin, logout, hasPermission } = useAdminAuth(); 
+  const { admin, logout, hasPermission } = useAdminAuth();
 
   const handleLogout = () => {
     logout();
@@ -50,42 +50,53 @@ function LayoutAdmin() {
               <span className="transition-opacity duration-300">Dashboard</span>
             )}
           </Link>
-          <Link
-            to="/admin/users"
-            className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"
-          >
-            <div className="flex items-center justify-center w-6 h-6">
-              <Users className="w-5 h-5" />
-            </div>
-            {sidebarOpen && (
-              <span className="transition-opacity duration-300">
-                Người dùng
-              </span>
-            )}
-          </Link>
-          <Link
-            to="/admin/products"
-            className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"
-          >
-            <div className="flex items-center justify-center w-6 h-6">
-              <IoBagAdd className="w-5 h-5" />
-            </div>
-            {sidebarOpen && (
-              <span className="transition-opacity duration-300">Sản phẩm</span>
-            )}
-          </Link>
-          <Link
-            to="/admin/category"
-            className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"
-          >
-            <div className="flex items-center justify-center w-6 h-6">
-              <BiSolidCategoryAlt className="w-5 h-5" />
-            </div>
-            {sidebarOpen && (
-              <span className="transition-opacity duration-300">Danh mục</span>
-            )}
-          </Link>
-          {hasPermission("accounts_view") && ( // Use hasPermission
+          {hasPermission("users_view") && (
+            <Link
+              to="/admin/users"
+              className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"
+            >
+              <div className="flex items-center justify-center w-6 h-6">
+                <Users className="w-5 h-5" />
+              </div>
+              {sidebarOpen && (
+                <span className="transition-opacity duration-300">
+                  Người dùng
+                </span>
+              )}
+            </Link>
+          )}
+
+          {hasPermission("product_view") && (
+            <Link
+              to="/admin/products"
+              className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"
+            >
+              <div className="flex items-center justify-center w-6 h-6">
+                <IoBagAdd className="w-5 h-5" />
+              </div>
+              {sidebarOpen && (
+                <span className="transition-opacity duration-300">
+                  Sản phẩm
+                </span>
+              )}
+            </Link>
+          )}
+          {hasPermission("product-category_view") && (
+            <Link
+              to="/admin/category"
+              className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"
+            >
+              <div className="flex items-center justify-center w-6 h-6">
+                <BiSolidCategoryAlt className="w-5 h-5" />
+              </div>
+              {sidebarOpen && (
+                <span className="transition-opacity duration-300">
+                  Danh mục
+                </span>
+              )}
+            </Link>
+          )}
+          {hasPermission("accounts_view") && ( 
             <Link
               to="/admin/accounts"
               className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"
@@ -100,8 +111,7 @@ function LayoutAdmin() {
               )}
             </Link>
           )}
-            {hasPermission("orders_view") && ( 
-              
+          {hasPermission("orders_view") && (
             <Link
               to="/admin/orders"
               className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"
@@ -113,8 +123,8 @@ function LayoutAdmin() {
                 </span>
               )}
             </Link>
-            )}
-          
+          )}
+
           {hasPermission("roles_view") && ( // Example for roles
             <Link
               to="/admin/roles"

@@ -137,52 +137,70 @@ const PermissionsPage: React.FC = () => {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Phân quyền</h1>
-        <button
-          onClick={handleSubmit}
-          className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
-        >
-          Cập nhật
-        </button>
+        {roles.length > 0 && (
+          <button
+            onClick={handleSubmit}
+            className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
+          >
+            Cập nhật
+          </button>
+        )}
       </div>
 
-      <div className="overflow-x-auto">
-        <div className="min-w-full bg-white rounded-lg shadow">
-            {permissionConfig.map(group => (
-                <div key={group.name} className="mb-8">
-                    <h2 className="p-4 text-xl font-semibold border-b">{group.name}</h2>
-                    <table className="min-w-full">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="w-1/4 px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Tính năng</th>
-                                {roles.map(role => (
-                                    <th key={role._id} className="w-1/4 px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">
-                                        {role.title}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {group.permissions.map(permission => (
-                                <tr key={permission.key}>
-                                    <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">{permission.label}</td>
-                                    {roles.map(role => (
-                                        <td key={role._id} className="px-6 py-4 text-sm text-center text-gray-500 whitespace-nowrap">
-                                            <input
-                                                type="checkbox"
-                                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                                checked={role.permissions.includes(permission.key)}
-                                                onChange={e => handlePermissionChange(role._id, permission.key, e.target.checked)}
-                                            />
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+      {roles.length > 0 ? (
+        <div className="overflow-x-auto">
+          <div className="min-w-full bg-white rounded-lg shadow">
+            {permissionConfig.map((group) => (
+              <div key={group.name} className="mb-8">
+                <h2 className="p-4 text-xl font-semibold border-b">{group.name}</h2>
+                <table className="min-w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="w-1/4 px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                        Tính năng
+                      </th>
+                      {roles.map((role) => (
+                        <th
+                          key={role._id}
+                          className="w-1/4 px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase"
+                        >
+                          {role.title}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {group.permissions.map((permission) => (
+                      <tr key={permission.key}>
+                        <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                          {permission.label}
+                        </td>
+                        {roles.map((role) => (
+                          <td
+                            key={role._id}
+                            className="px-6 py-4 text-sm text-center text-gray-500 whitespace-nowrap"
+                          >
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                              checked={role.permissions.includes(permission.key)}
+                              onChange={(e) =>
+                                handlePermissionChange(role._id, permission.key, e.target.checked)
+                              }
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ))}
+          </div>
         </div>
-      </div>
+      ) : (
+        <p>Không có dữ liệu để phân quyền.</p>
+      )}
     </div>
   );
 };
