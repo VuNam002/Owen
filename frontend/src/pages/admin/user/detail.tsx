@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useUserClient } from '../../../hooks/userAdmin'; // Adjust import path as needed
+import { useUserClient } from '../../../hooks/userAdmin'; 
 
 interface UserClient {
     id: string;
