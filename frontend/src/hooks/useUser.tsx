@@ -46,7 +46,7 @@ export const useAuth = () => {
     try {
       localStorage.setItem('token', token);
     } catch (error) {
-      console.error('Error saving token:', error);
+      console.error(error);
     }
   }, []);
 
@@ -54,8 +54,9 @@ export const useAuth = () => {
     try {
       sessionStorage.removeItem('token');
       localStorage.removeItem('token');
+      
     } catch (error) {
-      console.error('Error clearing auth data:', error);
+      console.error( error);
     }
   }, []);
 
@@ -64,6 +65,7 @@ export const useAuth = () => {
       setLoading(true);
       const token = getToken();
       if (!token) {
+        console.log('No token found in checkAuthStatus');
         return;
       }
 
@@ -75,6 +77,7 @@ export const useAuth = () => {
         },
       });
 
+
       if (response.ok) {
         const data: ApiResponse = await response.json();
         if (data.success) {
@@ -82,7 +85,12 @@ export const useAuth = () => {
             ...data.data,
             id: data.data._id || data.data.id
           };
-          setUser(userData);
+          
+          if (userData.status === 'active') {
+            setUser(userData);
+          } else {
+            clearAuthData();
+          }
         } else {
           clearAuthData();
         }
@@ -117,7 +125,9 @@ export const useAuth = () => {
             ...data.data,
             id: data.data._id || data.data.id
           };
-          setUser(userData);
+          if (userData.status === 'active') {
+            setUser(userData);
+          }
         }
       }
     } catch (error) {
@@ -151,7 +161,6 @@ export const useLogin = () => {
   ): Promise<{ success: boolean; message?: string }> => {
     try {
       setLoading(true);
-      
       const response = await fetch(`${API_BASE_URL}/api/v1/users/login`, {
         method: 'POST',
         headers: {
@@ -163,18 +172,27 @@ export const useLogin = () => {
       const data: ApiResponse = await response.json();
 
       if (response.ok && data.success) {
-        const { token } = data;
+        const token = data.token;
         const userData = {
           ...data.data,
           id: data.data._id || data.data.id 
         };
         
-        setUser(userData);
-        if (token) {
-          setToken(token);
-        }
         
-        return { success: true, message: data.message };
+        // Normalize status check
+        const normalizedStatus = userData.status?.toString().toLowerCase().trim();
+        
+        if (normalizedStatus === 'active') {
+          setUser(userData);
+          if (token) {
+            setToken(token);
+          } else {
+            console.warn('Token is missing from response');
+          }
+          return { success: true, message: data.message };
+        } else {
+          return { success: false, message: 'Tài khoản của bạn chưa được kích hoạt.' };
+        }
       } else {
         return { success: false, message: data.message || 'Đăng nhập thất bại' };
       }
