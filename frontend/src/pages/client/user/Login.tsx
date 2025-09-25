@@ -69,8 +69,7 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="w-full max-w-md">
-        {/* Logo and Brand */}
+      <div className="w-full max-w-md">   
         <div className="mb-8 text-center">
           <div className="inline-flex items-center justify-center mb-4">
             <img src={Logo} alt="Logo" className="w-auto h-12" />
@@ -91,7 +90,7 @@ const LoginPage: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full py-3 pl-12 pr-4 transition-all border border-gray-300 rounded-lg outline-none focus:ring-2 focus:[#323232] focus:border-transparent"
+                  className="w-full py-3 pl-12 pr-4 transition-all border border-gray-300  outline-none focus:ring-2 focus:[#323232] focus:border-transparent"
                   placeholder="Nhập địa chỉ email"
                   required
                   disabled={loading}
@@ -99,7 +98,6 @@ const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Password Field */}
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-700">
                 Mật khẩu
@@ -110,7 +108,7 @@ const LoginPage: React.FC = () => {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full py-3 pl-12 pr-12 transition-all border border-gray-300 rounded-lg outline-none focus:ring-2 focus:[#323232] focus:border-transparent"
+                  className="w-full py-3 pl-12 pr-12 transition-all border border-gray-300  outline-none focus:ring-2 focus:[#323232] focus:border-transparent"
                   placeholder="Nhập mật khẩu"
                   required
                   disabled={loading}

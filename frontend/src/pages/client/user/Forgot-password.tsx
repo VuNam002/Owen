@@ -19,12 +19,14 @@ const ForgotPasswordPage: React.FC = () => {
     }
 
     try {
-      toast.success('Yêu cầu đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra email của bạn.');
-      navigate('/loginClient');
+      const response = await forgotPassword(email);
+      toast.success(response.message || 'Mã OTP đã gửi đến email của bạn');
+      navigate('/otp-password', { state: { email } });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Forgot password error:', error);
-      toast.error('Có lỗi xảy ra. Vui lòng thử lại!');
+      const errorMessage = error?.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại!';
+      toast.error(errorMessage);
     }
   };
 

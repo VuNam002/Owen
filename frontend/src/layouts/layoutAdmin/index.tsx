@@ -60,7 +60,7 @@ function LayoutAdmin() {
               </div>
               {sidebarOpen && (
                 <span className="transition-opacity duration-300">
-                  Người dùng
+                  Tài khoản người dùng
                 </span>
               )}
             </Link>
@@ -106,7 +106,7 @@ function LayoutAdmin() {
               </div>
               {sidebarOpen && (
                 <span className="transition-opacity duration-300">
-                  Tài khoản
+                  Tài khoản quản trị
                 </span>
               )}
             </Link>

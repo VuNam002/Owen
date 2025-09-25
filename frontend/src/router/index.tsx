@@ -32,6 +32,7 @@ import RegisterPage from "../pages/client/user/Register";
 import ForgotPasswordPage from "../pages/client/user/Forgot-password";
 import User from "../pages/admin/user/index";
 import UserDetail from "../pages/admin/user/detail";
+import OtpPassword from "../pages/client/user/Otp-password";
 
 export const routes = [
     {
@@ -82,6 +83,10 @@ export const routes = [
                 path: 'forgot-password',
                 element: <ForgotPasswordPage/>
             },
+            {
+                path: 'otp-password',
+                element: <OtpPassword/>
+            }
         ]
     },
     {

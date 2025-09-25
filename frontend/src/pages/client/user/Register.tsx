@@ -5,6 +5,7 @@ import { useUserAuth } from '../../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import Logo from "../../../assets/logo.svg";
 
+
 const RegisterPage: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
