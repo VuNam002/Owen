@@ -79,30 +79,27 @@ module.exports.forgotPassword = async (req, res) => {
       email: email,
       deleted: false
     });
-    if(!user) {
-      return res.status(404).json({
-        success: false,
-        message: "Email không tồn tại"
-      })
-    }
-    const otp = generateHelper.generateRandomNumber(6);
-    const objectForgotPassword = {
-      email: email,
-      otp: otp,
-      expiresAt: Date.now() + 3 * 60 * 1000 // Tồn tại trong 3 phút
-    }
-    const forgotPassword = new ForgotPassword(objectForgotPassword);
-    await forgotPassword.save();
 
-    const subject = `Mã OTP xác minh lấy lại mật khẩu`;
-    const html=`
-      Mã OTP để lấy lại mật khẩu của bạn là: <b>${otp}</b>. Mã OTP có hiệu lực trong 3 phút.
-    `
-    sendMailHelper.sendMail(email,subject,html);
+    if (user) {
+      const otp = generateHelper.generateRandomNumber(6);
+      const objectForgotPassword = {
+        email: email,
+        otp: otp,
+        expiresAt: Date.now() + 3 * 60 * 1000 // Tồn tại trong 3 phút
+      }
+      const forgotPassword = new ForgotPassword(objectForgotPassword);
+      await forgotPassword.save();
+
+      const subject = `Mã OTP xác minh lấy lại mật khẩu`;
+      const html = `
+        Mã OTP để lấy lại mật khẩu của bạn là: <b>${otp}</b>. Mã OTP có hiệu lực trong 3 phút.
+      `
+      sendMailHelper.sendMail(email, subject, html);
+    }
 
     res.status(200).json({
       success: true,
-      message: "Mã OTP đã được gửi vào email của bạn"
+      message: "Nếu email của bạn đã được đăng ký, một mã OTP đã được gửi đến."
     });
   } catch (error) {
     res.status(500).json({
@@ -145,7 +142,13 @@ module.exports.otpPassword = async (req, res) => {
       expiresIn: '15m',
     });
 
-    res.cookie("resetToken", token);
+    res.cookie("resetToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      expires: new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
+    });
 
     res.status(200).json({
       success: true,
