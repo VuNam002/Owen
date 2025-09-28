@@ -38,7 +38,7 @@ This is a full-stack web application with a React frontend and a Node.js (Expres
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/VuNam002/Owen
     cd Owen
     ```
 
