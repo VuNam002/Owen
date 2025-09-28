@@ -38,12 +38,26 @@ const API_BASE = "http://localhost:3000/api/v1/products";
 const apiRequest = async (
   url: string,
   options: RequestInit = {}
-): Promise<ApiResponse> => {
+): Promise<any> => {
+  const token = localStorage.getItem('admin_token');
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const response = await fetch(url, {
-    headers: { "Content-Type": "application/json" },
     ...options,
+    headers,
   });
-  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: `HTTP error! status: ${response.status}` }));
+    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+  }
   return response.json();
 };
 

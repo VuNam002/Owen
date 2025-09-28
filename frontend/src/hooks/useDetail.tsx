@@ -61,8 +61,6 @@ export const useProductDetail = () => {
   // Comment states
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentForm, setCommentForm] = useState({
-    fullName: "",
-    email: "",
     content: ""
   });
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
@@ -190,16 +188,15 @@ export const useProductDetail = () => {
       return;
     }
 
-    if (!commentForm.fullName.trim() || !commentForm.email.trim() || !commentForm.content.trim()) {
-      toast.error("Vui lòng điền đầy đủ thông tin!");
+    if (!commentForm.content.trim()) {
+      toast.error("Vui lòng nhập nội dung bình luận!");
       return;
     }
 
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(commentForm.email)) {
-      toast.error("Email không hợp lệ!");
-      return;
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
+        toast.error("Bạn cần đăng nhập để bình luận!");
+        return;
     }
 
     setIsSubmittingComment(true);
@@ -209,27 +206,20 @@ export const useProductDetail = () => {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify(commentForm),
+        body: JSON.stringify({ content: commentForm.content }),
       });
 
       const result = await response.json();
 
       if (response.ok && result.success) {
-        const newComment: Comment = {
-          _id: result.data._id,
-          fullName: commentForm.fullName,
-          email: commentForm.email,
-          content: commentForm.content,
-          createdAt: new Date().toISOString(),
-        };
+        const newComment: Comment = result.data;
         
         setComments(prev => [newComment, ...prev]);
         
         // Reset form
         setCommentForm({
-          fullName: "",
-          email: "",
           content: ""
         });
         
