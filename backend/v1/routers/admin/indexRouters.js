@@ -10,6 +10,8 @@ const cartRoutes = require("../admin/cartRoute");
 const checkoutRoutes = require("../admin/checkoutRoute");
 const homeRoutes = require("../admin/homeRoute");
 const userRoutes = require("../admin/userRoute");
+const commentRoutes = require("../admin/commentRoute");
+
 
 
 module.exports = (app) => {
@@ -27,4 +29,5 @@ module.exports = (app) => {
     app.use(version + "/checkout", checkoutRoutes);
     app.use(version + "/home", homeRoutes);
     app.use(version + "/users", userRoutes);
+    app.use(version + "/comments", commentRoutes);
 };

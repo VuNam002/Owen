@@ -10,7 +10,7 @@ const commentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
     },
-    // user_id: { type: mongoose.Schema.Types.ObjectId, ref: "Account" }, // Sẽ dùng khi có chức năng đăng nhập
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Sẽ dùng khi có chức năng đăng nhập
     fullName: String,
     email: String,
     content: String,
