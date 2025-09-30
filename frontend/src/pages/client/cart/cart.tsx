@@ -326,7 +326,7 @@ export default function ShoppingCart() {
                       Thanh toán
                     </button>
                   </Link>
-                  <Link to="/products">
+                  <Link to="/">
                     <button className="w-full py-2 text-sm transition-colors border border-gray-300 ">
                       Tiếp tục mua sắm
                     </button>
