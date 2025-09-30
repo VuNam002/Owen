@@ -24,7 +24,7 @@ module.exports.register = async (req, res, next) => {
       message: 'Đăng ký thành công',
       data: {
         id: user._id,
-        name: user.name,
+        fullName: user.fullName,
         email: user.email,
       },
     });
@@ -57,7 +57,7 @@ module.exports.login = async (req, res, next) => {
       token,
       data: {
         id: user._id,
-        name: user.name,
+        fullName: user.fullName,
         email: user.email,
         status: user.status,
       },

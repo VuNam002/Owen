@@ -17,19 +17,16 @@ const userSchema = new mongoose.Schema(
         default: "active"
     },
     deleted: {
-        type:Boolean,
+        type: Boolean,
         default: false,
-      },
-      deletedAt: Date,
     },
-    {
-      timestamps: true,
-      
-    },
-    {
-      updateBy: String,
-      updateAt: Date
-    }
+    deletedAt: Date,
+    updateBy: String,
+    updateAt: Date
+  },
+  {
+    timestamps: true
+  }
 );
 
 const User = mongoose.model("User", userSchema, "users");

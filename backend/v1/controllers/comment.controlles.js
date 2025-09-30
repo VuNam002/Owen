@@ -60,6 +60,9 @@ module.exports.create = async (req, res) => {
   try {
     const { content, product_id, article_id } = req.body;
 
+    // console.log('req.user:', req.user);
+    // console.log('req.user.fullName:', req.user?.fullName)
+
     // Validation
     if (!content || content.trim() === '') {
       return res.status(400).json({
@@ -87,12 +90,12 @@ module.exports.create = async (req, res) => {
     }
 
     // Tạo comment mới với thông tin từ user đã đăng nhập
-    const newComment = new Comment({
+      const newComment = new Comment({
       content: content.trim(),
       product_id: product_id || null,
       article_id: article_id || null,
       user_id: req.user._id, // Lấy từ middleware requireAuth
-      fullName: req.user.fullName, // Từ user đã đăng nhập
+      fullName: req.user.fullName || req.user.email, // Từ user đã đăng nhập
       email: req.user.email, // Từ user đã đăng nhập
       deleted: false
     });
