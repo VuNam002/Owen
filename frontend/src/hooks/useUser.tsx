@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 
 interface User {
   id: string;
-  name: string;
+  fullName: string;
   email: string;
   phone?: string;
   avatar?: string;
@@ -12,7 +12,7 @@ interface User {
 }
 
 interface RegisterData {
-  name: string;
+  fullName: string;
   email: string;
   password: string;
 }

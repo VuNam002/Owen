@@ -541,11 +541,9 @@ function ProductDetail() {
                       </button>
                     </div>
                   </form>{" "}
-                  {/* ĐÓNG FORM TAG */}
                 </div>
               )}
 
-              {/* Comments List */}
               <div className="space-y-6">
                 {comments.length === 0 ? (
                   <div className="py-12 text-center">
