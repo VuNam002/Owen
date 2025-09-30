@@ -89,14 +89,13 @@ module.exports.create = async (req, res) => {
       }
     }
 
-    // Tạo comment mới với thông tin từ user đã đăng nhập
       const newComment = new Comment({
       content: content.trim(),
       product_id: product_id || null,
       article_id: article_id || null,
-      user_id: req.user._id, // Lấy từ middleware requireAuth
-      fullName: req.user.fullName || req.user.email, // Từ user đã đăng nhập
-      email: req.user.email, // Từ user đã đăng nhập
+      user_id: req.user._id, 
+      fullName: req.user.fullName || req.user.email, 
+      email: req.user.email, 
       deleted: false
     });
 
