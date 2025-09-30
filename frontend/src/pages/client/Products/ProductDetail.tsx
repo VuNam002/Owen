@@ -1,14 +1,54 @@
-import { Heart,ShoppingCart,Minus,Plus,Truck,RotateCcw,Shield,MessageCircle,Send,User,} from "lucide-react";
+import {
+  Heart,
+  ShoppingCart,
+  Minus,
+  Plus,
+  Truck,
+  RotateCcw,
+  Shield,
+  MessageCircle,
+  Send,
+  User,
+} from "lucide-react";
 import { useProductDetail } from "../../../hooks/useDetail";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
 function ProductDetail() {
-  const {product,loading, error,selectedSize, selectedColor,  quantity,  selectedImage,  isWishlisted,  comments,  commentForm,  isSubmittingComment,
-  showCommentForm,  mockImages,  availableColors,  availableSizes,  formatPrice,  formatDate,  getColorInfo,  hasDiscount,  calculateDiscountedPrice,
-  calculateSavings,  getDiscountPercent,  handleQuantityChange,  handleAddToCart,  handleWishlistToggle,  handleCommentSubmit,  handleCommentFormChange,
-  toggleCommentForm,setSelectedSize,setSelectedColor,setSelectedImage} = useProductDetail();
-  const navigate = useNavigate()
+  const {
+    product,
+    loading,
+    error,
+    selectedSize,
+    selectedColor,
+    quantity,
+    selectedImage,
+    isWishlisted,
+    comments,
+    commentForm,
+    isSubmittingComment,
+    showCommentForm,
+    mockImages,
+    availableColors,
+    availableSizes,
+    formatPrice,
+    formatDate,
+    getColorInfo,
+    hasDiscount,
+    calculateDiscountedPrice,
+    calculateSavings,
+    getDiscountPercent,
+    handleQuantityChange,
+    handleAddToCart,
+    handleWishlistToggle,
+    handleCommentSubmit,
+    handleCommentFormChange,
+    toggleCommentForm,
+    setSelectedSize,
+    setSelectedColor,
+    setSelectedImage,
+  } = useProductDetail();
+  const navigate = useNavigate();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -446,52 +486,14 @@ function ProductDetail() {
               </div>
 
               {/* Comment Form */}
+              {/* Comment Form */}
               {showCommentForm && (
                 <div className="p-6 mb-8 border border-gray-200 rounded-lg bg-gray-50">
                   <h4 className="mb-4 text-lg font-semibold text-gray-900">
                     Viết bình luận của bạn
                   </h4>
+                  {/* THÊM FORM TAG VÀ onSubmit Ở ĐÂY */}
                   <form onSubmit={handleCommentSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div>
-                        <label
-                          htmlFor="fullName"
-                          className="block mb-2 text-sm font-medium text-gray-700"
-                        >
-                          Họ và tên <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="fullName"
-                          value={commentForm.fullName}
-                          onChange={(e) =>
-                            handleCommentFormChange("fullName", e.target.value)
-                          }
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="Nhập họ và tên của bạn"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="email"
-                          className="block mb-2 text-sm font-medium text-gray-700"
-                        >
-                          Email <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="email"
-                          id="email"
-                          value={commentForm.email}
-                          onChange={(e) =>
-                            handleCommentFormChange("email", e.target.value)
-                          }
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="Nhập email của bạn"
-                          required
-                        />
-                      </div>
-                    </div>
                     <div>
                       <label
                         htmlFor="content"
@@ -514,7 +516,7 @@ function ProductDetail() {
                     </div>
                     <div className="flex items-center space-x-4">
                       <button
-                        type="submit"
+                        type="submit" // ĐẢM BẢO TYPE LÀ "submit"
                         disabled={isSubmittingComment}
                         className="flex items-center px-6 py-2 text-sm font-medium text-white transition-colors bg-[#323232] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                       >
@@ -531,14 +533,15 @@ function ProductDetail() {
                         )}
                       </button>
                       <button
-                        type="button"
+                        type="button" // Button hủy phải là type="button" để không submit
                         onClick={toggleCommentForm}
                         className="px-6 py-2 text-sm font-medium text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                       >
                         Hủy
                       </button>
                     </div>
-                  </form>
+                  </form>{" "}
+                  {/* ĐÓNG FORM TAG */}
                 </div>
               )}
 

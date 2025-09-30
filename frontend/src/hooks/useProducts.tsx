@@ -191,6 +191,8 @@ export const useProducts = () => {
     }
   };
 
+  
+
   const handleSelectProduct = (productId: string, checked: boolean) => {
     setSelectedProducts((prev) =>
       checked ? [...prev, productId] : prev.filter((id) => id !== productId)

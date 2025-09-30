@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 interface Comment {
   _id: string;
@@ -49,6 +49,7 @@ const mockImages = [
 
 export const useProductDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -104,7 +105,6 @@ export const useProductDetail = () => {
 
   const hasDiscount = () => product && (product.oldPrice || product.discountPercentage);
   
-  // Giá sau khi giảm
   const calculateDiscountedPrice = () => {
     if (!product) return 0;
     if (product.oldPrice && product.discountPercentage) {
@@ -156,22 +156,22 @@ export const useProductDetail = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ quantity: quantity }),
-        credentials: 'include', // Thêm dòng này
+        credentials: 'include',
       });
 
       const result = await response.json();
 
       if (result.code === 200) {
         toast.success(`Đã thêm ${quantity} sản phẩm "${product.title}" vào giỏ hàng!`);
-        return true; // Trả về true nếu thành công
+        return true;
       } else {
         toast.error(result.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng.');
-        return false; // Trả về false nếu thất bại
+        return false;
       }
     } catch (error) {
       console.error('Lỗi khi thêm vào giỏ hàng:', error);
       toast.error('Không thể kết nối đến server. Vui lòng thử lại.');
-      return false; // Trả về false nếu thất bại
+      return false;
     }
   };
 
@@ -179,12 +179,30 @@ export const useProductDetail = () => {
     setIsWishlisted(!isWishlisted);
   };
 
-  // Comment handlers
+  // Fetch comments function
+  const fetchComments = async () => {
+    if (!id) return;
+    
+    try {
+      const response = await fetch(`http://localhost:3000/api/v1/comments?product_id=${id}`);
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        setComments(result.data);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải bình luận:", error);
+    }
+  };
+
+  // Comment submit handler - Yêu cầu đăng nhập
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!product?.slug) {
-      toast.error("Không thể thêm bình luận lúc này");
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) {
+      toast.warning('Vui lòng đăng nhập để bình luận');
+      navigate('/loginClient', { state: { from: `/products/${id}` } });
       return;
     }
 
@@ -193,38 +211,32 @@ export const useProductDetail = () => {
       return;
     }
 
-    const token = localStorage.getItem('admin_token');
-    if (!token) {
-        toast.error("Bạn cần đăng nhập để bình luận!");
-        return;
-    }
-
     setIsSubmittingComment(true);
 
     try {
-      const response = await fetch(`http://localhost:3000/api/v1/products/create-comment/${id}`, {
-        method: "PATCH",
+      const response = await fetch('http://localhost:3000/api/v1/comments/create', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ content: commentForm.content }),
+        body: JSON.stringify({
+          content: commentForm.content.trim(),
+          product_id: id,
+        })
       });
 
       const result = await response.json();
 
       if (response.ok && result.success) {
-        const newComment: Comment = result.data;
-        
-        setComments(prev => [newComment, ...prev]);
+        toast.success("Đã thêm bình luận thành công!");
         
         // Reset form
-        setCommentForm({
-          content: ""
-        });
-        
+        setCommentForm({ content: "" });
         setShowCommentForm(false);
-        toast.success("Đã thêm bình luận thành công!");
+        
+        // Refresh comments list
+        await fetchComments();
       } else {
         toast.error(result.message || "Có lỗi xảy ra khi thêm bình luận");
       }
@@ -244,6 +256,13 @@ export const useProductDetail = () => {
   };
 
   const toggleCommentForm = () => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) {
+      toast.warning('Vui lòng đăng nhập để bình luận');
+      navigate('/loginClient', { state: { from: `/products/${id}` } });
+      return;
+    }
+    
     setShowCommentForm(!showCommentForm);
   };
 
@@ -267,8 +286,10 @@ export const useProductDetail = () => {
         if (!result.data) throw new Error("Không có dữ liệu sản phẩm");
         
         setProduct(result.data);
-        setComments(result.data.comments || []);
         setSelectedImage(result.data.thumbnail || mockImages[0]);
+        
+        // Fetch comments separately
+        await fetchComments();
       } catch (error) {
         console.error("Lỗi khi tải sản phẩm:", error);
         setError(error instanceof Error ? error.message : "Có lỗi xảy ra");
