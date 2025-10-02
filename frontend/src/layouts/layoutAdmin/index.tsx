@@ -10,6 +10,7 @@ import { HiUserGroup } from "react-icons/hi";
 import { FaAddressCard } from "react-icons/fa";
 import { FaFolder } from "react-icons/fa";
 import { useAdminAuth } from "../../context/AuthContext";
+import { GoCommentDiscussion } from "react-icons/go";
 
 function LayoutAdmin() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -136,7 +137,20 @@ function LayoutAdmin() {
               )}
             </Link>
           )}
-          {hasPermission("roles_permissions") && ( // Example for permissions
+          
+          {hasPermission("comments_view") && ( 
+            <Link
+              to="/admin/comments"
+              className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"
+            >
+              <GoCommentDiscussion className="w-5 h-5" />
+              {sidebarOpen && (
+                <span className="transition-opacity duration-300">Bình luận</span>
+              )}
+            </Link>
+          )}
+          
+          {hasPermission("roles_permissions") && ( 
             <Link
               to="/admin/permissions"
               className="flex items-center gap-4 p-3 mb-2 text-gray-700 transition-all rounded-lg hover:bg-gray-100 hover:text-blue-600 group"

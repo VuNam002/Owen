@@ -33,6 +33,8 @@ import ForgotPasswordPage from "../pages/client/user/Forgot-password";
 import User from "../pages/admin/user/index";
 import UserDetail from "../pages/admin/user/detail";
 import OtpPassword from "../pages/client/user/Otp-password";
+import CommentPage from "../pages/admin/comment/index";
+
 
 export const routes = [
     {
@@ -172,6 +174,10 @@ export const routes = [
                     {
                         path:"users/detail/:userId",
                         element: <PrivateRoutes requiredPermission="users_view"><UserDetail/></PrivateRoutes> 
+                    },
+                    {
+                        path:"comments",
+                        element: <PrivateRoutes requiredPermission="comments_view"><CommentPage/></PrivateRoutes> 
                     }
                 ]
             }

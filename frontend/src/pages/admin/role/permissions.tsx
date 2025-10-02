@@ -62,6 +62,13 @@ const permissionConfig = [
         { key: 'users_delete', label: 'Xóa' },
         { key: 'users_detail', label: 'Chi tiết'}
     ]
+  }, 
+  {
+    name: "Bình luận",
+    permissions: [
+        { key: 'comments_view', label: 'Xem' },
+        { key: 'comments_delete', label: 'Xóa' },
+    ]
   }
   // Thêm các nhóm quyền khác nếu cần
 ];

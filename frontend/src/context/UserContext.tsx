@@ -57,7 +57,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Check auth status khi component mount
   useEffect(() => {
-    auth.checkAuthStatus();
+    if (!window.location.pathname.startsWith('/admin')) {
+      auth.checkAuthStatus();
+    }
   }, [auth.checkAuthStatus]);
 
   // Wrapper functions để kết nối hooks với context
