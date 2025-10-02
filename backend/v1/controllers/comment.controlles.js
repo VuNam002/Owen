@@ -10,6 +10,11 @@ module.exports. index = async (req, res) => {
     const find = {
       deleted: false,
     };
+
+    if (req.query.status) {
+      find.status = req.query.status;
+    }
+
     if (req.query.product_id) {
       find.product_id = req.query.product_id;
     }
@@ -153,18 +158,22 @@ module.exports.delete = async (req, res) => {
 module.exports.changeStatus = async (req, res) =>  {
   try {
     const id = req.params.id;
-    const status = req.params.status;
-    await Comment.updateOne({
-      _id: id,
-      deleted: false,
-    }, {
-      status: status,
-    })
-    res.json({
-      code: 200,
+    const { status } = req.body;
+
+    if (!status || !['active', 'inactive'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Trạng thái không hợp lệ. Chỉ chấp nhận 'active' hoặc 'inactive'.",
+      });
+    }
+
+    await Comment.updateOne({ _id: id, deleted: false }, { status: status });
+
+    res.status(200).json({
+      success: true,
       message: "Cập nhật trạng thái bình luận thành công",
-    })
+    });
   } catch (error) {
-    handleError(res, error, "Lỗi trạng thái khi cập nhật bình luận thành công");
+    handleError(res, error, "Lỗi khi cập nhật trạng thái bình luận");
   }
 }

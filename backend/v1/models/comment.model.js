@@ -14,6 +14,11 @@ const commentSchema = new mongoose.Schema(
     fullName: String,
     email: String,
     content: String,
+    status: {
+      type: String,
+      default: "active",
+      enum: ["active", "inactive"],
+    },
     parent_id: {
       type: String,
       default: "",
