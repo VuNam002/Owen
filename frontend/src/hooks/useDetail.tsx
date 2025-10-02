@@ -8,6 +8,7 @@ interface Comment {
   email: string;
   content: string;
   createdAt: string;
+  status: boolean;
 }
 
 interface Product {

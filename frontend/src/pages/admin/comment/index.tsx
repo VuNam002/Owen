@@ -3,7 +3,6 @@ import { useComment } from '../../../hooks/useComment';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Pagination } from '../../../components/ui/pagination';
-import LayoutAdmin from '../../../layouts/layoutAdmin';
 
 const CommentPage: React.FC = () => {
     const {
@@ -15,14 +14,19 @@ const CommentPage: React.FC = () => {
         currentPage,
         setCurrentPage,
         itemsPerPage,
-        setItemsPerPage,
         deleteComment,
         updateCommentStatus,
         totalComments,
+        statusFilter,
+        setStatusFilter,
     } = useComment();
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setKeyword(e.target.value);
+    };
+
+    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setStatusFilter(e.target.value as 'all' | 'active' | 'inactive');
     };
 
     const totalPages = Math.ceil(totalComments / itemsPerPage);
@@ -38,6 +42,17 @@ const CommentPage: React.FC = () => {
                             value={keyword}
                             onChange={handleSearch}
                         />
+                    </div>
+                    <div className="w-1/4">
+                        <select
+                            value={statusFilter}
+                            onChange={handleStatusChange}
+                            className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        >
+                            <option value="all">Tất cả trạng thái</option>
+                            <option value="active">Đã duyệt</option>
+                            <option value="inactive">Chưa duyệt</option>
+                        </select>
                     </div>
                 </div>
 
@@ -73,14 +88,17 @@ const CommentPage: React.FC = () => {
                                         <p className="text-gray-900 whitespace-no-wrap">{comment.content}</p>
                                     </td>
                                     <td className="px-5 py-5 text-sm bg-white border-b border-gray-200">
-                                        <span className={`relative inline-block px-3 py-1 font-semibold leading-tight ${comment.status ? 'text-green-900' : 'text-red-900'}`}>
-                                            <span aria-hidden className={`absolute inset-0 ${comment.status ? 'bg-green-200' : 'bg-red-200'} opacity-50 rounded-full`}></span>
-                                            <span className="relative">{comment.status ? 'Đã duyệt' : 'Chưa duyệt'}</span>
+                                        <span className={`relative inline-block px-3 py-1 font-semibold leading-tight ${comment.status === 'active' ? 'text-green-900' : 'text-red-900'}`}>
+                                            <span aria-hidden className={`absolute inset-0 ${comment.status === 'active' ? 'bg-green-200' : 'bg-red-200'} opacity-50 rounded-full`}></span>
+                                            <span className="relative">{comment.status === 'active' ? 'Đã duyệt' : 'Chưa duyệt'}</span>
                                         </span>
                                     </td>
                                     <td className="px-5 py-5 text-sm bg-white border-b border-gray-200">
-                                        <Button onClick={() => updateCommentStatus(comment._id, !comment.status)} variant={comment.status ? 'secondary' : 'default'}>
-                                            {comment.status ? 'Hủy duyệt' : 'Duyệt'}
+                                        <Button
+                                            onClick={() => updateCommentStatus(comment._id, comment.status === 'active' ? 'inactive' : 'active')}
+                                            variant={comment.status === 'active' ? 'secondary' : 'default'}
+                                        >
+                                            {comment.status === 'active' ? 'Hủy duyệt' : 'Duyệt'}
                                         </Button>
                                         <Button onClick={() => deleteComment(comment._id)} variant="destructive" className="ml-2">
                                             Xóa
@@ -103,7 +121,4 @@ const CommentPage: React.FC = () => {
     );
 };
 
-
-
 export default CommentPage;
-

@@ -556,33 +556,35 @@ function ProductDetail() {
                     </p>
                   </div>
                 ) : (
-                  comments.map((comment) => (
-                    <div
-                      key={comment._id}
-                      className="p-6 bg-white border border-gray-200 rounded-lg"
-                    >
-                      <div className="flex items-start space-x-4">
-                        <div className="flex-shrink-0">
-                          <div className="flex items-center justify-center w-10 h-10 bg-indigo-100 rounded-full">
-                            <User className="w-5 h-5 text-indigo-600" />
+                  comments
+                    .filter((comment) => comment.status === "active")
+                    .map((comment) => (
+                      <div
+                        key={comment._id}
+                        className="p-6 bg-white border border-gray-200 rounded-lg"
+                      >
+                        <div className="flex items-start space-x-4">
+                          <div className="flex-shrink-0">
+                            <div className="flex items-center justify-center w-10 h-10 bg-indigo-100 rounded-full">
+                              <User className="w-5 h-5 text-indigo-600" />
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-sm font-semibold text-gray-900">
-                              {comment.fullName}
-                            </h4>
-                            <p className="text-sm text-gray-500">
-                              {formatDate(comment.createdAt)}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="text-sm font-semibold text-gray-900">
+                                {comment.fullName}
+                              </h4>
+                              <p className="text-sm text-gray-500">
+                                {formatDate(comment.createdAt)}
+                              </p>
+                            </div>
+                            <p className="text-sm leading-relaxed text-gray-700">
+                              {comment.content}
                             </p>
                           </div>
-                          <p className="text-sm leading-relaxed text-gray-700">
-                            {comment.content}
-                          </p>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    ))
                 )}
               </div>
             </div>

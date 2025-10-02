@@ -9,7 +9,7 @@ interface Comment {
     email: string;
     content: string;
     parent_id: string;
-    status: boolean;
+    status: "active" | "inactive";
 }
 
 interface ApiResponse {
@@ -21,7 +21,7 @@ const API_BASE = "http://localhost:3000/api/v1/comments";
 const apiRequest = async (
     url: string,
     options: RequestInit = {}
-): Promise<ApiResponse> => {
+): Promise<any> => {
     const token = localStorage.getItem('admin_token');
     const headers = {
         "Content-Type": "application/json",
@@ -39,7 +39,6 @@ const apiRequest = async (
 
     if (!response.ok) {
         if (response.status === 401) {
-            // Unauthorized, redirect to login or handle appropriately
             window.location.href = '/admin/login';
         }
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -54,19 +53,24 @@ export const useComment = () => {
     const [keyword, setKeyword] = useState("");
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+    const [statusFilter, setStatusFilter] = useState<'active' | 'inactive' | 'all'>('all');
 
     const loadingRef = useRef(false);
 
-    const fetchComments = useCallback(async () => {
+    const fetchComments = useCallback(async (status: 'active' | 'inactive' | 'all') => {
         if (loadingRef.current) return;
         loadingRef.current = true;
         setLoading(true);
         setError(null);
 
         try {
-            const result = await apiRequest(API_BASE);
+            let url = API_BASE;
+            if (status !== 'all') {
+                url += `?status=${status}`;
+            }
+            const result = await apiRequest(url);
             setComments(result.data);
-        } catch  {
+        } catch (err) {
             setError("Không thể tải dữ liệu bình luận");
         } finally {
             setLoading(false);
@@ -75,11 +79,11 @@ export const useComment = () => {
     }, []);
 
     useEffect(() => {
-        fetchComments();
-    }, [fetchComments]);
+        fetchComments(statusFilter);
+    }, [fetchComments, statusFilter]);
 
     const filteredComments = useMemo(() => {
-        if (!comments.length) return [];
+        if (!comments || !comments.length) return [];
 
         const keywordLower = keyword.toLowerCase();
         return comments.filter(comment =>
@@ -98,21 +102,21 @@ export const useComment = () => {
         try {
             await apiRequest(`${API_BASE}/delete/${id}`, { method: "DELETE" });
             setComments(prev => prev.filter(c => c._id !== id));
-        } catch  {
+        } catch {
             setError("Không thể xóa bình luận");
         }
     };
 
-    const updateCommentStatus = async (id: string, status: boolean) => {
+    const updateCommentStatus = async (id: string, status: "active" | "inactive") => {
         try {
-            await apiRequest(`${API_BASE}/change-status/${status}/${id}`, {
+            await apiRequest(`${API_BASE}/change-status/${id}`, {
                 method: "PATCH",
                 body: JSON.stringify({ status }),
             });
             setComments(prev =>
                 prev.map(c => (c._id === id ? { ...c, status } : c))
             );
-        } catch  {
+        } catch {
             setError("Không thể cập nhật trạng thái");
         }
     };
@@ -130,5 +134,7 @@ export const useComment = () => {
         deleteComment,
         updateCommentStatus,
         totalComments: filteredComments.length,
+        statusFilter,
+        setStatusFilter,
     };
 };
