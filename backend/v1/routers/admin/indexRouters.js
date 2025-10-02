@@ -15,7 +15,7 @@ const commentRoutes = require("../admin/commentRoute");
 
 
 module.exports = (app) => {
-    //admin
+
     const version = "/api/v1";
     app.use(version + "/products", productRoutes);
     app.use(version + "/categorys", categoryRoutes);

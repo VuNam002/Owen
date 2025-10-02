@@ -77,8 +77,6 @@ module.exports.create = async (req, res) => {
         message: 'Cần cung cấp product_id hoặc article_id'
       });
     }
-
-    // Kiểm tra sản phẩm/bài viết có tồn tại không
     if (product_id) {
       const productExists = await Product.findById(product_id);
       if (!productExists) {
@@ -111,3 +109,62 @@ module.exports.create = async (req, res) => {
   }
 };
 
+module.exports.detail = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const comment = await Comment.findOne({
+      _id: id,
+      deleted: false,
+    })
+    if(!comment) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy bình luận",
+      })
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Lấy chi tiết bình luận thành công",
+      data: comment,
+    })
+  } catch (error) {
+    handleError(res, error, "Lỗi khi lấy bình luận");
+  }
+}
+
+module.exports.delete = async (req, res) => {
+  try {
+    const id = req.params.id;
+    await Comment.updateOne({
+      _id: id,
+      deleted: false,
+    }, {
+      deleted: true,
+    })
+    res.status(200).json({
+      success: true,
+      message: "Xóa bình luận thành công",
+    })
+  } catch (error) {
+    handleError(res, error, "Lỗi khi xóa bình luận");
+  }
+}
+
+module.exports.changeStatus = async (req, res) =>  {
+  try {
+    const id = req.params.id;
+    const status = req.params.status;
+    await Comment.updateOne({
+      _id: id,
+      deleted: false,
+    }, {
+      status: status,
+    })
+    res.json({
+      code: 200,
+      message: "Cập nhật trạng thái bình luận thành công",
+    })
+  } catch (error) {
+    handleError(res, error, "Lỗi trạng thái khi cập nhật bình luận thành công");
+  }
+}
