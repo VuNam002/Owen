@@ -3,8 +3,11 @@ import { useComment } from '../../../hooks/useComment';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Pagination } from '../../../components/ui/pagination';
+import { useAdminAuth } from '../../../context/AuthContext';
+
 
 const CommentPage: React.FC = () => {
+    const {hasPermission} = useAdminAuth();
     const {
         comments,
         loading,
@@ -100,9 +103,11 @@ const CommentPage: React.FC = () => {
                                         >
                                             {comment.status === 'active' ? 'Hủy duyệt' : 'Duyệt'}
                                         </Button>
+                                        {hasPermission('comments_delete') && (
                                         <Button onClick={() => deleteComment(comment._id)} variant="destructive" className="ml-2">
                                             Xóa
                                         </Button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

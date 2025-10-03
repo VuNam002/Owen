@@ -1,5 +1,6 @@
 import { useRole } from "../../../hooks/useRole";
 import { RoleAction } from "../../../components/Role/RoleAction";
+import { useAdminAuth } from "../../../context/AuthContext";
 
 interface Role {
   _id: string;
@@ -9,6 +10,7 @@ interface Role {
 
 function RolePage() {
   const { roles, loading, deleteRole } = useRole();
+  const { hasPermission } = useAdminAuth();
 
   const handleDelete = async (id: string) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa không?")) {
@@ -29,11 +31,9 @@ function RolePage() {
   return (
     <div className="min-h-screen p-6 bg-gray-50">
       <h1 className="text-2xl font-semibold text-gray-900">Nhóm quyền</h1>
-      <p className="mt-1 text-sm text-gray-600">
-        Quản lý danh sách nhóm quyền
-      </p>
+      <p className="mt-1 text-sm text-gray-600">Quản lý danh sách nhóm quyền</p>
 
-      <RoleAction/>
+      <RoleAction />
 
       <div className="overflow-hidden bg-white border border-gray-200 rounded-lg">
         <div className="overflow-x-auto">
@@ -62,20 +62,29 @@ function RolePage() {
                     <td className="px-6 py-4 font-medium text-gray-900">
                       {role.title}
                     </td>
-                    <td className="px-6 py-4" dangerouslySetInnerHTML={{ __html: role.description }}></td>
+                    <td
+                      className="px-6 py-4"
+                      dangerouslySetInnerHTML={{ __html: role.description }}
+                    ></td>
                     <td className="px-6 py-4 space-x-2">
-                      <button
-                        onClick={() => handleDelete(role._id)}
-                        className="px-3 py-1 text-white bg-red-500 rounded-md hover:bg-red-600"
-                      >
-                        Xóa
-                      </button>
-                      <button
-                        onClick={() => (window.location.href = `/admin/roles/edit/${role._id}`)}
-                        className="px-3 py-1 text-white bg-blue-500 rounded-md hover:bg-blue-600"
-                      >
-                        Sửa
-                      </button>
+                      {hasPermission("roles_delete") && (
+                        <button
+                          onClick={() => handleDelete(role._id)}
+                          className="px-3 py-1 text-white bg-red-500 rounded-md hover:bg-red-600"
+                        >
+                          Xóa
+                        </button>
+                      )}
+                      {hasPermission("roles_edit") && (
+                        <button
+                          onClick={() =>
+                            (window.location.href = `/admin/roles/edit/${role._id}`)
+                          }
+                          className="px-3 py-1 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                        >
+                          Sửa
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))

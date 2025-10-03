@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useUserClient } from "../../../hooks/userAdmin";
 import { Link } from "react-router-dom";
+import { useAdminAuth } from "../../../context/AuthContext";
 
 interface UserClient {
   id: string;
@@ -13,6 +14,7 @@ interface UserClient {
 }
 
 function UserList() {
+  const { hasPermission } = useAdminAuth();
   const {
     userClients,
     loading,
@@ -347,22 +349,26 @@ function UserList() {
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                     <div className="flex justify-end gap-2">
-                      <Link
-                        to={`/admin/users/detail/${user.id}`}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        Chi tiết
-                      </Link>
-                      <button
-                        onClick={() => {
-                          setUserToDelete(user.id);
-                          setShowDeleteConfirm(true);
-                        }}
-                        className="text-red-600 hover:text-red-900"
-                        disabled={loading}
-                      >
-                        Xóa
-                      </button>
+                      {hasPermission("users_edit") && (
+                        <Link
+                          to={`/admin/users/detail/${user.id}`}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          Chi tiết
+                        </Link>
+                      )}
+                      {hasPermission("users_delete") && (
+                        <button
+                          onClick={() => {
+                            setUserToDelete(user.id);
+                            setShowDeleteConfirm(true);
+                          }}
+                          className="text-red-600 hover:text-red-900"
+                          disabled={loading}
+                        >
+                          Xóa
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

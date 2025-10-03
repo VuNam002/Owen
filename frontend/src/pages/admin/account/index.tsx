@@ -2,6 +2,7 @@ import { useAccount } from "../../../hooks/useAccount";
 import { ErrorAlert } from "../../../components/ErrorAlert/ErrorAlert";
 import { AccountAction } from "../../../components/Account/AccountAction";
 import { AccountFilters } from "../../../components/Account/AccountFilters";
+import { useAdminAuth } from "../../../context/AuthContext";
 
 interface Account {
   _id: string;
@@ -19,6 +20,7 @@ interface Account {
 }
 
 function Account() {
+  const {hasPermission} = useAdminAuth();
   const {
     accounts,
     filteredAccounts, 
@@ -153,6 +155,7 @@ function Account() {
                       </td>
                       <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                         <div className="flex space-x-2">
+                          {hasPermission('accounts_edit') && (
                           <button
                             onClick={() =>
                               (window.location.href = `/admin/accounts/edit/${account._id}`)
@@ -161,6 +164,7 @@ function Account() {
                           >
                             Sửa
                           </button>
+                          )}
                           <button
                             onClick={() =>
                               handleToggleStatus(account._id, account.status)
@@ -175,12 +179,14 @@ function Account() {
                               ? "Vô hiệu hóa"
                               : "Kích hoạt"}
                           </button>
+                          {hasPermission('accounts_delete') && (
                           <button
                             onClick={() => handleDelete(account._id)}
                             className="px-2 py-1 text-xs text-red-800 bg-red-100 rounded hover:bg-red-200"
                           >
                             Xóa
                           </button>
+                          )}
                         </div>
                       </td>
                     </tr>

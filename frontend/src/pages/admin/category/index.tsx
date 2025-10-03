@@ -3,6 +3,7 @@ import { useCategorys } from "../../../hooks/useCategory";
 import { CategoryFilters } from "../../../components/Category/CategoryFillers";
 import { CategoryActions } from "../../../components/Category/CategoryAction";
 import { ErrorAlert } from "../../../components/ErrorAlert/ErrorAlert";
+import { useAdminAuth } from "../../../context/AuthContext";
 
 interface CategoryWithLevel {
   _id: string;
@@ -20,6 +21,7 @@ interface CategoryWithLevel {
 }
 
 function Category() {
+  const {hasPermission} = useAdminAuth();
   const {
     loading, error, setError, categorys, keyword, setKeyword, filterStatus, setFilterStatus,
     sortBy, setSortBy, sortOrder, setSortOrder, selectedCategorys, selectAll,
@@ -357,10 +359,14 @@ function Category() {
                     </td>
                     <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                       <div className="flex items-center gap-3">
+                        {hasPermission('product-category_edit') && (
                         <button onClick={() => window.location.href = `/admin/categorys/edit/${category._id}`}
                                 className="text-blue-600 transition-colors hover:text-blue-900">Sửa</button>
+                        )}
+                        {hasPermission('product-category_delete') && (
                         <button onClick={() => handleDelete(category._id)}
                                 className="text-red-600 transition-colors hover:text-red-900">Xóa</button>
+                        )}
                       </div>
                     </td>
                   </tr>
