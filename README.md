@@ -81,7 +81,28 @@ This is a full-stack web application with a React frontend and a Node.js (Expres
     npm run dev
     ```
     - The application will be available at http://localhost:5173 (or another port if 5173 is in use).
-
+3. **Demo**
+<div >
+    <img src="./demo/trangchu.png" alt="Trang chủ"/>
+    <img src = "./demo/login1.png" alt="Đăng nhập người dùng"/>
+    <img src = "./demo/login2.png" alt="Đăng nhập quản trị viên"/>
+    <img src="./demo/demo1.png"/>
+</div>
 ## Folder Structure
 
 ```
+
+## Demo
+
+### Trang chủ
+![Trang chủ](./demo/trangchu.png)
+
+### Demo
+<div></div>
+
+### Đăng nhập
+![Đăng nhập 1](./demo/login1.png)
+![Đăng nhập 2](./demo/login2.png)
+
+### Trang quản trị
+![Admin](./demo/admin.png)
